@@ -5,7 +5,7 @@ A comprehensive Swift SDK for the OpenAI API.
 ## Features
 
 - 🚀 Type-safe API with Swift's powerful type system
-- 🌍 Cross-platform support (iOS, macOS, watchOS, tvOS, visionOS, Linux)
+- 🌍 Cross-platform support (iOS 15+, macOS 12+, watchOS 8+, tvOS 15+, visionOS, Linux)
 - 📚 Complete API coverage (Chat, Images, Audio, Embeddings, and more)
 - ⚡ Modern async/await with streaming support
 - 🛡️ Comprehensive error handling

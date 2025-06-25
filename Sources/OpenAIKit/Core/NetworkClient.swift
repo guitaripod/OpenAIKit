@@ -117,7 +117,7 @@ public final class NetworkClient: NetworkClientProtocol, @unchecked Sendable {
                     task.resume()
                     _ = semaphore.wait(timeout: .distantFuture)
                     #else
-                    // macOS/iOS implementation using bytes
+                    // macOS/iOS implementation using bytes API
                     let (bytes, response) = try await session.bytes(for: urlRequest)
                     
                     try validateResponse(response, data: nil)
