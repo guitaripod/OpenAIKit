@@ -2,7 +2,7 @@ name: Deploy DocC to GitHub Pages
 
 on:
   push:
-    branches: ["main", "master"]
+    branches: ["master"]
   workflow_dispatch:
 
 permissions:
