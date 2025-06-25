@@ -4,14 +4,12 @@
         
         You'll build a weather assistant that can fetch real-time weather data when asked.
         
-        @Image(source: functions-intro.png, alt: "Function calling")
     }
     
     @Section(title: "Understanding Function Calling") {
         @ContentAndMedia {
             Function calling allows GPT to generate structured outputs that trigger actions in your app.
             
-            @Image(source: function-flow.png, alt: "Function calling flow")
         }
         
         @Steps {
@@ -45,7 +43,6 @@
         @ContentAndMedia {
             Now let's implement the actual weather fetching logic that will be called when the model requests it.
             
-            @Image(source: weather-api.png, alt: "Weather API")
         }
         
         @Steps {
@@ -79,7 +76,6 @@
         @ContentAndMedia {
             Learn how to detect when the model wants to call a function and execute it.
             
-            @Image(source: function-execution.png, alt: "Function execution")
         }
         
         @Steps {
@@ -125,7 +121,6 @@
         @ContentAndMedia {
             Put it all together in a SwiftUI interface that can answer weather questions.
             
-            @Image(source: weather-assistant-ui.png, alt: "Weather assistant UI")
         }
         
         @Steps {
@@ -165,7 +160,6 @@
         @ContentAndMedia {
             Explore advanced patterns like multiple functions and parallel execution.
             
-            @Image(source: advanced-functions.png, alt: "Advanced patterns")
         }
         
         @Steps {

@@ -4,14 +4,12 @@
         
         Build a voice note app that converts speech to text with translation capabilities.
         
-        @Image(source: audio-transcription-intro.png, alt: "Audio transcription")
     }
     
     @Section(title: "Basic Audio Transcription") {
         @ContentAndMedia {
             Learn how to transcribe audio files using the Whisper model.
             
-            @Image(source: whisper-basics.png, alt: "Whisper basics")
         }
         
         @Steps {
@@ -51,7 +49,6 @@
         @ContentAndMedia {
             Explore advanced features like language detection, timestamps, and response formats.
             
-            @Image(source: transcription-options.png, alt: "Transcription options")
         }
         
         @Steps {
@@ -91,7 +88,6 @@
         @ContentAndMedia {
             Translate audio from any supported language directly to English.
             
-            @Image(source: audio-translation.png, alt: "Audio translation")
         }
         
         @Steps {
@@ -125,7 +121,6 @@
         @ContentAndMedia {
             Create a complete voice notes application with recording and transcription.
             
-            @Image(source: voice-notes-app.png, alt: "Voice notes app")
         }
         
         @Steps {
@@ -171,7 +166,6 @@
         @ContentAndMedia {
             Learn strategies for processing long audio files within API limits.
             
-            @Image(source: large-audio.png, alt: "Large audio handling")
         }
         
         @Steps {

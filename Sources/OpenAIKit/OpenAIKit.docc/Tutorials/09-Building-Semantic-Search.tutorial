@@ -4,14 +4,12 @@
         
         Build a knowledge base app that understands meaning, not just keywords.
         
-        @Image(source: semantic-search-intro.png, alt: "Semantic search")
     }
     
     @Section(title: "Understanding Embeddings") {
         @ContentAndMedia {
             Learn how embeddings convert text into numerical vectors that capture semantic meaning.
             
-            @Image(source: embeddings-explained.png, alt: "Embeddings explained")
         }
         
         @Steps {
@@ -51,7 +49,6 @@
         @ContentAndMedia {
             Implement vector similarity calculations to find related content.
             
-            @Image(source: vector-similarity.png, alt: "Vector similarity")
         }
         
         @Steps {
@@ -91,7 +88,6 @@
         @ContentAndMedia {
             Create an efficient vector storage system for semantic search at scale.
             
-            @Image(source: vector-database.png, alt: "Vector database")
         }
         
         @Steps {
@@ -131,7 +127,6 @@
         @ContentAndMedia {
             Combine embeddings and vector search to build a complete semantic search system.
             
-            @Image(source: search-engine.png, alt: "Search engine")
         }
         
         @Steps {
@@ -171,7 +166,6 @@
         @ContentAndMedia {
             Create a complete knowledge base application with semantic search capabilities.
             
-            @Image(source: knowledge-base-app.png, alt: "Knowledge base app")
         }
         
         @Steps {
@@ -217,7 +211,6 @@
         @ContentAndMedia {
             Explore advanced embedding techniques for improved search quality.
             
-            @Image(source: advanced-embeddings.png, alt: "Advanced techniques")
         }
         
         @Steps {

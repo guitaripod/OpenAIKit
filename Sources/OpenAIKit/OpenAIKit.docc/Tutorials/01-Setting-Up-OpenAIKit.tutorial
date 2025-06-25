@@ -4,14 +4,12 @@
         
         This tutorial covers installation, API key management, and basic configuration options.
         
-        @Image(source: setup-intro.png, alt: "OpenAIKit setup")
     }
     
     @Section(title: "Install OpenAIKit") {
         @ContentAndMedia {
             First, you'll add OpenAIKit as a dependency to your Swift project using Swift Package Manager.
             
-            @Image(source: spm-install.png, alt: "Swift Package Manager")
         }
         
         @Steps {
@@ -25,7 +23,6 @@
                 Enter the OpenAIKit repository URL and select your version requirements.
                 
                 @Code(name: "Package.swift", file: setup-02-package.swift) {
-                    @Image(source: setup-step2.png, alt: "Add package dialog")
                 }
             }
             
@@ -41,32 +38,27 @@
         @ContentAndMedia {
             To use OpenAI's API, you need an API key from your OpenAI account.
             
-            @Image(source: api-key-section.png, alt: "API Keys page")
         }
         
         @Steps {
             @Step {
                 Visit [platform.openai.com](https://platform.openai.com) and sign in to your account.
                 
-                @Image(source: openai-platform.png, alt: "OpenAI Platform")
             }
             
             @Step {
                 Navigate to the API Keys section in your account settings.
                 
-                @Image(source: api-keys-nav.png, alt: "API Keys navigation")
             }
             
             @Step {
                 Click "Create new secret key" and give it a descriptive name.
                 
-                @Image(source: create-key.png, alt: "Create API key")
             }
             
             @Step {
                 Copy your API key immediately - you won't be able to see it again!
                 
-                @Image(source: copy-key.png, alt: "Copy API key")
             }
         }
     }
@@ -75,7 +67,6 @@
         @ContentAndMedia {
             Now let's initialize OpenAIKit with your API key. We'll use environment variables for security.
             
-            @Image(source: configure-intro.png, alt: "Configuration")
         }
         
         @Steps {
@@ -115,26 +106,22 @@
         @ContentAndMedia {
             Configure your development environment to securely provide the API key.
             
-            @Image(source: env-vars.png, alt: "Environment variables")
         }
         
         @Steps {
             @Step {
                 In Xcode, edit your scheme by clicking the scheme selector and choosing "Edit Scheme".
                 
-                @Image(source: edit-scheme.png, alt: "Edit scheme")
             }
             
             @Step {
                 Navigate to the Run section and select the Arguments tab.
                 
-                @Image(source: scheme-arguments.png, alt: "Scheme arguments")
             }
             
             @Step {
                 Add your API key as an environment variable named `OPENAI_API_KEY`.
                 
-                @Image(source: add-env-var.png, alt: "Add environment variable")
             }
         }
     }

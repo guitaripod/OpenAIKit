@@ -4,14 +4,12 @@
         
         Build an image generation app with proper error handling and UI feedback.
         
-        @Image(source: image-generation-intro.png, alt: "Image generation")
     }
     
     @Section(title: "Basic Image Generation") {
         @ContentAndMedia {
             Start by generating your first image from a text prompt using DALL-E 3.
             
-            @Image(source: dalle-basic.png, alt: "DALL-E basics")
         }
         
         @Steps {
@@ -51,7 +49,6 @@
         @ContentAndMedia {
             Explore advanced options like size, quality, style, and multiple image generation.
             
-            @Image(source: image-options.png, alt: "Image options")
         }
         
         @Steps {
@@ -91,7 +88,6 @@
         @ContentAndMedia {
             Create a SwiftUI interface for generating and displaying AI images.
             
-            @Image(source: image-ui.png, alt: "Image generation UI")
         }
         
         @Steps {
@@ -131,7 +127,6 @@
         @ContentAndMedia {
             Learn to create variations of existing images and use masks for targeted edits.
             
-            @Image(source: image-variations.png, alt: "Image variations")
         }
         
         @Steps {
@@ -171,7 +166,6 @@
         @ContentAndMedia {
             Master the art of writing effective prompts for high-quality image generation.
             
-            @Image(source: prompt-engineering.png, alt: "Prompt engineering")
         }
         
         @Steps {

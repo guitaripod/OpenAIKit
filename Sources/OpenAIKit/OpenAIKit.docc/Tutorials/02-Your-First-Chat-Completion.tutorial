@@ -4,14 +4,12 @@
         
         You'll learn how to construct requests, handle responses, and work with the chat format.
         
-        @Image(source: first-chat-intro.png, alt: "Chat completion")
     }
     
     @Section(title: "Create a Simple Chat Request") {
         @ContentAndMedia {
             Let's start with a basic chat completion request to see how the API works.
             
-            @Image(source: chat-request.png, alt: "Chat request structure")
         }
         
         @Steps {
@@ -63,7 +61,6 @@
         @ContentAndMedia {
             Chat completions use a conversation format with different message roles.
             
-            @Image(source: message-roles.png, alt: "Message roles")
         }
         
         @Steps {
@@ -97,7 +94,6 @@
         @ContentAndMedia {
             Fine-tune the model's behavior with parameters like temperature and max tokens.
             
-            @Image(source: parameters.png, alt: "Model parameters")
         }
         
         @Steps {
@@ -131,7 +127,6 @@
         @ContentAndMedia {
             Let's create a complete chat interface that maintains conversation history.
             
-            @Image(source: chat-interface.png, alt: "Chat interface")
         }
         
         @Steps {

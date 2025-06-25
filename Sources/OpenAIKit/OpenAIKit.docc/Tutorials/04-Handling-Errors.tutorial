@@ -4,14 +4,12 @@
         
         You'll implement comprehensive error handling, retry logic, and user-friendly error messages.
         
-        @Image(source: error-handling-intro.png, alt: "Error handling")
     }
     
     @Section(title: "Understanding OpenAIKit Errors") {
         @ContentAndMedia {
             OpenAIKit provides a comprehensive error system to help you handle various failure scenarios.
             
-            @Image(source: error-types.png, alt: "Error types")
         }
         
         @Steps {
@@ -51,7 +49,6 @@
         @ContentAndMedia {
             Network requests can fail temporarily. Let's implement smart retry logic for transient errors.
             
-            @Image(source: retry-logic.png, alt: "Retry logic")
         }
         
         @Steps {
@@ -85,7 +82,6 @@
         @ContentAndMedia {
             Convert technical errors into messages your users can understand.
             
-            @Image(source: user-errors.png, alt: "User-friendly errors")
         }
         
         @Steps {
@@ -119,7 +115,6 @@
         @ContentAndMedia {
             Combine all error handling patterns into a reusable error handler.
             
-            @Image(source: error-handler.png, alt: "Error handler")
         }
         
         @Steps {

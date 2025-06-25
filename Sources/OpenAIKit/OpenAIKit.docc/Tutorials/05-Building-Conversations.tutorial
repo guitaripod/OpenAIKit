@@ -4,14 +4,12 @@
         
         Learn advanced patterns for building chatbots and conversational interfaces.
         
-        @Image(source: conversations-intro.png, alt: "Building conversations")
     }
     
     @Section(title: "Managing Conversation Context") {
         @ContentAndMedia {
             Effective conversations require careful management of context and message history.
             
-            @Image(source: context-management.png, alt: "Context management")
         }
         
         @Steps {
@@ -51,7 +49,6 @@
         @ContentAndMedia {
             Give your AI assistant the ability to remember important information across sessions.
             
-            @Image(source: conversation-memory.png, alt: "Conversation memory")
         }
         
         @Steps {
@@ -85,7 +82,6 @@
         @ContentAndMedia {
             Build AI assistants with consistent personalities and specialized knowledge.
             
-            @Image(source: personas.png, alt: "AI personas")
         }
         
         @Steps {
@@ -119,7 +115,6 @@
         @ContentAndMedia {
             Implement sophisticated conversation patterns like branching dialogues and context switching.
             
-            @Image(source: advanced-patterns.png, alt: "Advanced patterns")
         }
         
         @Steps {
@@ -153,7 +148,6 @@
         @ContentAndMedia {
             Combine all patterns to create a sophisticated chatbot with memory, personas, and state management.
             
-            @Image(source: complete-chatbot.png, alt: "Complete chatbot")
         }
         
         @Steps {
