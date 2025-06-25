@@ -13,7 +13,6 @@ let indexHTML = """
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>OpenAIKit - Swift SDK for OpenAI API</title>
     <meta name="description" content="A comprehensive Swift SDK for the OpenAI API with support for all Apple platforms and Linux">
-    <meta http-equiv="refresh" content="3; url=./documentation/openaikit">
     <link rel="canonical" href="./documentation/openaikit">
     <style>
         * {
@@ -114,14 +113,6 @@ let indexHTML = """
             color: #667eea;
         }
         
-        .redirect-notice {
-            margin-top: 2rem;
-            padding: 1rem;
-            background: #e3f2fd;
-            border-radius: 10px;
-            color: #1976d2;
-        }
-        
         .emoji {
             font-size: 2rem;
             margin: 0 0.5rem;
@@ -178,15 +169,11 @@ let indexHTML = """
             <a href="./documentation/openaikit" class="button">
                 View Documentation
             </a>
-            <a href="./documentation/openaikit/tutorials/openaikit-tutorials" class="button secondary">
+            <a href="./tutorials/openaikit/openaikit-tutorials" class="button secondary">
                 Start Tutorial
             </a>
         </div>
         
-        <div class="redirect-notice">
-            <p><span class="emoji">📖</span> Redirecting to documentation in 3 seconds...</p>
-            <p>If you're not redirected, <a href="./documentation/openaikit">click here</a>.</p>
-        </div>
     </div>
 </body>
 </html>

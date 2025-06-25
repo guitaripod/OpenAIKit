@@ -25,11 +25,11 @@ import PackageDescription
 let package = Package(
     name: "MyApp",
     platforms: [
-        .iOS(.v13),
-        .macOS(.v10_15)
+        .iOS(.v15),
+        .macOS(.v12)
     ],
     dependencies: [
-        .package(url: "https://github.com/yourusername/OpenAIKit.git", from: "1.0.0")
+        .package(url: "https://github.com/marcusziade/OpenAIKit.git", from: "1.0.0")
     ],
     targets: [
         .target(
