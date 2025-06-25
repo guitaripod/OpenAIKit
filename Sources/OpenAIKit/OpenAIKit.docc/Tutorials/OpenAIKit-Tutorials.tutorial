@@ -12,9 +12,9 @@
         
         @Image(source: chapter1-hero.png, alt: "Getting started with OpenAIKit")
         
-        @TutorialReference(tutorial: "doc:Setting-Up-OpenAIKit")
-        @TutorialReference(tutorial: "doc:Your-First-Chat-Completion")
-        @TutorialReference(tutorial: "doc:Handling-Errors")
+        @TutorialReference(tutorial: "doc:01-Setting-Up-OpenAIKit")
+        @TutorialReference(tutorial: "doc:02-Your-First-Chat-Completion")
+        @TutorialReference(tutorial: "doc:04-Handling-Errors")
     }
     
     @Chapter(name: "Chat Completions") {
@@ -22,9 +22,9 @@
         
         @Image(source: chapter2-hero.png, alt: "Chat completions")
         
-        @TutorialReference(tutorial: "doc:Building-Conversations")
-        @TutorialReference(tutorial: "doc:Streaming-Responses")
-        @TutorialReference(tutorial: "doc:Working-With-Functions")
+        @TutorialReference(tutorial: "doc:05-Building-Conversations")
+        @TutorialReference(tutorial: "doc:06-Streaming-Responses")
+        @TutorialReference(tutorial: "doc:03-Working-With-Functions")
     }
     
     @Chapter(name: "Multimodal AI") {
@@ -32,8 +32,8 @@
         
         @Image(source: chapter3-hero.png, alt: "Multimodal AI")
         
-        @TutorialReference(tutorial: "doc:Generating-Images")
-        @TutorialReference(tutorial: "doc:Transcribing-Audio")
-        @TutorialReference(tutorial: "doc:Building-Semantic-Search")
+        @TutorialReference(tutorial: "doc:07-Generating-Images")
+        @TutorialReference(tutorial: "doc:08-Transcribing-Audio")
+        @TutorialReference(tutorial: "doc:09-Building-Semantic-Search")
     }
 }
