@@ -11,13 +11,13 @@ Comprehensive documentation with interactive tutorials is available at:
 - [Getting Started Guide](https://marcusziade.github.io/OpenAIKit/documentation/openaikit/gettingstarted)
 
 ### Featured Tutorials
-- 🚀 [Setting Up OpenAIKit](https://marcusziade.github.io/OpenAIKit/documentation/openaikit/tutorials/setting-up-openaikit)
-- 💬 [Your First Chat Completion](https://marcusziade.github.io/OpenAIKit/documentation/openaikit/tutorials/your-first-chat-completion)
-- 🔧 [Working with Functions](https://marcusziade.github.io/OpenAIKit/documentation/openaikit/tutorials/working-with-functions)
-- 🌊 [Streaming Responses](https://marcusziade.github.io/OpenAIKit/documentation/openaikit/tutorials/streaming-responses)
-- 🎨 [Generating Images](https://marcusziade.github.io/OpenAIKit/documentation/openaikit/tutorials/generating-images)
-- 🎙️ [Transcribing Audio](https://marcusziade.github.io/OpenAIKit/documentation/openaikit/tutorials/transcribing-audio)
-- 🔍 [Building Semantic Search](https://marcusziade.github.io/OpenAIKit/documentation/openaikit/tutorials/building-semantic-search)
+- 🚀 [Setting Up OpenAIKit](https://marcusziade.github.io/OpenAIKit/documentation/openaikit/01-setting-up-openaikit)
+- 💬 [Your First Chat Completion](https://marcusziade.github.io/OpenAIKit/documentation/openaikit/02-your-first-chat-completion)
+- 🔧 [Working with Functions](https://marcusziade.github.io/OpenAIKit/documentation/openaikit/03-working-with-functions)
+- 🌊 [Streaming Responses](https://marcusziade.github.io/OpenAIKit/documentation/openaikit/06-streaming-responses)
+- 🎨 [Generating Images](https://marcusziade.github.io/OpenAIKit/documentation/openaikit/07-generating-images)
+- 🎙️ [Transcribing Audio](https://marcusziade.github.io/OpenAIKit/documentation/openaikit/08-transcribing-audio)
+- 🔍 [Building Semantic Search](https://marcusziade.github.io/OpenAIKit/documentation/openaikit/09-building-semantic-search)
 
 ### Building Documentation Locally
 
