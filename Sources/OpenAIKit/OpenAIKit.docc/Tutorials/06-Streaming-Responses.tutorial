@@ -1,0 +1,255 @@
+@Tutorial(time: 15) {
+    @Intro(title: "Streaming Responses") {
+        Implement real-time streaming to create responsive chat experiences that display responses as they're generated.
+        
+        You'll learn how to handle Server-Sent Events (SSE) and create smooth, interactive UIs.
+        
+        @Image(source: streaming-intro.png, alt: "Streaming responses")
+    }
+    
+    @Section(title: "Understanding Streaming") {
+        @ContentAndMedia {
+            Streaming allows you to receive and display AI responses in real-time, creating a more engaging user experience.
+            
+            @Image(source: streaming-flow.png, alt: "Streaming flow")
+        }
+        
+        @Steps {
+            @Step {
+                Create a new file to explore streaming functionality.
+                
+                @Code(name: "StreamingChat.swift", file: streaming-01-empty.swift)
+            }
+            
+            @Step {
+                Import OpenAIKit and create a streaming chat function.
+                
+                @Code(name: "StreamingChat.swift", file: streaming-02-function.swift)
+            }
+            
+            @Step {
+                Create a streaming request with the stream parameter.
+                
+                @Code(name: "StreamingChat.swift", file: streaming-03-request.swift)
+            }
+            
+            @Step {
+                Handle the AsyncThrowingStream of ChatStreamResponse.
+                
+                @Code(name: "StreamingChat.swift", file: streaming-04-stream.swift)
+            }
+            
+            @Step {
+                Process each chunk and accumulate the response.
+                
+                @Code(name: "StreamingChat.swift", file: streaming-05-process.swift)
+            }
+        }
+    }
+    
+    @Section(title: "Building a Streaming UI") {
+        @ContentAndMedia {
+            Create a SwiftUI interface that smoothly displays streaming text as it arrives.
+            
+            @Image(source: streaming-ui.png, alt: "Streaming UI")
+        }
+        
+        @Steps {
+            @Step {
+                Create a view model for streaming chat.
+                
+                @Code(name: "StreamingChatView.swift", file: ui-01-viewmodel.swift)
+            }
+            
+            @Step {
+                Add a streaming message property with real-time updates.
+                
+                @Code(name: "StreamingChatView.swift", file: ui-02-property.swift)
+            }
+            
+            @Step {
+                Implement the streaming send message function.
+                
+                @Code(name: "StreamingChatView.swift", file: ui-03-send.swift)
+            }
+            
+            @Step {
+                Create the SwiftUI view with typing indicator.
+                
+                @Code(name: "StreamingChatView.swift", file: ui-04-view.swift)
+            }
+            
+            @Step {
+                Add smooth text animation for incoming chunks.
+                
+                @Code(name: "StreamingChatView.swift", file: ui-05-animation.swift)
+            }
+        }
+    }
+    
+    @Section(title: "Handling Stream Interruptions") {
+        @ContentAndMedia {
+            Learn to gracefully handle stream interruptions, cancellations, and errors.
+            
+            @Image(source: stream-errors.png, alt: "Stream error handling")
+        }
+        
+        @Steps {
+            @Step {
+                Create a StreamManager to handle stream lifecycle.
+                
+                @Code(name: "StreamManager.swift", file: stream-01-manager.swift)
+            }
+            
+            @Step {
+                Add stream cancellation support.
+                
+                @Code(name: "StreamManager.swift", file: stream-02-cancel.swift)
+            }
+            
+            @Step {
+                Implement stream reconnection logic.
+                
+                @Code(name: "StreamManager.swift", file: stream-03-reconnect.swift)
+            }
+            
+            @Step {
+                Add timeout handling for stalled streams.
+                
+                @Code(name: "StreamManager.swift", file: stream-04-timeout.swift)
+            }
+        }
+    }
+    
+    @Section(title: "Advanced Streaming Features") {
+        @ContentAndMedia {
+            Implement advanced features like token counting, speed control, and partial response handling.
+            
+            @Image(source: advanced-streaming.png, alt: "Advanced streaming")
+        }
+        
+        @Steps {
+            @Step {
+                Add real-time token counting during streaming.
+                
+                @Code(name: "AdvancedStreaming.swift", file: advanced-01-tokens.swift)
+            }
+            
+            @Step {
+                Implement response speed throttling.
+                
+                @Code(name: "AdvancedStreaming.swift", file: advanced-02-throttle.swift)
+            }
+            
+            @Step {
+                Add partial JSON parsing for function calls.
+                
+                @Code(name: "AdvancedStreaming.swift", file: advanced-03-json.swift)
+            }
+            
+            @Step {
+                Create a streaming markdown renderer.
+                
+                @Code(name: "AdvancedStreaming.swift", file: advanced-04-markdown.swift)
+            }
+            
+            @Step {
+                Add streaming response caching.
+                
+                @Code(name: "AdvancedStreaming.swift", file: advanced-05-cache.swift)
+            }
+        }
+    }
+    
+    @Section(title: "Cross-Platform Streaming") {
+        @ContentAndMedia {
+            Handle platform-specific streaming implementations for iOS, macOS, and Linux.
+            
+            @Image(source: cross-platform.png, alt: "Cross-platform streaming")
+        }
+        
+        @Steps {
+            @Step {
+                Create platform-agnostic streaming interface.
+                
+                @Code(name: "CrossPlatformStreaming.swift", file: platform-01-interface.swift)
+            }
+            
+            @Step {
+                Implement iOS/macOS streaming with URLSession.
+                
+                @Code(name: "CrossPlatformStreaming.swift", file: platform-02-apple.swift)
+            }
+            
+            @Step {
+                Add Linux streaming support.
+                
+                @Code(name: "CrossPlatformStreaming.swift", file: platform-03-linux.swift)
+            }
+            
+            @Step {
+                Create unified error handling across platforms.
+                
+                @Code(name: "CrossPlatformStreaming.swift", file: platform-04-errors.swift)
+            }
+        }
+    }
+    
+    @Assessments {
+        @MultipleChoice {
+            What's the main advantage of streaming responses?
+            
+            @Choice(isCorrect: true) {
+                Users see responses as they're generated in real-time.
+                
+                @Justification(reaction: "Correct!") {
+                    Streaming provides immediate feedback and a more interactive experience.
+                }
+            }
+            
+            @Choice(isCorrect: false) {
+                It uses less memory than regular responses.
+                
+                @Justification(reaction: "Incorrect") {
+                    Memory usage is similar; the benefit is user experience.
+                }
+            }
+            
+            @Choice(isCorrect: false) {
+                Responses are generated faster.
+                
+                @Justification(reaction: "Incorrect") {
+                    Total generation time is the same; it's the perception that improves.
+                }
+            }
+        }
+        
+        @MultipleChoice {
+            How should you handle stream cancellation?
+            
+            @Choice(isCorrect: false) {
+                Let the stream complete naturally.
+                
+                @Justification(reaction: "Incorrect") {
+                    This wastes resources and provides poor user experience.
+                }
+            }
+            
+            @Choice(isCorrect: true) {
+                Use a Task handle to cancel the stream and clean up resources.
+                
+                @Justification(reaction: "Correct!") {
+                    Proper cancellation ensures resources are freed and the UI updates correctly.
+                }
+            }
+            
+            @Choice(isCorrect: false) {
+                Force quit the entire app.
+                
+                @Justification(reaction: "Incorrect") {
+                    This is extreme and provides terrible user experience.
+                }
+            }
+        }
+    }
+}

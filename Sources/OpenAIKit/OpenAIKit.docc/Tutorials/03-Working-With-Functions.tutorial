@@ -1,0 +1,255 @@
+@Tutorial(time: 20) {
+    @Intro(title: "Working with Functions") {
+        Extend GPT's capabilities by defining custom functions that the model can call to perform actions or retrieve information.
+        
+        You'll build a weather assistant that can fetch real-time weather data when asked.
+        
+        @Image(source: functions-intro.png, alt: "Function calling")
+    }
+    
+    @Section(title: "Understanding Function Calling") {
+        @ContentAndMedia {
+            Function calling allows GPT to generate structured outputs that trigger actions in your app.
+            
+            @Image(source: function-flow.png, alt: "Function calling flow")
+        }
+        
+        @Steps {
+            @Step {
+                Create a new file for our weather assistant.
+                
+                @Code(name: "WeatherAssistant.swift", file: functions-01-empty.swift)
+            }
+            
+            @Step {
+                Define a struct to represent weather function arguments.
+                
+                @Code(name: "WeatherAssistant.swift", file: functions-02-args.swift)
+            }
+            
+            @Step {
+                Create a Function definition for getting weather data.
+                
+                @Code(name: "WeatherAssistant.swift", file: functions-03-definition.swift)
+            }
+            
+            @Step {
+                Add the complete JSON schema for the function parameters.
+                
+                @Code(name: "WeatherAssistant.swift", file: functions-04-schema.swift)
+            }
+        }
+    }
+    
+    @Section(title: "Implementing the Weather Function") {
+        @ContentAndMedia {
+            Now let's implement the actual weather fetching logic that will be called when the model requests it.
+            
+            @Image(source: weather-api.png, alt: "Weather API")
+        }
+        
+        @Steps {
+            @Step {
+                Create a mock weather service for this tutorial.
+                
+                @Code(name: "WeatherService.swift", file: weather-01-service.swift)
+            }
+            
+            @Step {
+                Add weather data models.
+                
+                @Code(name: "WeatherService.swift", file: weather-02-models.swift)
+            }
+            
+            @Step {
+                Implement the weather fetching function.
+                
+                @Code(name: "WeatherService.swift", file: weather-03-fetch.swift)
+            }
+            
+            @Step {
+                Format the weather data as a string for the model.
+                
+                @Code(name: "WeatherService.swift", file: weather-04-format.swift)
+            }
+        }
+    }
+    
+    @Section(title: "Handling Function Calls") {
+        @ContentAndMedia {
+            Learn how to detect when the model wants to call a function and execute it.
+            
+            @Image(source: function-execution.png, alt: "Function execution")
+        }
+        
+        @Steps {
+            @Step {
+                Create the weather assistant class.
+                
+                @Code(name: "WeatherAssistant.swift", file: assistant-01-class.swift)
+            }
+            
+            @Step {
+                Add a method to process user input with function support.
+                
+                @Code(name: "WeatherAssistant.swift", file: assistant-02-process.swift)
+            }
+            
+            @Step {
+                Send the request with the weather function tool.
+                
+                @Code(name: "WeatherAssistant.swift", file: assistant-03-request.swift)
+            }
+            
+            @Step {
+                Check if the model called a function in its response.
+                
+                @Code(name: "WeatherAssistant.swift", file: assistant-04-check.swift)
+            }
+            
+            @Step {
+                Parse the function arguments and execute the weather function.
+                
+                @Code(name: "WeatherAssistant.swift", file: assistant-05-execute.swift)
+            }
+            
+            @Step {
+                Send the function result back to get the final response.
+                
+                @Code(name: "WeatherAssistant.swift", file: assistant-06-complete.swift)
+            }
+        }
+    }
+    
+    @Section(title: "Building the Complete Assistant") {
+        @ContentAndMedia {
+            Put it all together in a SwiftUI interface that can answer weather questions.
+            
+            @Image(source: weather-assistant-ui.png, alt: "Weather assistant UI")
+        }
+        
+        @Steps {
+            @Step {
+                Create a view model for the weather assistant.
+                
+                @Code(name: "WeatherView.swift", file: view-01-model.swift)
+            }
+            
+            @Step {
+                Build the SwiftUI interface.
+                
+                @Code(name: "WeatherView.swift", file: view-02-ui.swift)
+            }
+            
+            @Step {
+                Add example queries to help users.
+                
+                @Code(name: "WeatherView.swift", file: view-03-examples.swift)
+            }
+            
+            @Step {
+                Display weather information in a formatted card.
+                
+                @Code(name: "WeatherView.swift", file: view-04-card.swift)
+            }
+            
+            @Step {
+                Add error handling and loading states.
+                
+                @Code(name: "WeatherView.swift", file: view-05-complete.swift)
+            }
+        }
+    }
+    
+    @Section(title: "Advanced Function Patterns") {
+        @ContentAndMedia {
+            Explore advanced patterns like multiple functions and parallel execution.
+            
+            @Image(source: advanced-functions.png, alt: "Advanced patterns")
+        }
+        
+        @Steps {
+            @Step {
+                Add multiple functions for a more capable assistant.
+                
+                @Code(name: "AdvancedAssistant.swift", file: advanced-01-multiple.swift)
+            }
+            
+            @Step {
+                Handle parallel function calls efficiently.
+                
+                @Code(name: "AdvancedAssistant.swift", file: advanced-02-parallel.swift)
+            }
+            
+            @Step {
+                Implement function result caching.
+                
+                @Code(name: "AdvancedAssistant.swift", file: advanced-03-cache.swift)
+            }
+            
+            @Step {
+                Add function call validation.
+                
+                @Code(name: "AdvancedAssistant.swift", file: advanced-04-validation.swift)
+            }
+        }
+    }
+    
+    @Assessments {
+        @MultipleChoice {
+            What happens when the model decides to call a function?
+            
+            @Choice(isCorrect: false) {
+                The function is automatically executed by OpenAI.
+                
+                @Justification(reaction: "Incorrect") {
+                    OpenAI never executes functions - it only tells you which function to call.
+                }
+            }
+            
+            @Choice(isCorrect: true) {
+                The model returns a tool call with the function name and arguments.
+                
+                @Justification(reaction: "Correct!") {
+                    You receive the function details and must execute it yourself, then send the result back.
+                }
+            }
+            
+            @Choice(isCorrect: false) {
+                The conversation ends and you get the function result.
+                
+                @Justification(reaction: "Incorrect") {
+                    You need to execute the function and continue the conversation with the result.
+                }
+            }
+        }
+        
+        @MultipleChoice {
+            How do you send a function result back to the model?
+            
+            @Choice(isCorrect: false) {
+                Create a new conversation with the result.
+                
+                @Justification(reaction: "Incorrect") {
+                    You should continue the same conversation to maintain context.
+                }
+            }
+            
+            @Choice(isCorrect: true) {
+                Add a message with role `.tool` and the matching `toolCallId`.
+                
+                @Justification(reaction: "Correct!") {
+                    Tool messages with the correct ID link the result to the function call.
+                }
+            }
+            
+            @Choice(isCorrect: false) {
+                Add a user message with the function result.
+                
+                @Justification(reaction: "Incorrect") {
+                    Function results must use the tool role, not the user role.
+                }
+            }
+        }
+    }
+}

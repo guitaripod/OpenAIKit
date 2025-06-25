@@ -1,0 +1,233 @@
+@Tutorial(time: 15) {
+    @Intro(title: "Your First Chat Completion") {
+        Make your first API call to generate text using OpenAI's chat completion models.
+        
+        You'll learn how to construct requests, handle responses, and work with the chat format.
+        
+        @Image(source: first-chat-intro.png, alt: "Chat completion")
+    }
+    
+    @Section(title: "Create a Simple Chat Request") {
+        @ContentAndMedia {
+            Let's start with a basic chat completion request to see how the API works.
+            
+            @Image(source: chat-request.png, alt: "Chat request structure")
+        }
+        
+        @Steps {
+            @Step {
+                Create a new SwiftUI view to build our chat interface.
+                
+                @Code(name: "ChatView.swift", file: chat-01-empty.swift)
+            }
+            
+            @Step {
+                Import OpenAIKit and add a state variable for the response.
+                
+                @Code(name: "ChatView.swift", file: chat-02-imports.swift)
+            }
+            
+            @Step {
+                Add a text field for user input and a button to send the message.
+                
+                @Code(name: "ChatView.swift", file: chat-03-ui.swift)
+            }
+            
+            @Step {
+                Create an async function to send the chat request.
+                
+                @Code(name: "ChatView.swift", file: chat-04-function.swift)
+            }
+            
+            @Step {
+                Implement the chat completion request with a simple user message.
+                
+                @Code(name: "ChatView.swift", file: chat-05-request.swift)
+            }
+            
+            @Step {
+                Extract the response text and update the UI.
+                
+                @Code(name: "ChatView.swift", file: chat-06-response.swift)
+            }
+            
+            @Step {
+                Add error handling to gracefully handle failures.
+                
+                @Code(name: "ChatView.swift", file: chat-07-complete.swift)
+            }
+        }
+    }
+    
+    @Section(title: "Understanding Chat Messages") {
+        @ContentAndMedia {
+            Chat completions use a conversation format with different message roles.
+            
+            @Image(source: message-roles.png, alt: "Message roles")
+        }
+        
+        @Steps {
+            @Step {
+                Create a ChatMessage with the user role for questions from the user.
+                
+                @Code(name: "MessageExamples.swift", file: messages-01-user.swift)
+            }
+            
+            @Step {
+                Add a system message to set the assistant's behavior and context.
+                
+                @Code(name: "MessageExamples.swift", file: messages-02-system.swift)
+            }
+            
+            @Step {
+                Build a multi-turn conversation by maintaining message history.
+                
+                @Code(name: "MessageExamples.swift", file: messages-03-conversation.swift)
+            }
+            
+            @Step {
+                Include the assistant's responses in the conversation.
+                
+                @Code(name: "MessageExamples.swift", file: messages-04-assistant.swift)
+            }
+        }
+    }
+    
+    @Section(title: "Customizing Model Parameters") {
+        @ContentAndMedia {
+            Fine-tune the model's behavior with parameters like temperature and max tokens.
+            
+            @Image(source: parameters.png, alt: "Model parameters")
+        }
+        
+        @Steps {
+            @Step {
+                Start with a basic request using default parameters.
+                
+                @Code(name: "Parameters.swift", file: params-01-basic.swift)
+            }
+            
+            @Step {
+                Add temperature to control response creativity (0.0 to 2.0).
+                
+                @Code(name: "Parameters.swift", file: params-02-temperature.swift)
+            }
+            
+            @Step {
+                Limit response length with maxCompletionTokens.
+                
+                @Code(name: "Parameters.swift", file: params-03-tokens.swift)
+            }
+            
+            @Step {
+                Use different models for different use cases.
+                
+                @Code(name: "Parameters.swift", file: params-04-models.swift)
+            }
+        }
+    }
+    
+    @Section(title: "Building a Chat Interface") {
+        @ContentAndMedia {
+            Let's create a complete chat interface that maintains conversation history.
+            
+            @Image(source: chat-interface.png, alt: "Chat interface")
+        }
+        
+        @Steps {
+            @Step {
+                Create a Message model to represent chat messages.
+                
+                @Code(name: "ChatInterface.swift", file: interface-01-model.swift)
+            }
+            
+            @Step {
+                Build a view model to manage the conversation state.
+                
+                @Code(name: "ChatInterface.swift", file: interface-02-viewmodel.swift)
+            }
+            
+            @Step {
+                Implement the sendMessage function with conversation history.
+                
+                @Code(name: "ChatInterface.swift", file: interface-03-send.swift)
+            }
+            
+            @Step {
+                Create the SwiftUI view with a message list and input field.
+                
+                @Code(name: "ChatInterface.swift", file: interface-04-view.swift)
+            }
+            
+            @Step {
+                Add message bubbles for better visual presentation.
+                
+                @Code(name: "ChatInterface.swift", file: interface-05-bubbles.swift)
+            }
+            
+            @Step {
+                Add loading states and disable input while processing.
+                
+                @Code(name: "ChatInterface.swift", file: interface-06-complete.swift)
+            }
+        }
+    }
+    
+    @Assessments {
+        @MultipleChoice {
+            Which role should you use for instructions that define the assistant's behavior?
+            
+            @Choice(isCorrect: false) {
+                `.user`
+                
+                @Justification(reaction: "Incorrect") {
+                    The user role is for messages from the end user.
+                }
+            }
+            
+            @Choice(isCorrect: true) {
+                `.system`
+                
+                @Justification(reaction: "Correct!") {
+                    System messages set the context and behavior for the assistant.
+                }
+            }
+            
+            @Choice(isCorrect: false) {
+                `.assistant`
+                
+                @Justification(reaction: "Incorrect") {
+                    The assistant role is for responses from the AI model.
+                }
+            }
+        }
+        
+        @MultipleChoice {
+            What temperature value would you use for factual, consistent responses?
+            
+            @Choice(isCorrect: true) {
+                `0.2`
+                
+                @Justification(reaction: "Correct!") {
+                    Lower temperatures (0.0-0.5) produce more focused and deterministic responses.
+                }
+            }
+            
+            @Choice(isCorrect: false) {
+                `1.5`
+                
+                @Justification(reaction: "Incorrect") {
+                    Higher temperatures produce more creative but less consistent responses.
+                }
+            }
+            
+            @Choice(isCorrect: false) {
+                `2.0`
+                
+                @Justification(reaction: "Incorrect") {
+                    Maximum temperature produces very creative but potentially incoherent responses.
+                }
+            }
+        }
+    }
+}

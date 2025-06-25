@@ -1,0 +1,255 @@
+@Tutorial(time: 18) {
+    @Intro(title: "Building Conversations") {
+        Create sophisticated conversational AI experiences by managing context, memory, and multi-turn interactions.
+        
+        Learn advanced patterns for building chatbots and conversational interfaces.
+        
+        @Image(source: conversations-intro.png, alt: "Building conversations")
+    }
+    
+    @Section(title: "Managing Conversation Context") {
+        @ContentAndMedia {
+            Effective conversations require careful management of context and message history.
+            
+            @Image(source: context-management.png, alt: "Context management")
+        }
+        
+        @Steps {
+            @Step {
+                Create a ConversationManager class to handle message history.
+                
+                @Code(name: "ConversationManager.swift", file: conversation-01-manager.swift)
+            }
+            
+            @Step {
+                Add methods to append messages and maintain history.
+                
+                @Code(name: "ConversationManager.swift", file: conversation-02-messages.swift)
+            }
+            
+            @Step {
+                Implement token counting to stay within model limits.
+                
+                @Code(name: "ConversationManager.swift", file: conversation-03-tokens.swift)
+            }
+            
+            @Step {
+                Add context window management with sliding window.
+                
+                @Code(name: "ConversationManager.swift", file: conversation-04-window.swift)
+            }
+            
+            @Step {
+                Implement message summarization for long conversations.
+                
+                @Code(name: "ConversationManager.swift", file: conversation-05-summary.swift)
+            }
+        }
+    }
+    
+    @Section(title: "Implementing Conversation Memory") {
+        @ContentAndMedia {
+            Give your AI assistant the ability to remember important information across sessions.
+            
+            @Image(source: conversation-memory.png, alt: "Conversation memory")
+        }
+        
+        @Steps {
+            @Step {
+                Create a memory system for storing key information.
+                
+                @Code(name: "MemorySystem.swift", file: memory-01-system.swift)
+            }
+            
+            @Step {
+                Add semantic memory with embeddings.
+                
+                @Code(name: "MemorySystem.swift", file: memory-02-semantic.swift)
+            }
+            
+            @Step {
+                Implement memory retrieval based on context.
+                
+                @Code(name: "MemorySystem.swift", file: memory-03-retrieval.swift)
+            }
+            
+            @Step {
+                Add memory persistence with Core Data.
+                
+                @Code(name: "MemorySystem.swift", file: memory-04-persistence.swift)
+            }
+        }
+    }
+    
+    @Section(title: "Creating Dynamic Personas") {
+        @ContentAndMedia {
+            Build AI assistants with consistent personalities and specialized knowledge.
+            
+            @Image(source: personas.png, alt: "AI personas")
+        }
+        
+        @Steps {
+            @Step {
+                Define a Persona struct with characteristics.
+                
+                @Code(name: "Personas.swift", file: persona-01-struct.swift)
+            }
+            
+            @Step {
+                Create system prompts from persona definitions.
+                
+                @Code(name: "Personas.swift", file: persona-02-prompts.swift)
+            }
+            
+            @Step {
+                Add persona-specific behaviors and responses.
+                
+                @Code(name: "Personas.swift", file: persona-03-behaviors.swift)
+            }
+            
+            @Step {
+                Implement dynamic persona switching.
+                
+                @Code(name: "Personas.swift", file: persona-04-switching.swift)
+            }
+        }
+    }
+    
+    @Section(title: "Advanced Conversation Patterns") {
+        @ContentAndMedia {
+            Implement sophisticated conversation patterns like branching dialogues and context switching.
+            
+            @Image(source: advanced-patterns.png, alt: "Advanced patterns")
+        }
+        
+        @Steps {
+            @Step {
+                Create a conversation state machine.
+                
+                @Code(name: "ConversationStateMachine.swift", file: state-01-machine.swift)
+            }
+            
+            @Step {
+                Add conversation branching logic.
+                
+                @Code(name: "ConversationStateMachine.swift", file: state-02-branching.swift)
+            }
+            
+            @Step {
+                Implement context switching between topics.
+                
+                @Code(name: "ConversationStateMachine.swift", file: state-03-context.swift)
+            }
+            
+            @Step {
+                Add conversation analytics and insights.
+                
+                @Code(name: "ConversationStateMachine.swift", file: state-04-analytics.swift)
+            }
+        }
+    }
+    
+    @Section(title: "Building a Complete Chatbot") {
+        @ContentAndMedia {
+            Combine all patterns to create a sophisticated chatbot with memory, personas, and state management.
+            
+            @Image(source: complete-chatbot.png, alt: "Complete chatbot")
+        }
+        
+        @Steps {
+            @Step {
+                Create the main Chatbot class.
+                
+                @Code(name: "Chatbot.swift", file: chatbot-01-class.swift)
+            }
+            
+            @Step {
+                Integrate conversation management and memory.
+                
+                @Code(name: "Chatbot.swift", file: chatbot-02-integration.swift)
+            }
+            
+            @Step {
+                Add intent recognition and routing.
+                
+                @Code(name: "Chatbot.swift", file: chatbot-03-intents.swift)
+            }
+            
+            @Step {
+                Implement conversation flow control.
+                
+                @Code(name: "Chatbot.swift", file: chatbot-04-flow.swift)
+            }
+            
+            @Step {
+                Create a SwiftUI interface for the chatbot.
+                
+                @Code(name: "Chatbot.swift", file: chatbot-05-ui.swift)
+            }
+            
+            @Step {
+                Add conversation export and sharing.
+                
+                @Code(name: "Chatbot.swift", file: chatbot-06-export.swift)
+            }
+        }
+    }
+    
+    @Assessments {
+        @MultipleChoice {
+            Why is token counting important for conversation management?
+            
+            @Choice(isCorrect: false) {
+                To calculate API costs.
+                
+                @Justification(reaction: "Partially correct") {
+                    While tokens affect cost, the primary concern is staying within model limits.
+                }
+            }
+            
+            @Choice(isCorrect: true) {
+                To ensure conversations stay within the model's context window.
+                
+                @Justification(reaction: "Correct!") {
+                    Models have token limits, and exceeding them causes errors or truncation.
+                }
+            }
+            
+            @Choice(isCorrect: false) {
+                To improve response speed.
+                
+                @Justification(reaction: "Incorrect") {
+                    Token count doesn't directly affect response speed.
+                }
+            }
+        }
+        
+        @MultipleChoice {
+            What's the best approach for handling very long conversations?
+            
+            @Choice(isCorrect: false) {
+                Keep all messages forever.
+                
+                @Justification(reaction: "Incorrect") {
+                    This will eventually exceed token limits and increase costs.
+                }
+            }
+            
+            @Choice(isCorrect: true) {
+                Use a sliding window with optional summarization.
+                
+                @Justification(reaction: "Correct!") {
+                    This maintains context while staying within limits.
+                }
+            }
+            
+            @Choice(isCorrect: false) {
+                Start a new conversation every few messages.
+                
+                @Justification(reaction: "Incorrect") {
+                    This loses important context and continuity.
+                }
+            }
+        }
+    }
+}

@@ -1,0 +1,267 @@
+@Tutorial(time: 12) {
+    @Intro(title: "Transcribing Audio") {
+        Use Whisper to transcribe audio files into text with high accuracy across multiple languages.
+        
+        Build a voice note app that converts speech to text with translation capabilities.
+        
+        @Image(source: audio-transcription-intro.png, alt: "Audio transcription")
+    }
+    
+    @Section(title: "Basic Audio Transcription") {
+        @ContentAndMedia {
+            Learn how to transcribe audio files using the Whisper model.
+            
+            @Image(source: whisper-basics.png, alt: "Whisper basics")
+        }
+        
+        @Steps {
+            @Step {
+                Create a new file for audio transcription.
+                
+                @Code(name: "AudioTranscriber.swift", file: audio-01-empty.swift)
+            }
+            
+            @Step {
+                Import OpenAIKit and AVFoundation for audio handling.
+                
+                @Code(name: "AudioTranscriber.swift", file: audio-02-imports.swift)
+            }
+            
+            @Step {
+                Create a transcription function that accepts an audio file.
+                
+                @Code(name: "AudioTranscriber.swift", file: audio-03-function.swift)
+            }
+            
+            @Step {
+                Build a transcription request with the audio data.
+                
+                @Code(name: "AudioTranscriber.swift", file: audio-04-request.swift)
+            }
+            
+            @Step {
+                Send the request and extract the transcribed text.
+                
+                @Code(name: "AudioTranscriber.swift", file: audio-05-response.swift)
+            }
+        }
+    }
+    
+    @Section(title: "Advanced Transcription Options") {
+        @ContentAndMedia {
+            Explore advanced features like language detection, timestamps, and response formats.
+            
+            @Image(source: transcription-options.png, alt: "Transcription options")
+        }
+        
+        @Steps {
+            @Step {
+                Add language specification for better accuracy.
+                
+                @Code(name: "TranscriptionOptions.swift", file: options-01-language.swift)
+            }
+            
+            @Step {
+                Enable timestamp generation for subtitles.
+                
+                @Code(name: "TranscriptionOptions.swift", file: options-02-timestamps.swift)
+            }
+            
+            @Step {
+                Use different response formats (json, text, srt, vtt).
+                
+                @Code(name: "TranscriptionOptions.swift", file: options-03-formats.swift)
+            }
+            
+            @Step {
+                Add prompt context for domain-specific vocabulary.
+                
+                @Code(name: "TranscriptionOptions.swift", file: options-04-prompt.swift)
+            }
+            
+            @Step {
+                Implement temperature control for transcription certainty.
+                
+                @Code(name: "TranscriptionOptions.swift", file: options-05-temperature.swift)
+            }
+        }
+    }
+    
+    @Section(title: "Audio Translation") {
+        @ContentAndMedia {
+            Translate audio from any supported language directly to English.
+            
+            @Image(source: audio-translation.png, alt: "Audio translation")
+        }
+        
+        @Steps {
+            @Step {
+                Create a translation function using the translations endpoint.
+                
+                @Code(name: "AudioTranslator.swift", file: translate-01-function.swift)
+            }
+            
+            @Step {
+                Build a translation request with audio data.
+                
+                @Code(name: "AudioTranslator.swift", file: translate-02-request.swift)
+            }
+            
+            @Step {
+                Handle the translated English text response.
+                
+                @Code(name: "AudioTranslator.swift", file: translate-03-response.swift)
+            }
+            
+            @Step {
+                Create a language detection system.
+                
+                @Code(name: "AudioTranslator.swift", file: translate-04-detection.swift)
+            }
+        }
+    }
+    
+    @Section(title: "Building a Voice Notes App") {
+        @ContentAndMedia {
+            Create a complete voice notes application with recording and transcription.
+            
+            @Image(source: voice-notes-app.png, alt: "Voice notes app")
+        }
+        
+        @Steps {
+            @Step {
+                Create an audio recorder using AVAudioRecorder.
+                
+                @Code(name: "VoiceNotesApp.swift", file: app-01-recorder.swift)
+            }
+            
+            @Step {
+                Build a recording interface with waveform visualization.
+                
+                @Code(name: "VoiceNotesApp.swift", file: app-02-interface.swift)
+            }
+            
+            @Step {
+                Add automatic transcription after recording.
+                
+                @Code(name: "VoiceNotesApp.swift", file: app-03-transcribe.swift)
+            }
+            
+            @Step {
+                Implement voice note storage with Core Data.
+                
+                @Code(name: "VoiceNotesApp.swift", file: app-04-storage.swift)
+            }
+            
+            @Step {
+                Add search and filtering by transcribed content.
+                
+                @Code(name: "VoiceNotesApp.swift", file: app-05-search.swift)
+            }
+            
+            @Step {
+                Create export options for notes and transcripts.
+                
+                @Code(name: "VoiceNotesApp.swift", file: app-06-export.swift)
+            }
+        }
+    }
+    
+    @Section(title: "Handling Large Audio Files") {
+        @ContentAndMedia {
+            Learn strategies for processing long audio files within API limits.
+            
+            @Image(source: large-audio.png, alt: "Large audio handling")
+        }
+        
+        @Steps {
+            @Step {
+                Implement audio file chunking for large files.
+                
+                @Code(name: "AudioChunking.swift", file: chunk-01-split.swift)
+            }
+            
+            @Step {
+                Create overlap between chunks for context.
+                
+                @Code(name: "AudioChunking.swift", file: chunk-02-overlap.swift)
+            }
+            
+            @Step {
+                Process chunks in parallel for speed.
+                
+                @Code(name: "AudioChunking.swift", file: chunk-03-parallel.swift)
+            }
+            
+            @Step {
+                Merge transcriptions intelligently.
+                
+                @Code(name: "AudioChunking.swift", file: chunk-04-merge.swift)
+            }
+            
+            @Step {
+                Add progress tracking for long operations.
+                
+                @Code(name: "AudioChunking.swift", file: chunk-05-progress.swift)
+            }
+        }
+    }
+    
+    @Assessments {
+        @MultipleChoice {
+            What's the maximum file size for Whisper API?
+            
+            @Choice(isCorrect: false) {
+                10 MB
+                
+                @Justification(reaction: "Incorrect") {
+                    The limit is higher than this.
+                }
+            }
+            
+            @Choice(isCorrect: true) {
+                25 MB
+                
+                @Justification(reaction: "Correct!") {
+                    Whisper API accepts files up to 25 MB.
+                }
+            }
+            
+            @Choice(isCorrect: false) {
+                100 MB
+                
+                @Justification(reaction: "Incorrect") {
+                    This exceeds the API limit.
+                }
+            }
+        }
+        
+        @MultipleChoice {
+            What audio formats does Whisper support?
+            
+            @Choice(isCorrect: false) {
+                Only MP3
+                
+                @Justification(reaction: "Incorrect") {
+                    Whisper supports many audio formats.
+                }
+            }
+            
+            @Choice(isCorrect: true) {
+                MP3, MP4, M4A, WAV, WEBM, and more
+                
+                @Justification(reaction: "Correct!") {
+                    Whisper supports a wide variety of audio formats.
+                }
+            }
+            
+            @Choice(isCorrect: false) {
+                Only uncompressed formats like WAV
+                
+                @Justification(reaction: "Incorrect") {
+                    Whisper supports both compressed and uncompressed formats.
+                }
+            }
+        }
+    }
+}

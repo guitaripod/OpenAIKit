@@ -1,0 +1,215 @@
+@Tutorial(time: 12) {
+    @Intro(title: "Handling Errors") {
+        Learn how to gracefully handle errors and edge cases when working with the OpenAI API.
+        
+        You'll implement comprehensive error handling, retry logic, and user-friendly error messages.
+        
+        @Image(source: error-handling-intro.png, alt: "Error handling")
+    }
+    
+    @Section(title: "Understanding OpenAIKit Errors") {
+        @ContentAndMedia {
+            OpenAIKit provides a comprehensive error system to help you handle various failure scenarios.
+            
+            @Image(source: error-types.png, alt: "Error types")
+        }
+        
+        @Steps {
+            @Step {
+                Create a new file to explore error handling patterns.
+                
+                @Code(name: "ErrorHandling.swift", file: errors-01-empty.swift)
+            }
+            
+            @Step {
+                Import OpenAIKit and create a function that might fail.
+                
+                @Code(name: "ErrorHandling.swift", file: errors-02-function.swift)
+            }
+            
+            @Step {
+                Add a do-catch block to handle OpenAIError cases.
+                
+                @Code(name: "ErrorHandling.swift", file: errors-03-catch.swift)
+            }
+            
+            @Step {
+                Handle specific error cases like invalid API key.
+                
+                @Code(name: "ErrorHandling.swift", file: errors-04-specific.swift)
+            }
+            
+            @Step {
+                Extract error details for better debugging.
+                
+                @Code(name: "ErrorHandling.swift", file: errors-05-details.swift)
+            }
+        }
+    }
+    
+    @Section(title: "Implementing Retry Logic") {
+        @ContentAndMedia {
+            Network requests can fail temporarily. Let's implement smart retry logic for transient errors.
+            
+            @Image(source: retry-logic.png, alt: "Retry logic")
+        }
+        
+        @Steps {
+            @Step {
+                Create a retry wrapper for API calls.
+                
+                @Code(name: "RetryLogic.swift", file: retry-01-wrapper.swift)
+            }
+            
+            @Step {
+                Add exponential backoff for rate limit errors.
+                
+                @Code(name: "RetryLogic.swift", file: retry-02-backoff.swift)
+            }
+            
+            @Step {
+                Implement the retry logic with delay calculation.
+                
+                @Code(name: "RetryLogic.swift", file: retry-03-implementation.swift)
+            }
+            
+            @Step {
+                Add circuit breaker pattern for repeated failures.
+                
+                @Code(name: "RetryLogic.swift", file: retry-04-circuit.swift)
+            }
+        }
+    }
+    
+    @Section(title: "User-Friendly Error Messages") {
+        @ContentAndMedia {
+            Convert technical errors into messages your users can understand.
+            
+            @Image(source: user-errors.png, alt: "User-friendly errors")
+        }
+        
+        @Steps {
+            @Step {
+                Create an error message mapper.
+                
+                @Code(name: "ErrorMessages.swift", file: messages-01-mapper.swift)
+            }
+            
+            @Step {
+                Map common API errors to user messages.
+                
+                @Code(name: "ErrorMessages.swift", file: messages-02-mapping.swift)
+            }
+            
+            @Step {
+                Add localization support for error messages.
+                
+                @Code(name: "ErrorMessages.swift", file: messages-03-localized.swift)
+            }
+            
+            @Step {
+                Create actionable error messages with recovery suggestions.
+                
+                @Code(name: "ErrorMessages.swift", file: messages-04-actionable.swift)
+            }
+        }
+    }
+    
+    @Section(title: "Building a Robust Error Handler") {
+        @ContentAndMedia {
+            Combine all error handling patterns into a reusable error handler.
+            
+            @Image(source: error-handler.png, alt: "Error handler")
+        }
+        
+        @Steps {
+            @Step {
+                Create an ErrorHandler class.
+                
+                @Code(name: "ErrorHandler.swift", file: handler-01-class.swift)
+            }
+            
+            @Step {
+                Add error tracking and analytics.
+                
+                @Code(name: "ErrorHandler.swift", file: handler-02-tracking.swift)
+            }
+            
+            @Step {
+                Implement error recovery strategies.
+                
+                @Code(name: "ErrorHandler.swift", file: handler-03-recovery.swift)
+            }
+            
+            @Step {
+                Create SwiftUI error presentation.
+                
+                @Code(name: "ErrorHandler.swift", file: handler-04-ui.swift)
+            }
+            
+            @Step {
+                Add error state management.
+                
+                @Code(name: "ErrorHandler.swift", file: handler-05-state.swift)
+            }
+        }
+    }
+    
+    @Assessments {
+        @MultipleChoice {
+            Which error indicates you've exceeded your API rate limit?
+            
+            @Choice(isCorrect: false) {
+                `.invalidAPIKey`
+                
+                @Justification(reaction: "Incorrect") {
+                    This error indicates your API key is invalid or missing.
+                }
+            }
+            
+            @Choice(isCorrect: true) {
+                `.rateLimitExceeded`
+                
+                @Justification(reaction: "Correct!") {
+                    Rate limit errors occur when you make too many requests in a short time.
+                }
+            }
+            
+            @Choice(isCorrect: false) {
+                `.networkError`
+                
+                @Justification(reaction: "Incorrect") {
+                    Network errors indicate connection or timeout issues.
+                }
+            }
+        }
+        
+        @MultipleChoice {
+            What's the best practice for handling transient network errors?
+            
+            @Choice(isCorrect: true) {
+                Implement retry logic with exponential backoff.
+                
+                @Justification(reaction: "Correct!") {
+                    Exponential backoff prevents overwhelming the server while giving transient issues time to resolve.
+                }
+            }
+            
+            @Choice(isCorrect: false) {
+                Immediately show an error to the user.
+                
+                @Justification(reaction: "Incorrect") {
+                    Many network errors are temporary and can be resolved with a retry.
+                }
+            }
+            
+            @Choice(isCorrect: false) {
+                Retry indefinitely until it succeeds.
+                
+                @Justification(reaction: "Incorrect") {
+                    Infinite retries can drain battery and frustrate users. Always have a retry limit.
+                }
+            }
+        }
+    }
+}

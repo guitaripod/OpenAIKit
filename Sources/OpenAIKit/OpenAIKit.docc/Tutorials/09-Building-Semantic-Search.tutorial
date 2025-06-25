@@ -1,0 +1,313 @@
+@Tutorial(time: 20) {
+    @Intro(title: "Building Semantic Search") {
+        Create intelligent search systems using embeddings to find semantically similar content.
+        
+        Build a knowledge base app that understands meaning, not just keywords.
+        
+        @Image(source: semantic-search-intro.png, alt: "Semantic search")
+    }
+    
+    @Section(title: "Understanding Embeddings") {
+        @ContentAndMedia {
+            Learn how embeddings convert text into numerical vectors that capture semantic meaning.
+            
+            @Image(source: embeddings-explained.png, alt: "Embeddings explained")
+        }
+        
+        @Steps {
+            @Step {
+                Create a new file for embedding generation.
+                
+                @Code(name: "EmbeddingGenerator.swift", file: embeddings-01-empty.swift)
+            }
+            
+            @Step {
+                Import OpenAIKit and create an embedding function.
+                
+                @Code(name: "EmbeddingGenerator.swift", file: embeddings-02-function.swift)
+            }
+            
+            @Step {
+                Create an embedding request for a text string.
+                
+                @Code(name: "EmbeddingGenerator.swift", file: embeddings-03-request.swift)
+            }
+            
+            @Step {
+                Extract the embedding vector from the response.
+                
+                @Code(name: "EmbeddingGenerator.swift", file: embeddings-04-response.swift)
+            }
+            
+            @Step {
+                Process multiple texts in a batch for efficiency.
+                
+                @Code(name: "EmbeddingGenerator.swift", file: embeddings-05-batch.swift)
+            }
+        }
+    }
+    
+    @Section(title: "Vector Similarity Search") {
+        @ContentAndMedia {
+            Implement vector similarity calculations to find related content.
+            
+            @Image(source: vector-similarity.png, alt: "Vector similarity")
+        }
+        
+        @Steps {
+            @Step {
+                Create a vector similarity calculator.
+                
+                @Code(name: "VectorSimilarity.swift", file: similarity-01-calculator.swift)
+            }
+            
+            @Step {
+                Implement cosine similarity calculation.
+                
+                @Code(name: "VectorSimilarity.swift", file: similarity-02-cosine.swift)
+            }
+            
+            @Step {
+                Add dot product similarity option.
+                
+                @Code(name: "VectorSimilarity.swift", file: similarity-03-dot.swift)
+            }
+            
+            @Step {
+                Create a similarity ranking system.
+                
+                @Code(name: "VectorSimilarity.swift", file: similarity-04-ranking.swift)
+            }
+            
+            @Step {
+                Implement similarity thresholds and filtering.
+                
+                @Code(name: "VectorSimilarity.swift", file: similarity-05-threshold.swift)
+            }
+        }
+    }
+    
+    @Section(title: "Building a Vector Database") {
+        @ContentAndMedia {
+            Create an efficient vector storage system for semantic search at scale.
+            
+            @Image(source: vector-database.png, alt: "Vector database")
+        }
+        
+        @Steps {
+            @Step {
+                Design a document model with embeddings.
+                
+                @Code(name: "VectorDatabase.swift", file: database-01-model.swift)
+            }
+            
+            @Step {
+                Create a vector index for fast searching.
+                
+                @Code(name: "VectorDatabase.swift", file: database-02-index.swift)
+            }
+            
+            @Step {
+                Implement document storage with Core Data.
+                
+                @Code(name: "VectorDatabase.swift", file: database-03-storage.swift)
+            }
+            
+            @Step {
+                Add efficient k-nearest neighbor search.
+                
+                @Code(name: "VectorDatabase.swift", file: database-04-knn.swift)
+            }
+            
+            @Step {
+                Create metadata filtering for hybrid search.
+                
+                @Code(name: "VectorDatabase.swift", file: database-05-hybrid.swift)
+            }
+        }
+    }
+    
+    @Section(title: "Semantic Search Engine") {
+        @ContentAndMedia {
+            Combine embeddings and vector search to build a complete semantic search system.
+            
+            @Image(source: search-engine.png, alt: "Search engine")
+        }
+        
+        @Steps {
+            @Step {
+                Create the main search engine class.
+                
+                @Code(name: "SemanticSearchEngine.swift", file: engine-01-class.swift)
+            }
+            
+            @Step {
+                Implement document indexing with embeddings.
+                
+                @Code(name: "SemanticSearchEngine.swift", file: engine-02-index.swift)
+            }
+            
+            @Step {
+                Add query processing and embedding.
+                
+                @Code(name: "SemanticSearchEngine.swift", file: engine-03-query.swift)
+            }
+            
+            @Step {
+                Create result ranking and relevance scoring.
+                
+                @Code(name: "SemanticSearchEngine.swift", file: engine-04-ranking.swift)
+            }
+            
+            @Step {
+                Implement search result caching.
+                
+                @Code(name: "SemanticSearchEngine.swift", file: engine-05-cache.swift)
+            }
+        }
+    }
+    
+    @Section(title: "Building a Knowledge Base App") {
+        @ContentAndMedia {
+            Create a complete knowledge base application with semantic search capabilities.
+            
+            @Image(source: knowledge-base-app.png, alt: "Knowledge base app")
+        }
+        
+        @Steps {
+            @Step {
+                Create a document ingestion system.
+                
+                @Code(name: "KnowledgeBaseApp.swift", file: app-01-ingest.swift)
+            }
+            
+            @Step {
+                Build a search interface with SwiftUI.
+                
+                @Code(name: "KnowledgeBaseApp.swift", file: app-02-interface.swift)
+            }
+            
+            @Step {
+                Add document preview and highlighting.
+                
+                @Code(name: "KnowledgeBaseApp.swift", file: app-03-preview.swift)
+            }
+            
+            @Step {
+                Implement related document suggestions.
+                
+                @Code(name: "KnowledgeBaseApp.swift", file: app-04-related.swift)
+            }
+            
+            @Step {
+                Create search analytics and insights.
+                
+                @Code(name: "KnowledgeBaseApp.swift", file: app-05-analytics.swift)
+            }
+            
+            @Step {
+                Add document categorization using embeddings.
+                
+                @Code(name: "KnowledgeBaseApp.swift", file: app-06-categorize.swift)
+            }
+        }
+    }
+    
+    @Section(title: "Advanced Techniques") {
+        @ContentAndMedia {
+            Explore advanced embedding techniques for improved search quality.
+            
+            @Image(source: advanced-embeddings.png, alt: "Advanced techniques")
+        }
+        
+        @Steps {
+            @Step {
+                Implement text chunking strategies.
+                
+                @Code(name: "AdvancedEmbeddings.swift", file: advanced-01-chunking.swift)
+            }
+            
+            @Step {
+                Add query expansion for better recall.
+                
+                @Code(name: "AdvancedEmbeddings.swift", file: advanced-02-expansion.swift)
+            }
+            
+            @Step {
+                Create embedding fine-tuning for domains.
+                
+                @Code(name: "AdvancedEmbeddings.swift", file: advanced-03-finetune.swift)
+            }
+            
+            @Step {
+                Implement multi-language search support.
+                
+                @Code(name: "AdvancedEmbeddings.swift", file: advanced-04-multilang.swift)
+            }
+            
+            @Step {
+                Add real-time index updates.
+                
+                @Code(name: "AdvancedEmbeddings.swift", file: advanced-05-realtime.swift)
+            }
+        }
+    }
+    
+    @Assessments {
+        @MultipleChoice {
+            What dimension are OpenAI's text-embedding-3-small vectors?
+            
+            @Choice(isCorrect: true) {
+                1536
+                
+                @Justification(reaction: "Correct!") {
+                    The text-embedding-3-small model produces 1536-dimensional vectors.
+                }
+            }
+            
+            @Choice(isCorrect: false) {
+                768
+                
+                @Justification(reaction: "Incorrect") {
+                    This is a common dimension for other models, but not OpenAI's current embeddings.
+                }
+            }
+            
+            @Choice(isCorrect: false) {
+                3072
+                
+                @Justification(reaction: "Incorrect") {
+                    This is the dimension for text-embedding-3-large, not small.
+                }
+            }
+        }
+        
+        @MultipleChoice {
+            Which similarity metric is most commonly used for embeddings?
+            
+            @Choice(isCorrect: true) {
+                Cosine similarity
+                
+                @Justification(reaction: "Correct!") {
+                    Cosine similarity is standard for normalized embedding vectors.
+                }
+            }
+            
+            @Choice(isCorrect: false) {
+                Euclidean distance
+                
+                @Justification(reaction: "Partially correct") {
+                    While usable, cosine similarity is more common for embeddings.
+                }
+            }
+            
+            @Choice(isCorrect: false) {
+                Manhattan distance
+                
+                @Justification(reaction: "Incorrect") {
+                    This metric is rarely used for embedding similarity.
+                }
+            }
+        }
+    }
+}

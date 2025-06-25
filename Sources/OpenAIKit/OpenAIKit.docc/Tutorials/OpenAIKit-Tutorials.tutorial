@@ -1,0 +1,39 @@
+@Tutorials(name: "OpenAIKit") {
+    @Intro(title: "Welcome to OpenAIKit") {
+        Learn how to integrate OpenAI's powerful AI models into your Swift applications with OpenAIKit.
+        
+        These tutorials will guide you through everything from basic setup to advanced features like function calling and streaming responses.
+        
+        @Image(source: openaikit-hero.png, alt: "OpenAIKit logo")
+    }
+    
+    @Chapter(name: "Getting Started") {
+        Set up OpenAIKit and make your first API calls.
+        
+        @Image(source: chapter1-hero.png, alt: "Getting started with OpenAIKit")
+        
+        @TutorialReference(tutorial: "doc:Setting-Up-OpenAIKit")
+        @TutorialReference(tutorial: "doc:Your-First-Chat-Completion")
+        @TutorialReference(tutorial: "doc:Handling-Errors")
+    }
+    
+    @Chapter(name: "Chat Completions") {
+        Master conversational AI with chat completions.
+        
+        @Image(source: chapter2-hero.png, alt: "Chat completions")
+        
+        @TutorialReference(tutorial: "doc:Building-Conversations")
+        @TutorialReference(tutorial: "doc:Streaming-Responses")
+        @TutorialReference(tutorial: "doc:Working-With-Functions")
+    }
+    
+    @Chapter(name: "Multimodal AI") {
+        Work with images, audio, and embeddings.
+        
+        @Image(source: chapter3-hero.png, alt: "Multimodal AI")
+        
+        @TutorialReference(tutorial: "doc:Generating-Images")
+        @TutorialReference(tutorial: "doc:Transcribing-Audio")
+        @TutorialReference(tutorial: "doc:Building-Semantic-Search")
+    }
+}

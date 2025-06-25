@@ -1,0 +1,267 @@
+@Tutorial(time: 15) {
+    @Intro(title: "Generating Images") {
+        Create stunning images from text descriptions using DALL-E 3 and learn to handle image generation, editing, and variations.
+        
+        Build an image generation app with proper error handling and UI feedback.
+        
+        @Image(source: image-generation-intro.png, alt: "Image generation")
+    }
+    
+    @Section(title: "Basic Image Generation") {
+        @ContentAndMedia {
+            Start by generating your first image from a text prompt using DALL-E 3.
+            
+            @Image(source: dalle-basic.png, alt: "DALL-E basics")
+        }
+        
+        @Steps {
+            @Step {
+                Create a new file for image generation.
+                
+                @Code(name: "ImageGenerator.swift", file: image-01-empty.swift)
+            }
+            
+            @Step {
+                Import OpenAIKit and create an image generation function.
+                
+                @Code(name: "ImageGenerator.swift", file: image-02-function.swift)
+            }
+            
+            @Step {
+                Create an image generation request with a prompt.
+                
+                @Code(name: "ImageGenerator.swift", file: image-03-request.swift)
+            }
+            
+            @Step {
+                Send the request and handle the response.
+                
+                @Code(name: "ImageGenerator.swift", file: image-04-response.swift)
+            }
+            
+            @Step {
+                Download and display the generated image.
+                
+                @Code(name: "ImageGenerator.swift", file: image-05-download.swift)
+            }
+        }
+    }
+    
+    @Section(title: "Advanced Image Options") {
+        @ContentAndMedia {
+            Explore advanced options like size, quality, style, and multiple image generation.
+            
+            @Image(source: image-options.png, alt: "Image options")
+        }
+        
+        @Steps {
+            @Step {
+                Configure image size options (1024x1024, 1792x1024, 1024x1792).
+                
+                @Code(name: "ImageOptions.swift", file: options-01-size.swift)
+            }
+            
+            @Step {
+                Set quality level (standard or hd).
+                
+                @Code(name: "ImageOptions.swift", file: options-02-quality.swift)
+            }
+            
+            @Step {
+                Choose between vivid and natural styles.
+                
+                @Code(name: "ImageOptions.swift", file: options-03-style.swift)
+            }
+            
+            @Step {
+                Generate multiple images in a single request.
+                
+                @Code(name: "ImageOptions.swift", file: options-04-multiple.swift)
+            }
+            
+            @Step {
+                Add response format options (url or base64).
+                
+                @Code(name: "ImageOptions.swift", file: options-05-format.swift)
+            }
+        }
+    }
+    
+    @Section(title: "Building an Image Generation UI") {
+        @ContentAndMedia {
+            Create a SwiftUI interface for generating and displaying AI images.
+            
+            @Image(source: image-ui.png, alt: "Image generation UI")
+        }
+        
+        @Steps {
+            @Step {
+                Create a view model for image generation.
+                
+                @Code(name: "ImageGeneratorView.swift", file: ui-01-viewmodel.swift)
+            }
+            
+            @Step {
+                Build the prompt input interface.
+                
+                @Code(name: "ImageGeneratorView.swift", file: ui-02-prompt.swift)
+            }
+            
+            @Step {
+                Add image display with loading states.
+                
+                @Code(name: "ImageGeneratorView.swift", file: ui-03-display.swift)
+            }
+            
+            @Step {
+                Implement image saving and sharing.
+                
+                @Code(name: "ImageGeneratorView.swift", file: ui-04-save.swift)
+            }
+            
+            @Step {
+                Add generation history and favorites.
+                
+                @Code(name: "ImageGeneratorView.swift", file: ui-05-history.swift)
+            }
+        }
+    }
+    
+    @Section(title: "Image Variations and Editing") {
+        @ContentAndMedia {
+            Learn to create variations of existing images and use masks for targeted edits.
+            
+            @Image(source: image-variations.png, alt: "Image variations")
+        }
+        
+        @Steps {
+            @Step {
+                Create an image variation request.
+                
+                @Code(name: "ImageVariations.swift", file: variations-01-request.swift)
+            }
+            
+            @Step {
+                Upload an image for variation generation.
+                
+                @Code(name: "ImageVariations.swift", file: variations-02-upload.swift)
+            }
+            
+            @Step {
+                Generate multiple variations of an image.
+                
+                @Code(name: "ImageVariations.swift", file: variations-03-multiple.swift)
+            }
+            
+            @Step {
+                Implement image editing with masks.
+                
+                @Code(name: "ImageVariations.swift", file: variations-04-edit.swift)
+            }
+            
+            @Step {
+                Create a mask drawing interface.
+                
+                @Code(name: "ImageVariations.swift", file: variations-05-mask.swift)
+            }
+        }
+    }
+    
+    @Section(title: "Prompt Engineering for Images") {
+        @ContentAndMedia {
+            Master the art of writing effective prompts for high-quality image generation.
+            
+            @Image(source: prompt-engineering.png, alt: "Prompt engineering")
+        }
+        
+        @Steps {
+            @Step {
+                Create a prompt builder with style templates.
+                
+                @Code(name: "PromptBuilder.swift", file: prompt-01-builder.swift)
+            }
+            
+            @Step {
+                Add artistic style modifiers.
+                
+                @Code(name: "PromptBuilder.swift", file: prompt-02-styles.swift)
+            }
+            
+            @Step {
+                Include composition and lighting options.
+                
+                @Code(name: "PromptBuilder.swift", file: prompt-03-composition.swift)
+            }
+            
+            @Step {
+                Build a prompt enhancement system.
+                
+                @Code(name: "PromptBuilder.swift", file: prompt-04-enhance.swift)
+            }
+            
+            @Step {
+                Add prompt history and suggestions.
+                
+                @Code(name: "PromptBuilder.swift", file: prompt-05-history.swift)
+            }
+        }
+    }
+    
+    @Assessments {
+        @MultipleChoice {
+            What's the maximum resolution for DALL-E 3 square images?
+            
+            @Choice(isCorrect: true) {
+                1024x1024
+                
+                @Justification(reaction: "Correct!") {
+                    DALL-E 3 supports 1024x1024 for square images.
+                }
+            }
+            
+            @Choice(isCorrect: false) {
+                2048x2048
+                
+                @Justification(reaction: "Incorrect") {
+                    DALL-E 3 doesn't support this resolution.
+                }
+            }
+            
+            @Choice(isCorrect: false) {
+                512x512
+                
+                @Justification(reaction: "Incorrect") {
+                    This was the resolution for DALL-E 2, not DALL-E 3.
+                }
+            }
+        }
+        
+        @MultipleChoice {
+            How should you handle image generation errors?
+            
+            @Choice(isCorrect: false) {
+                Retry immediately with the same prompt.
+                
+                @Justification(reaction: "Incorrect") {
+                    This might hit rate limits or repeat the same error.
+                }
+            }
+            
+            @Choice(isCorrect: true) {
+                Check for content policy violations and suggest prompt modifications.
+                
+                @Justification(reaction: "Correct!") {
+                    Many errors are due to content policies, and modifying the prompt often helps.
+                }
+            }
+            
+            @Choice(isCorrect: false) {
+                Always use a different model.
+                
+                @Justification(reaction: "Incorrect") {
+                    The model isn't usually the issue; it's often the prompt or temporary errors.
+                }
+            }
+        }
+    }
+}
