@@ -6,3 +6,12 @@ DerivedData/
 .swiftpm/configuration/registries.json
 .swiftpm/xcode/package.xcworkspace/contents.xcworkspacedata
 .netrc
+
+# Documentation build artifacts
+**/OpenAIKit.docc/docs/
+**/OpenAIKit.docc/Tutorials/docs/
+docs/
+
+# Script artifacts
+*.png
+placeholder_images/
