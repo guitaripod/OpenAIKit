@@ -169,7 +169,7 @@ let indexHTML = """
             <a href="./documentation/openaikit" class="button">
                 View Documentation
             </a>
-            <a href="./documentation/openaikit/tutorials/openaikit-tutorials" class="button secondary">
+            <a href="./tutorials/openaikit-tutorials" class="button secondary">
                 Start Tutorial
             </a>
         </div>
