@@ -109,6 +109,21 @@ public struct Models: Sendable {
         public static let omniModeration20241025 = "omni-moderation-2024-10-25"
     }
     
+    /// DeepResearch models for advanced research and analysis
+    public struct DeepResearch: Sendable {
+        /// O3 Deep Research - Most capable research model
+        /// - Capabilities: Web search, MCP tools, code interpreter
+        /// - Use cases: Complex analysis, scientific research, market analysis
+        /// - Note: Can take tens of minutes to complete
+        public static let o3DeepResearch = "o3-deep-research"
+        
+        /// O4 Mini Deep Research - Faster research model
+        /// - Capabilities: Web search, MCP tools, code interpreter
+        /// - Use cases: Quicker research tasks, summaries
+        /// - Note: Faster but potentially less comprehensive than o3
+        public static let o4MiniDeepResearch = "o4-mini-deep-research"
+    }
+    
     /// Legacy completion models (deprecated)
     @available(*, deprecated, message: "Use chat models instead")
     public struct Completions: Sendable {
@@ -148,6 +163,12 @@ public extension Models {
     
     /// The default moderation model
     static let moderation = Moderation.textModerationLatest
+    
+    /// The default deep research model
+    static let deepResearch = DeepResearch.o3DeepResearch
+    
+    /// The fast deep research model
+    static let deepResearchFast = DeepResearch.o4MiniDeepResearch
 }
 
 /// Model capabilities and metadata
