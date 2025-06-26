@@ -1,5 +1,14 @@
 # OpenAIKit
 
+[![Swift](https://img.shields.io/badge/Swift-5.9+-orange.svg?style=flat)](https://swift.org)
+[![Platforms](https://img.shields.io/badge/Platforms-iOS%2015%2B%20%7C%20macOS%2012%2B%20%7C%20watchOS%208%2B%20%7C%20tvOS%2015%2B%20%7C%20visionOS%20%7C%20Linux-blue.svg?style=flat)](https://developer.apple.com)
+[![Swift Package Manager](https://img.shields.io/badge/SPM-compatible-brightgreen.svg?style=flat)](https://swift.org/package-manager)
+[![Documentation](https://img.shields.io/badge/Documentation-DocC-blue)](https://marcusziade.github.io/OpenAIKit/)
+[![License](https://img.shields.io/badge/License-MIT-lightgrey.svg?style=flat)](LICENSE)
+[![GitHub Stars](https://img.shields.io/github/stars/marcusziade/OpenAIKit?style=social)](https://github.com/marcusziade/OpenAIKit/stargazers)
+[![GitHub Forks](https://img.shields.io/github/forks/marcusziade/OpenAIKit?style=social)](https://github.com/marcusziade/OpenAIKit/network/members)
+[![CI](https://github.com/marcusziade/OpenAIKit/actions/workflows/docc.yml/badge.svg)](https://github.com/marcusziade/OpenAIKit/actions/workflows/docc.yml)
+
 A comprehensive Swift SDK for the OpenAI API.
 
 ## Features
