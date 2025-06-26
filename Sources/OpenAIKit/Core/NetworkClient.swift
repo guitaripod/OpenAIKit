@@ -35,6 +35,11 @@ public final class NetworkClient: NetworkClientProtocol, @unchecked Sendable {
         
         try validateResponse(response, data: data)
         
+        // Special handling for Data type
+        if T.self == Data.self {
+            return data as! T
+        }
+        
         do {
             return try decoder.decode(T.self, from: data)
         } catch {
@@ -170,9 +175,9 @@ public final class NetworkClient: NetworkClientProtocol, @unchecked Sendable {
     }
     
     private func buildURLRequest(from request: any Request) async throws -> URLRequest {
-        guard let url = URL(string: request.path, relativeTo: configuration.baseURL.appendingPathComponent("/v1")) else {
-            throw OpenAIError.invalidURL
-        }
+        let url = configuration.baseURL
+            .appendingPathComponent("v1")
+            .appendingPathComponent(request.path)
         
         var urlRequest = URLRequest(url: url)
         urlRequest.httpMethod = request.method.rawValue
@@ -196,9 +201,9 @@ public final class NetworkClient: NetworkClientProtocol, @unchecked Sendable {
     }
     
     private func buildUploadURLRequest(from request: any UploadRequest) async throws -> URLRequest {
-        guard let url = URL(string: request.path, relativeTo: configuration.baseURL.appendingPathComponent("/v1")) else {
-            throw OpenAIError.invalidURL
-        }
+        let url = configuration.baseURL
+            .appendingPathComponent("v1")
+            .appendingPathComponent(request.path)
         
         var urlRequest = URLRequest(url: url)
         urlRequest.httpMethod = "POST"
@@ -236,8 +241,16 @@ public final class NetworkClient: NetworkClientProtocol, @unchecked Sendable {
         case 200...299:
             return
         case 401:
+            // Try to decode API error for more context
+            if let data = data, let apiError = try? decoder.decode(APIError.self, from: data) {
+                throw OpenAIError.apiError(apiError)
+            }
             throw OpenAIError.authenticationFailed
         case 429:
+            // Try to decode API error for rate limit details
+            if let data = data, let apiError = try? decoder.decode(APIError.self, from: data) {
+                throw OpenAIError.apiError(apiError)
+            }
             throw OpenAIError.rateLimitExceeded
         case 400...499:
             if let data = data, let apiError = try? decoder.decode(APIError.self, from: data) {
@@ -245,6 +258,10 @@ public final class NetworkClient: NetworkClientProtocol, @unchecked Sendable {
             }
             throw OpenAIError.clientError(statusCode: httpResponse.statusCode)
         case 500...599:
+            // Even server errors might have API error details
+            if let data = data, let apiError = try? decoder.decode(APIError.self, from: data) {
+                throw OpenAIError.apiError(apiError)
+            }
             throw OpenAIError.serverError(statusCode: httpResponse.statusCode)
         default:
             throw OpenAIError.unknownError(statusCode: httpResponse.statusCode)

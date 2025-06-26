@@ -370,7 +370,8 @@ public struct ChatMessage: Codable, Sendable {
     /// The content of the message.
     ///
     /// Can be either a simple string or an array of content parts for multimodal messages.
-    public let content: MessageContent
+    /// Note: When the assistant makes function/tool calls, this may be nil.
+    public let content: MessageContent?
     
     /// An optional name for the message author.
     ///
@@ -399,7 +400,7 @@ public struct ChatMessage: Codable, Sendable {
     ///   - toolCallId: ID when responding to a tool call
     public init(
         role: ChatRole,
-        content: MessageContent,
+        content: MessageContent?,
         name: String? = nil,
         toolCalls: [ToolCall]? = nil,
         toolCallId: String? = nil
@@ -425,6 +426,24 @@ public struct ChatMessage: Codable, Sendable {
     /// ```
     public init(role: ChatRole, content: String) {
         self.init(role: role, content: .string(content))
+    }
+    
+    /// Creates a new chat message without content.
+    ///
+    /// This is useful for function/tool call responses where content may be nil.
+    ///
+    /// - Parameters:
+    ///   - role: The role of the message author
+    ///   - name: Optional name for the author
+    ///   - toolCalls: Tool calls made by the assistant
+    ///   - toolCallId: ID when responding to a tool call
+    public init(
+        role: ChatRole,
+        name: String? = nil,
+        toolCalls: [ToolCall]? = nil,
+        toolCallId: String? = nil
+    ) {
+        self.init(role: role, content: nil, name: name, toolCalls: toolCalls, toolCallId: toolCallId)
     }
 }
 
@@ -496,6 +515,17 @@ public enum MessageContent: Codable, Sendable {
     
     public init(from decoder: Decoder) throws {
         let container = try decoder.singleValueContainer()
+        
+        // First check if the value is null
+        if container.decodeNil() {
+            // If we have a null, we need to throw since MessageContent itself can't represent null
+            // The parent ChatMessage should handle this as an optional
+            throw DecodingError.typeMismatch(
+                MessageContent.self,
+                DecodingError.Context(codingPath: decoder.codingPath, debugDescription: "MessageContent cannot be null")
+            )
+        }
+        
         if let string = try? container.decode(String.self) {
             self = .string(string)
         } else if let parts = try? container.decode([MessagePart].self) {

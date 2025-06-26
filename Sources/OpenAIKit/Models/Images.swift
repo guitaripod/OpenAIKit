@@ -473,8 +473,29 @@ public struct ImageObject: Codable, Sendable {
 /// Tracks the number of tokens used in processing the text prompt.
 /// This is primarily relevant for models that perform token-based billing.
 public struct ImageUsage: Codable, Sendable {
-    /// The number of tokens used to process the prompt.
+    /// Total number of tokens used.
+    public let totalTokens: Int?
+    
+    /// The number of tokens used for the input.
+    public let inputTokens: Int?
+    
+    /// The number of tokens used for the output.
+    public let outputTokens: Int?
+    
+    /// Detailed breakdown of input tokens.
+    public let inputTokensDetails: InputTokensDetails?
+    
+    /// The number of tokens used to process the prompt (legacy field).
     ///
     /// This helps track usage for billing and rate limiting purposes.
     public let promptTokens: Int?
+    
+    /// Detailed breakdown of input token usage.
+    public struct InputTokensDetails: Codable, Sendable {
+        /// Tokens used for text input.
+        public let textTokens: Int?
+        
+        /// Tokens used for image input.
+        public let imageTokens: Int?
+    }
 }

@@ -62,7 +62,7 @@ public struct SpeechRequest: Codable, Sendable {
     ///   - speed: Playback speed (0.25-4.0, default: 1.0)
     public init(
         input: String,
-        model: String = "tts-1",
+        model: String = Models.Audio.tts1,
         voice: Voice,
         instructions: String? = nil,
         responseFormat: AudioFormat? = nil,
@@ -265,7 +265,7 @@ public struct TranscriptionRequest: Sendable {
     public init(
         file: Data,
         fileName: String,
-        model: String = "whisper-1",
+        model: String = Models.Audio.whisper1,
         chunkingStrategy: ChunkingStrategy? = nil,
         include: [String]? = nil,
         language: String? = nil,
@@ -417,6 +417,21 @@ public enum ChunkingStrategy: Codable, Sendable {
     }
 }
 
+/// Token usage information for audio endpoints.
+///
+/// Audio endpoints return different usage information than chat endpoints.
+/// This structure captures the audio-specific usage data.
+public struct AudioUsage: Codable, Sendable {
+    /// Total number of tokens used.
+    public let totalTokens: Int?
+    
+    /// Prompt tokens used (if applicable).
+    public let promptTokens: Int?
+    
+    /// Completion tokens used (if applicable).
+    public let completionTokens: Int?
+}
+
 /// The response from an audio transcription request.
 ///
 /// Contains the transcribed text and optional detailed information
@@ -439,7 +454,7 @@ public struct TranscriptionResponse: Codable, Sendable {
     public let text: String
     
     /// Token usage information if requested via `include` parameter.
-    public let usage: Usage?
+    public let usage: AudioUsage?
     
     /// Detected language of the audio in ISO-639-1 format.
     ///
@@ -599,7 +614,7 @@ public struct TranslationRequest: Sendable {
     public init(
         file: Data,
         fileName: String,
-        model: String = "whisper-1",
+        model: String = Models.Audio.whisper1,
         prompt: String? = nil,
         responseFormat: TranscriptionFormat? = nil,
         temperature: Double? = nil
@@ -632,5 +647,5 @@ public struct TranslationResponse: Codable, Sendable {
     public let text: String
     
     /// Token usage information if requested via `include` parameter.
-    public let usage: Usage?
+    public let usage: AudioUsage?
 }
