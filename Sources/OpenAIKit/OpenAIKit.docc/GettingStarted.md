@@ -204,6 +204,24 @@ let embedding = try await openAI.embeddings.create(
 let vector = embedding.data.first?.embedding.floatValues ?? []
 ```
 
+### Deep Research
+
+```swift
+let research = try await openAI.deepResearch.analyze(
+    DeepResearchRequest(
+        query: "What are the latest developments in quantum computing?",
+        model: Models.DeepResearch.researcher1,
+        depth: .comprehensive,
+        sources: [.academic, .news, .technical]
+    )
+)
+
+print(research.summary)
+for finding in research.findings {
+    print("- \(finding.title): \(finding.description)")
+}
+```
+
 ## Error Handling
 
 Always handle potential errors:
@@ -292,3 +310,4 @@ if let usage = response.usage {
 - Try ``AudioEndpoint`` for speech synthesis and transcription
 - Generate images with ``ImagesEndpoint``
 - Build semantic search with ``EmbeddingsEndpoint``
+- Conduct in-depth research with ``DeepResearchEndpoint``

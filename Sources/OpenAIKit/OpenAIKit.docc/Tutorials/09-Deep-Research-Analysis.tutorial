@@ -1,0 +1,361 @@
+@Tutorial(time: 25) {
+    @Intro(title: "Deep Research and Analysis") {
+        Leverage DeepResearch to perform comprehensive research with web search, code interpretation, and custom data sources.
+        
+        You'll learn how to build powerful research applications that combine multiple AI capabilities for in-depth analysis.
+        
+    }
+    
+    @Section(title: "Introduction to DeepResearch") {
+        @ContentAndMedia {
+            DeepResearch is a powerful feature that combines web search, code interpretation, and custom data access through MCP servers.
+            
+        }
+        
+        @Steps {
+            @Step {
+                Create a new file to explore DeepResearch capabilities.
+                
+                @Code(name: "ResearchAssistant.swift", file: research-01-empty.swift)
+            }
+            
+            @Step {
+                Import OpenAIKit and set up the DeepResearch client.
+                
+                @Code(name: "ResearchAssistant.swift", file: research-02-setup.swift)
+            }
+            
+            @Step {
+                Create a basic research request structure.
+                
+                @Code(name: "ResearchAssistant.swift", file: research-03-request.swift)
+            }
+            
+            @Step {
+                Configure the research parameters and capabilities.
+                
+                @Code(name: "ResearchAssistant.swift", file: research-04-config.swift)
+            }
+        }
+    }
+    
+    @Section(title: "Web Search Research") {
+        @ContentAndMedia {
+            Use DeepResearch to search the web and analyze current information beyond the model's training data.
+            
+        }
+        
+        @Steps {
+            @Step {
+                Create a market research function using web search.
+                
+                @Code(name: "MarketResearch.swift", file: websearch-01-function.swift)
+            }
+            
+            @Step {
+                Configure web search parameters and domains.
+                
+                @Code(name: "MarketResearch.swift", file: websearch-02-params.swift)
+            }
+            
+            @Step {
+                Process and analyze search results.
+                
+                @Code(name: "MarketResearch.swift", file: websearch-03-analyze.swift)
+            }
+            
+            @Step {
+                Generate a comprehensive research report.
+                
+                @Code(name: "MarketResearch.swift", file: websearch-04-report.swift)
+            }
+            
+            @Step {
+                Add source citations and confidence scores.
+                
+                @Code(name: "MarketResearch.swift", file: websearch-05-citations.swift)
+            }
+        }
+    }
+    
+    @Section(title: "Code Interpreter for Data Analysis") {
+        @ContentAndMedia {
+            Leverage the code interpreter to perform complex data analysis and visualization tasks.
+            
+        }
+        
+        @Steps {
+            @Step {
+                Create a data analysis assistant.
+                
+                @Code(name: "DataAnalysis.swift", file: codeinterp-01-setup.swift)
+            }
+            
+            @Step {
+                Upload data files for analysis.
+                
+                @Code(name: "DataAnalysis.swift", file: codeinterp-02-upload.swift)
+            }
+            
+            @Step {
+                Request statistical analysis with code execution.
+                
+                @Code(name: "DataAnalysis.swift", file: codeinterp-03-stats.swift)
+            }
+            
+            @Step {
+                Generate visualizations and charts.
+                
+                @Code(name: "DataAnalysis.swift", file: codeinterp-04-viz.swift)
+            }
+            
+            @Step {
+                Export results and generated code.
+                
+                @Code(name: "DataAnalysis.swift", file: codeinterp-05-export.swift)
+            }
+        }
+    }
+    
+    @Section(title: "Working with MCP Servers") {
+        @ContentAndMedia {
+            Connect to Model Context Protocol (MCP) servers to access custom data sources and tools.
+            
+        }
+        
+        @Steps {
+            @Step {
+                Configure MCP server connection.
+                
+                @Code(name: "MCPIntegration.swift", file: mcp-01-config.swift)
+            }
+            
+            @Step {
+                Create a company data research assistant.
+                
+                @Code(name: "MCPIntegration.swift", file: mcp-02-assistant.swift)
+            }
+            
+            @Step {
+                Query internal databases through MCP.
+                
+                @Code(name: "MCPIntegration.swift", file: mcp-03-query.swift)
+            }
+            
+            @Step {
+                Combine MCP data with web research.
+                
+                @Code(name: "MCPIntegration.swift", file: mcp-04-combine.swift)
+            }
+            
+            @Step {
+                Handle MCP authentication and security.
+                
+                @Code(name: "MCPIntegration.swift", file: mcp-05-security.swift)
+            }
+        }
+    }
+    
+    @Section(title: "Streaming Research Responses") {
+        @ContentAndMedia {
+            Handle real-time streaming of research results for responsive user experiences.
+            
+        }
+        
+        @Steps {
+            @Step {
+                Create a streaming research view model.
+                
+                @Code(name: "StreamingResearch.swift", file: streaming-01-viewmodel.swift)
+            }
+            
+            @Step {
+                Implement streaming research requests.
+                
+                @Code(name: "StreamingResearch.swift", file: streaming-02-request.swift)
+            }
+            
+            @Step {
+                Handle incremental results and progress updates.
+                
+                @Code(name: "StreamingResearch.swift", file: streaming-03-progress.swift)
+            }
+            
+            @Step {
+                Display live research findings in SwiftUI.
+                
+                @Code(name: "StreamingResearch.swift", file: streaming-04-ui.swift)
+            }
+            
+            @Step {
+                Add cancellation and pause functionality.
+                
+                @Code(name: "StreamingResearch.swift", file: streaming-05-control.swift)
+            }
+        }
+    }
+    
+    @Section(title: "Best Practices for Research Prompting") {
+        @ContentAndMedia {
+            Learn effective prompting strategies to get the best research results from DeepResearch.
+            
+        }
+        
+        @Steps {
+            @Step {
+                Structure research queries effectively.
+                
+                @Code(name: "PromptingBestPractices.swift", file: prompting-01-structure.swift)
+            }
+            
+            @Step {
+                Add context and constraints to research requests.
+                
+                @Code(name: "PromptingBestPractices.swift", file: prompting-02-context.swift)
+            }
+            
+            @Step {
+                Use chain-of-thought prompting for complex analysis.
+                
+                @Code(name: "PromptingBestPractices.swift", file: prompting-03-chain.swift)
+            }
+            
+            @Step {
+                Implement iterative research refinement.
+                
+                @Code(name: "PromptingBestPractices.swift", file: prompting-04-iterate.swift)
+            }
+            
+            @Step {
+                Create reusable research templates.
+                
+                @Code(name: "PromptingBestPractices.swift", file: prompting-05-templates.swift)
+            }
+        }
+    }
+    
+    @Section(title: "Security and Privacy Considerations") {
+        @ContentAndMedia {
+            Implement security best practices when handling sensitive research data and external connections.
+            
+        }
+        
+        @Steps {
+            @Step {
+                Implement secure credential storage.
+                
+                @Code(name: "SecurityPractices.swift", file: security-01-credentials.swift)
+            }
+            
+            @Step {
+                Add content filtering for sensitive data.
+                
+                @Code(name: "SecurityPractices.swift", file: security-02-filtering.swift)
+            }
+            
+            @Step {
+                Configure network security and proxies.
+                
+                @Code(name: "SecurityPractices.swift", file: security-03-network.swift)
+            }
+            
+            @Step {
+                Implement audit logging for research activities.
+                
+                @Code(name: "SecurityPractices.swift", file: security-04-audit.swift)
+            }
+            
+            @Step {
+                Add data retention and cleanup policies.
+                
+                @Code(name: "SecurityPractices.swift", file: security-05-retention.swift)
+            }
+        }
+    }
+    
+    @Assessments {
+        @MultipleChoice {
+            What makes DeepResearch different from regular chat completions?
+            
+            @Choice(isCorrect: false) {
+                It uses a more powerful language model.
+                
+                @Justification(reaction: "Incorrect") {
+                    DeepResearch uses the same models but with additional capabilities.
+                }
+            }
+            
+            @Choice(isCorrect: true) {
+                It can access real-time web data and execute code for analysis.
+                
+                @Justification(reaction: "Correct!") {
+                    DeepResearch combines multiple tools including web search and code interpretation.
+                }
+            }
+            
+            @Choice(isCorrect: false) {
+                It provides faster response times.
+                
+                @Justification(reaction: "Incorrect") {
+                    DeepResearch may actually be slower due to additional processing steps.
+                }
+            }
+        }
+        
+        @MultipleChoice {
+            When should you use MCP servers with DeepResearch?
+            
+            @Choice(isCorrect: false) {
+                Only for public web data.
+                
+                @Justification(reaction: "Incorrect") {
+                    MCP servers are designed for private, custom data sources.
+                }
+            }
+            
+            @Choice(isCorrect: true) {
+                When you need to access proprietary or internal data sources.
+                
+                @Justification(reaction: "Correct!") {
+                    MCP servers provide secure access to custom data not available on the web.
+                }
+            }
+            
+            @Choice(isCorrect: false) {
+                To speed up research queries.
+                
+                @Justification(reaction: "Incorrect") {
+                    MCP servers add functionality, not necessarily speed.
+                }
+            }
+        }
+        
+        @MultipleChoice {
+            What's the best practice for handling sensitive data in research queries?
+            
+            @Choice(isCorrect: false) {
+                Include all data directly in the prompt.
+                
+                @Justification(reaction: "Incorrect") {
+                    This could expose sensitive information unnecessarily.
+                }
+            }
+            
+            @Choice(isCorrect: false) {
+                Rely on the model to identify sensitive data.
+                
+                @Justification(reaction: "Incorrect") {
+                    You should proactively filter sensitive data before sending.
+                }
+            }
+            
+            @Choice(isCorrect: true) {
+                Implement content filtering and use secure credential storage.
+                
+                @Justification(reaction: "Correct!") {
+                    Proper security measures should be implemented at the application level.
+                }
+            }
+        }
+    }
+}

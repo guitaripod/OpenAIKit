@@ -28,4 +28,10 @@
         @TutorialReference(tutorial: "doc:08-Transcribing-Audio")
         @TutorialReference(tutorial: "doc:09-Building-Semantic-Search")
     }
+    
+    @Chapter(name: "Advanced Research") {
+        Perform comprehensive research and analysis with DeepResearch capabilities.
+        
+        @TutorialReference(tutorial: "doc:09-Deep-Research-Analysis")
+    }
 }

@@ -12,6 +12,7 @@ OpenAIKit provides a comprehensive, Swift-native interface to OpenAI's API, feat
 - 📡 **Real-time Streaming**: Server-Sent Events support for streaming responses
 - 🎯 **Type-Safe**: Strongly typed requests and responses with comprehensive error handling
 - 📦 **Zero Dependencies**: Pure Swift implementation with no external dependencies
+- 🔍 **Deep Research**: Advanced research and analysis capabilities for complex queries
 
 ## Getting Started
 
@@ -103,3 +104,10 @@ print(response.choices.first?.message.content ?? "")
 - ``StreamableRequest``
 - ``UploadRequest``
 - ``JSONValue``
+
+### Deep Research and Analysis
+
+- <doc:DeepResearch-Tutorial>
+- ``DeepResearchEndpoint``
+- ``DeepResearchRequest``
+- ``DeepResearchResponse``
