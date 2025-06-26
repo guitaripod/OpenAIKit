@@ -48,3 +48,6 @@ let response = try await openAI.chat.completions(
 
 print(response.choices.first?.message.content ?? "")
 ```
+
+## Testing the SDK with OpenAIKitTester.swift
+run `swift run OpenAIKitTester <test>`
