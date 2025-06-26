@@ -19,7 +19,7 @@ final class OpenAIKitTests: XCTestCase {
         XCTAssertNotNil(client.assistants)
         XCTAssertNotNil(client.threads)
         XCTAssertNotNil(client.vectorStores)
-        XCTAssertNotNil(client.batch)
+        XCTAssertNotNil(client.batches)
     }
     
     func testOpenAIKitInitializationWithConfiguration() {
@@ -45,6 +45,6 @@ final class OpenAIKitTests: XCTestCase {
         XCTAssertNotNil(client.assistants)
         XCTAssertNotNil(client.threads)
         XCTAssertNotNil(client.vectorStores)
-        XCTAssertNotNil(client.batch)
+        XCTAssertNotNil(client.batches)
     }
 }
