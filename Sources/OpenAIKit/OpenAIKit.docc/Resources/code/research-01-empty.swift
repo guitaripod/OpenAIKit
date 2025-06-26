@@ -1,0 +1,2 @@
+// ResearchAssistant.swift
+import Foundation
