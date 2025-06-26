@@ -26,7 +26,7 @@ import Foundation
 /// - ``assistants``
 /// - ``threads``
 /// - ``vectorStores``
-/// - ``batch``
+/// - ``batches``
 ///
 /// ## Example
 ///
@@ -135,7 +135,7 @@ public final class OpenAIKit: @unchecked Sendable {
     /// Provides access to batch processing endpoints.
     ///
     /// Use this endpoint to process multiple API requests asynchronously in batches.
-    public lazy var batch = BatchEndpoint(networkClient: networkClient)
+    public lazy var batches = BatchesEndpoint(networkClient: networkClient)
 }
 
 /// Configuration options for the OpenAI API client.
