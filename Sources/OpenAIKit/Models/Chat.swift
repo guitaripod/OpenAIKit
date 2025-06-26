@@ -1086,6 +1086,16 @@ public enum ToolType: String, Codable, Sendable {
     ///
     /// Allows the model to search through uploaded files.
     case fileSearch = "file_search"
+    
+    /// Web search preview tool.
+    ///
+    /// Enables the model to search the web for information.
+    case webSearchPreview = "web_search_preview"
+    
+    /// MCP (Model Context Protocol) tool.
+    ///
+    /// Allows the model to interact with MCP-compliant tools.
+    case mcp
 }
 
 /// A function that the model can call.
