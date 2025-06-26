@@ -1,9 +1,9 @@
-import Foundation
+// OpenAIClient.swift
 import OpenAIKit
+import Foundation
 
-// OpenAIClient.swift - A shared instance for OpenAI API access
-class OpenAIClient {
-    static let shared = OpenAIClient()
+class OpenAIManager {
+    static let shared = OpenAIManager()
     
     private init() {}
 }

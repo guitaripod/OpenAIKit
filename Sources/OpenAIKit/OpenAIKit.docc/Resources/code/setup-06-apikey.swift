@@ -1,12 +1,15 @@
-import Foundation
+// OpenAIClient.swift
 import OpenAIKit
+import Foundation
 
-// OpenAIClient.swift - A shared instance for OpenAI API access
-class OpenAIClient {
-    static let shared = OpenAIClient()
+class OpenAIManager {
+    static let shared = OpenAIManager()
     
-    private var apiKey: String? {
-        ProcessInfo.processInfo.environment["OPENAI_API_KEY"]
+    private var apiKey: String {
+        guard let key = ProcessInfo.processInfo.environment["OPENAI_API_KEY"] else {
+            fatalError("Missing OPENAI_API_KEY environment variable")
+        }
+        return key
     }
     
     private init() {}

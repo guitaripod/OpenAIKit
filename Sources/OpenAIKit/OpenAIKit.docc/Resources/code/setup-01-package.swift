@@ -3,12 +3,15 @@ import PackageDescription
 
 let package = Package(
     name: "MyApp",
-    dependencies: [
-        // Other dependencies...
+    products: [
+        .library(
+            name: "MyApp",
+            targets: ["MyApp"]
+        )
     ],
     targets: [
         .target(
-            name: "MyApp",
-            dependencies: []),
+            name: "MyApp"
+        )
     ]
 )

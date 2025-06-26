@@ -1,23 +1,35 @@
-import Foundation
+// OpenAIClient.swift
 import OpenAIKit
+import Foundation
 
-// OpenAIClient.swift - A shared instance for OpenAI API access
-class OpenAIClient {
-    static let shared = OpenAIClient()
+enum OpenAIError: LocalizedError {
+    case missingAPIKey
     
-    private(set) var openai: OpenAIKit?
+    var errorDescription: String? {
+        switch self {
+        case .missingAPIKey:
+            return "OpenAI API key not found. Please set the OPENAI_API_KEY environment variable."
+        }
+    }
+}
+
+class OpenAIManager {
+    static let shared = OpenAIManager()
     
     private var apiKey: String? {
         ProcessInfo.processInfo.environment["OPENAI_API_KEY"]
     }
     
+    let client: OpenAIKit?
+    
     private init() {
         guard let apiKey = apiKey else {
-            print("⚠️ Warning: OPENAI_API_KEY environment variable not set")
-            print("Please add your API key to the environment variables")
+            print("Warning: \(OpenAIError.missingAPIKey.errorDescription ?? "")")
+            self.client = nil
             return
         }
         
-        self.openai = OpenAIKit(apiKey: apiKey)
+        let configuration = Configuration(apiKey: apiKey)
+        self.client = OpenAIKit(configuration: configuration)
     }
 }
