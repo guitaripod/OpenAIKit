@@ -136,6 +136,11 @@ public final class OpenAIKit: @unchecked Sendable {
     ///
     /// Use this endpoint to process multiple API requests asynchronously in batches.
     public lazy var batches = BatchesEndpoint(networkClient: networkClient)
+    
+    /// Provides access to responses endpoints.
+    ///
+    /// Use this endpoint to interact with API responses.
+    public lazy var responses = ResponsesEndpoint(networkClient: networkClient)
 }
 
 /// Configuration options for the OpenAI API client.
