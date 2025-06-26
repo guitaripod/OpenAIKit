@@ -35,9 +35,11 @@ public struct ImageGenerationRequest: Codable, Sendable {
     /// The model to use for image generation.
     ///
     /// Available models:
-    /// - `"dall-e-2"`: Standard DALL·E 2 model
-    /// - `"dall-e-3"`: Latest DALL·E 3 model with improved quality and coherence
+    /// - `"dall-e-2"`: Standard DALL·E 2 model (256x256, 512x512, or 1024x1024)
+    /// - `"dall-e-3"`: Advanced DALL·E 3 model with improved quality and coherence
+    /// - `"gpt-image-1"`: Latest multimodal model with photorealistic results and advanced features
     ///
+    /// Use `Models.Images` constants for type-safe model selection.
     /// Defaults to `"dall-e-2"` if not specified.
     public let model: String?
     

@@ -77,11 +77,26 @@ public struct Models: Sendable {
     
     /// Image generation models
     public struct Images: Sendable {
-        /// DALL-E models
+        /// DALL-E 2 - Classic image generation model
+        /// - Resolution: 256x256, 512x512, or 1024x1024
+        /// - Supports: n parameter for multiple images (1-10)
+        /// - Returns: URLs to generated images
         public static let dallE2 = "dall-e-2"
+        
+        /// DALL-E 3 - Advanced image generation with better prompt adherence
+        /// - Resolution: 1024x1024, 1024x1792, or 1792x1024
+        /// - Supports: quality (standard/hd), style (vivid/natural)
+        /// - Returns: URLs to generated images
+        /// - Note: n parameter must be 1
         public static let dallE3 = "dall-e-3"
         
-        /// GPT Image model
+        /// GPT Image 1 - Latest multimodal image generation model
+        /// - Advanced features: Better instruction following, photorealistic results
+        /// - Supports: Image editing with masks, up to 10 input images
+        /// - Parameters: outputCompression (0-100), outputFormat (jpeg/png/webp)
+        /// - Special: Can generate transparent backgrounds
+        /// - Returns: Base64-encoded images with detailed usage statistics
+        /// - Requirements: Requires organization verification for access
         public static let gptImage1 = "gpt-image-1"
     }
     
