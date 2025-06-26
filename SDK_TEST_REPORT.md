@@ -23,7 +23,7 @@ The OpenAIKit SDK is **production-ready** with 100% test coverage across 41 comp
 - **Function Calling** - Tool use and multi-function support
 - **Embeddings** - Text vectorization with dimension control
 - **Audio** - Speech-to-text and text-to-speech
-- **Images** - DALL-E 2/3 and gpt-image-1 generation
+- **Images** - DALL-E 2/3 and GPT Image 1 (latest multimodal model)
 - **Moderation** - Content safety checking
 - **Models** - List and retrieve model information
 - **Files** - Upload, download, list, and delete
@@ -36,31 +36,6 @@ The OpenAIKit SDK is **production-ready** with 100% test coverage across 41 comp
 - **Threads API** - Part of Assistants (beta)
 - **Vector Stores** - Part of Assistants (beta)
 - **Fine-tuning** - Not implemented
-
-## Critical Fixes Applied
-
-1. **URL Construction** - Fixed 404 errors by correcting path building
-2. **Function Calling** - Made content optional for function-only responses
-3. **Binary Responses** - Added special handling for audio data
-4. **Audio Usage** - Created dedicated AudioUsage struct
-5. **Image Usage** - Enhanced for gpt-image-1 model support
-
-## Recent Additions
-
-### Model Constants
-- Type-safe model names (no more string literals)
-- Includes model metadata and capabilities
-- Prevents typos and improves code maintainability
-
-### Batch API
-- Full async batch processing with 50% cost savings
-- JSONL file creation and parsing utilities
-- Support for up to 50,000 requests per batch
-
-### Enhanced Error Handling
-- UI-ready error messages and titles
-- Retry guidance with suggested delays
-- User action suggestions for common errors
 
 ## Quick Start
 
