@@ -14,7 +14,7 @@ class ChatExample {
         
         let request = ChatCompletionRequest(
             messages: [chatMessage],
-            model: "gpt-4o-mini"
+            model: Models.Chat.gpt4oMini
         )
         
         let response = try await openAI.chat.completions(request)

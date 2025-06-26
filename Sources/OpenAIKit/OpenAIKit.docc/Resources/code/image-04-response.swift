@@ -12,7 +12,7 @@ class ImageGenerator {
         
         let request = ImageGenerationRequest(
             prompt: prompt,
-            model: "dall-e-3",
+            model: Models.Images.dallE3,
             n: 1,
             quality: .standard,
             responseFormat: .url,

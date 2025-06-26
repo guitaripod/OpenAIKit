@@ -12,7 +12,7 @@ class EmbeddingGenerator {
         
         let request = EmbeddingRequest(
             input: text,
-            model: "text-embedding-3-small",
+            model: Models.Embeddings.textEmbedding3Small,
             dimensions: nil,
             encodingFormat: .float,
             user: nil

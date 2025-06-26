@@ -20,7 +20,7 @@ class AudioTranscriber {
                 filename: audioFileURL.lastPathComponent,
                 contentType: "audio/mpeg"
             ),
-            model: "whisper-1",
+            model: Models.Audio.whisper1,
             language: nil,
             prompt: nil,
             responseFormat: .json,

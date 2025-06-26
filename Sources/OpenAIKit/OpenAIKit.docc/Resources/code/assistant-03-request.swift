@@ -4,7 +4,7 @@ func processMessage(_ userMessage: String) async throws -> String {
     
     let request = ChatCompletionRequest(
         messages: messages,
-        model: "gpt-4o-mini",
+        model: Models.Chat.gpt4oMini,
         tools: [
             Tool(type: .function, function: getWeatherFunction)
         ],

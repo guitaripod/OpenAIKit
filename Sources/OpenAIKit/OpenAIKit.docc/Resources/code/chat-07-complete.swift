@@ -19,7 +19,7 @@ class ChatExample: ObservableObject {
         
         let request = ChatCompletionRequest(
             messages: [chatMessage],
-            model: "gpt-4o-mini"
+            model: Models.Chat.gpt4oMini
         )
         
         do {
