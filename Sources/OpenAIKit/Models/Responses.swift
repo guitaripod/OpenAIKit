@@ -202,10 +202,12 @@ public enum ResponseTool: Codable, Sendable {
 /// ```
 public struct WebSearchPreviewTool: Codable, Sendable {
     /// The type of tool, always "web_search_preview".
-    public let type: String = "web_search_preview"
+    public let type: String
     
     /// Creates a new web search preview tool.
-    public init() {}
+    public init() {
+        self.type = "web_search_preview"
+    }
 }
 
 /// MCP (Model Context Protocol) tool configuration.
@@ -223,7 +225,7 @@ public struct WebSearchPreviewTool: Codable, Sendable {
 /// ```
 public struct MCPTool: Codable, Sendable {
     /// The type of tool, always "mcp".
-    public let type: String = "mcp"
+    public let type: String
     
     /// A label identifying the MCP server.
     ///
@@ -248,6 +250,7 @@ public struct MCPTool: Codable, Sendable {
     ///   - serverUrl: URL of the MCP server
     ///   - requireApproval: Whether to require user approval for operations
     public init(serverLabel: String, serverUrl: String, requireApproval: Bool = true) {
+        self.type = "mcp"
         self.serverLabel = serverLabel
         self.serverUrl = serverUrl
         self.requireApproval = requireApproval
@@ -270,7 +273,7 @@ public struct MCPTool: Codable, Sendable {
 /// ```
 public struct CodeInterpreterTool: Codable, Sendable {
     /// The type of tool, always "code_interpreter".
-    public let type: String = "code_interpreter"
+    public let type: String
     
     /// Container configuration for code execution.
     ///
@@ -281,6 +284,7 @@ public struct CodeInterpreterTool: Codable, Sendable {
     ///
     /// - Parameter container: Container configuration for code execution
     public init(container: CodeContainer? = nil) {
+        self.type = "code_interpreter"
         self.container = container
     }
 }

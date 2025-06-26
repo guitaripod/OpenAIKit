@@ -1,6 +1,7 @@
 import Foundation
 import OpenAIKit
 
+@available(macOS 13.0, *)
 extension OpenAIKitTester {
     static func testBatchAPI(openAI: OpenAIKit) async {
         print("\n📦 Testing Batch API...")

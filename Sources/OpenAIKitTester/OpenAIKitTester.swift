@@ -5,6 +5,7 @@ import FoundationNetworking
 import OpenAIKit
 
 @main
+@available(macOS 13.0, *)
 struct OpenAIKitTester {
     // Set your API key via environment variable: export OPENAI_API_KEY=your-key-here
     static let apiKey = ProcessInfo.processInfo.environment["OPENAI_API_KEY"] ?? "YOUR_API_KEY_HERE"
@@ -1151,7 +1152,7 @@ struct OpenAIKitTester {
         ))
         
         // Create a stateful closure that tracks attempts
-        class AttemptTracker {
+        final class AttemptTracker: @unchecked Sendable {
             var count = 0
         }
         let tracker = AttemptTracker()
