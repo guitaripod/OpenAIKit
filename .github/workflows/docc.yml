@@ -47,8 +47,6 @@ jobs:
             --hosting-base-path OpenAIKit \
             --enable-inherited-docs
           
-          # Create beautiful landing page
-          swift create_docs_index.swift
           
       - name: Upload Pages Artifact
         uses: actions/upload-pages-artifact@v3
