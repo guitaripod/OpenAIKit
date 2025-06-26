@@ -1,259 +1,1529 @@
-@Tutorial(time: 15) {
-    @Intro(title: "Generating Images") {
-        Create stunning images from text descriptions using DALL-E 3 and learn to handle image generation, editing, and variations.
+@Tutorial(time: 25) {
+    @Intro(title: "Generating Images with AI") {
+        Master image generation using DALL-E 2, DALL-E 3, and the advanced GPT Image 1 model. Learn to select the right model, handle errors professionally, and build production-ready image generation features.
         
-        Build an image generation app with proper error handling and UI feedback.
+        This tutorial covers model comparison, advanced features, error handling, and prompt engineering techniques.
         
+    }
+    
+    @Section(title: "Understanding Image Models") {
+        @ContentAndMedia {
+            OpenAIKit supports three powerful image generation models, each with unique capabilities and use cases.
+            
+            Learn how to choose the right model for your needs and leverage their specific features.
+        }
+        
+        @Steps {
+            @Step {
+                Compare the available image generation models.
+                
+                @Code(name: "ModelComparison.swift", file: models-01-comparison.swift) {
+                    import OpenAIKit
+                    
+                    struct ImageModelComparison {
+                        enum ImageModel {
+                            case dallE2
+                            case dallE3
+                            case gptImage1
+                            
+                            var capabilities: ModelCapabilities {
+                                switch self {
+                                case .dallE2:
+                                    return ModelCapabilities(
+                                        modelId: Models.Images.dallE2,
+                                        resolutions: ["256x256", "512x512", "1024x1024"],
+                                        maxImages: 10,
+                                        supportsStyles: false,
+                                        supportsQuality: false,
+                                        returnsURLs: true,
+                                        supportsTransparency: false,
+                                        cost: .low
+                                    )
+                                case .dallE3:
+                                    return ModelCapabilities(
+                                        modelId: Models.Images.dallE3,
+                                        resolutions: ["1024x1024", "1024x1792", "1792x1024"],
+                                        maxImages: 1,
+                                        supportsStyles: true,
+                                        supportsQuality: true,
+                                        returnsURLs: true,
+                                        supportsTransparency: false,
+                                        cost: .medium
+                                    )
+                                case .gptImage1:
+                                    return ModelCapabilities(
+                                        modelId: Models.Images.gptImage1,
+                                        resolutions: ["flexible"],
+                                        maxImages: 10,
+                                        supportsStyles: true,
+                                        supportsQuality: true,
+                                        returnsURLs: false, // Returns base64
+                                        supportsTransparency: true,
+                                        cost: .high
+                                    )
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            
+            @Step {
+                Create a model selection helper based on requirements.
+                
+                @Code(name: "ModelComparison.swift", file: models-02-selection.swift) {
+                    extension ImageModelComparison {
+                        static func selectModel(for requirements: ImageRequirements) -> String {
+                            // Need transparency? Only gpt-image-1 supports it
+                            if requirements.needsTransparency {
+                                return Models.Images.gptImage1
+                            }
+                            
+                            // Need multiple images? DALL-E 3 only supports n=1
+                            if requirements.imageCount > 1 {
+                                return requirements.needsHighQuality 
+                                    ? Models.Images.gptImage1 
+                                    : Models.Images.dallE2
+                            }
+                            
+                            // Need specific aspect ratios?
+                            if requirements.aspectRatio != .square {
+                                return requirements.budget == .low 
+                                    ? Models.Images.dallE3 
+                                    : Models.Images.gptImage1
+                            }
+                            
+                            // Default recommendations
+                            switch requirements.useCase {
+                            case .quickPrototype:
+                                return Models.Images.dallE2
+                            case .productionQuality:
+                                return Models.Images.dallE3
+                            case .advancedEditing:
+                                return Models.Images.gptImage1
+                            }
+                        }
+                    }
+                    
+                    struct ImageRequirements {
+                        let needsTransparency: Bool
+                        let imageCount: Int
+                        let needsHighQuality: Bool
+                        let aspectRatio: AspectRatio
+                        let budget: Budget
+                        let useCase: UseCase
+                        
+                        enum AspectRatio { case square, wide, tall }
+                        enum Budget { case low, medium, high }
+                        enum UseCase { case quickPrototype, productionQuality, advancedEditing }
+                    }
+                }
+            }
+        }
     }
     
     @Section(title: "Basic Image Generation") {
         @ContentAndMedia {
-            Start by generating your first image from a text prompt using DALL-E 3.
+            Start generating images using type-safe model constants and proper error handling.
             
         }
         
         @Steps {
             @Step {
-                Create a new file for image generation.
+                Create an image generator with model selection.
                 
-                @Code(name: "ImageGenerator.swift", file: image-01-empty.swift)
+                @Code(name: "ImageGenerator.swift", file: image-01-generator.swift) {
+                    import OpenAIKit
+                    import SwiftUI
+                    
+                    class ImageGenerator: ObservableObject {
+                        private let openAI: OpenAIKit
+                        @Published var generatedImages: [GeneratedImage] = []
+                        @Published var isGenerating = false
+                        @Published var error: ImageError?
+                        
+                        init(apiKey: String) {
+                            self.openAI = OpenAIKit(apiKey: apiKey)
+                        }
+                    }
+                }
             }
             
             @Step {
-                Import OpenAIKit and create an image generation function.
+                Implement basic image generation with DALL-E 3.
                 
-                @Code(name: "ImageGenerator.swift", file: image-02-function.swift)
+                @Code(name: "ImageGenerator.swift", file: image-02-basic.swift) {
+                    extension ImageGenerator {
+                        func generateImage(prompt: String) async {
+                            await MainActor.run { 
+                                isGenerating = true 
+                                error = nil
+                            }
+                            
+                            do {
+                                let request = ImageGenerationRequest(
+                                    prompt: prompt,
+                                    model: Models.Images.dallE3,
+                                    size: "1024x1024",
+                                    quality: "hd",
+                                    style: "natural"
+                                )
+                                
+                                let response = try await openAI.images.generations(request)
+                                
+                                if let imageData = response.data.first {
+                                    let generated = GeneratedImage(
+                                        prompt: prompt,
+                                        model: Models.Images.dallE3,
+                                        imageData: imageData
+                                    )
+                                    
+                                    await MainActor.run {
+                                        generatedImages.append(generated)
+                                    }
+                                }
+                            } catch {
+                                await MainActor.run {
+                                    self.error = ImageError.from(error)
+                                }
+                            }
+                            
+                            await MainActor.run { isGenerating = false }
+                        }
+                    }
+                }
             }
             
             @Step {
-                Create an image generation request with a prompt.
+                Add support for different models with appropriate parameters.
                 
-                @Code(name: "ImageGenerator.swift", file: image-03-request.swift)
-            }
-            
-            @Step {
-                Send the request and handle the response.
-                
-                @Code(name: "ImageGenerator.swift", file: image-04-response.swift)
-            }
-            
-            @Step {
-                Download and display the generated image.
-                
-                @Code(name: "ImageGenerator.swift", file: image-05-download.swift)
+                @Code(name: "ImageGenerator.swift", file: image-03-multimodel.swift) {
+                    extension ImageGenerator {
+                        func generateImage(
+                            prompt: String,
+                            model: String = Models.Images.dallE3,
+                            options: ImageOptions = .default
+                        ) async {
+                            await MainActor.run { isGenerating = true }
+                            
+                            do {
+                                var request = ImageGenerationRequest(
+                                    prompt: prompt,
+                                    model: model
+                                )
+                                
+                                // Apply model-specific parameters
+                                switch model {
+                                case Models.Images.dallE2:
+                                    request.size = options.size ?? "1024x1024"
+                                    request.n = options.count
+                                    
+                                case Models.Images.dallE3:
+                                    request.size = options.size ?? "1024x1024"
+                                    request.quality = options.quality ?? "standard"
+                                    request.style = options.style ?? "natural"
+                                    request.n = 1 // DALL-E 3 only supports n=1
+                                    
+                                case Models.Images.gptImage1:
+                                    request.background = options.background
+                                    request.outputCompression = options.compression
+                                    request.outputFormat = options.format
+                                    request.n = options.count
+                                    
+                                default:
+                                    throw ImageError.unsupportedModel(model)
+                                }
+                                
+                                let response = try await openAI.images.generations(request)
+                                await processResponse(response, model: model, prompt: prompt)
+                                
+                            } catch {
+                                await handleError(error)
+                            }
+                            
+                            await MainActor.run { isGenerating = false }
+                        }
+                    }
+                    
+                    struct ImageOptions {
+                        let size: String?
+                        let quality: String?
+                        let style: String?
+                        let count: Int
+                        let background: String?
+                        let compression: Int?
+                        let format: String?
+                        
+                        static let `default` = ImageOptions(
+                            size: nil,
+                            quality: nil,
+                            style: nil,
+                            count: 1,
+                            background: nil,
+                            compression: nil,
+                            format: nil
+                        )
+                    }
+                }
             }
         }
     }
     
-    @Section(title: "Advanced Image Options") {
+    @Section(title: "Advanced gpt-image-1 Features") {
         @ContentAndMedia {
-            Explore advanced options like size, quality, style, and multiple image generation.
+            Explore the unique capabilities of gpt-image-1, including transparent backgrounds, compression control, and detailed usage statistics.
             
         }
         
         @Steps {
             @Step {
-                Configure image size options (1024x1024, 1792x1024, 1024x1792).
+                Generate images with transparent backgrounds.
                 
-                @Code(name: "ImageOptions.swift", file: options-01-size.swift)
+                @Code(name: "AdvancedImageGen.swift", file: advanced-01-transparent.swift) {
+                    class AdvancedImageGenerator: ImageGenerator {
+                        func generateTransparentImage(
+                            subject: String,
+                            style: String = "photorealistic"
+                        ) async {
+                            let prompt = "\(subject), \(style), isolated on transparent background"
+                            
+                            do {
+                                let request = ImageGenerationRequest(
+                                    prompt: prompt,
+                                    model: Models.Images.gptImage1,
+                                    background: "transparent",
+                                    outputFormat: "png", // PNG for transparency
+                                    outputCompression: 0  // No compression for quality
+                                )
+                                
+                                let response = try await openAI.images.generations(request)
+                                
+                                // gpt-image-1 returns base64 data
+                                if let imageData = response.data.first,
+                                   let base64String = imageData.b64JSON,
+                                   let data = Data(base64Encoded: base64String) {
+                                    
+                                    // Verify transparency
+                                    if let image = UIImage(data: data),
+                                        hasTransparency(image) {
+                                        await saveTransparentImage(data, prompt: prompt)
+                                    }
+                                }
+                                
+                                // Track token usage
+                                if let usage = response.usage {
+                                    await trackUsage(usage)
+                                }
+                                
+                            } catch {
+                                await handleError(error)
+                            }
+                        }
+                    }
+                }
             }
             
             @Step {
-                Set quality level (standard or hd).
+                Implement compression and format optimization.
                 
-                @Code(name: "ImageOptions.swift", file: options-02-quality.swift)
+                @Code(name: "AdvancedImageGen.swift", file: advanced-02-compression.swift) {
+                    extension AdvancedImageGenerator {
+                        func generateOptimizedImage(
+                            prompt: String,
+                            targetSizeKB: Int = 500
+                        ) async {
+                            // Start with high quality, low compression
+                            var compression = 10
+                            var format = "webp" // Best compression ratio
+                            
+                            while compression <= 100 {
+                                do {
+                                    let request = ImageGenerationRequest(
+                                        prompt: prompt,
+                                        model: Models.Images.gptImage1,
+                                        outputCompression: compression,
+                                        outputFormat: format
+                                    )
+                                    
+                                    let response = try await openAI.images.generations(request)
+                                    
+                                    if let imageData = response.data.first,
+                                       let base64 = imageData.b64JSON,
+                                       let data = Data(base64Encoded: base64) {
+                                        
+                                        let sizeKB = data.count / 1024
+                                        
+                                        if sizeKB <= targetSizeKB {
+                                            // Found optimal compression
+                                            await saveOptimizedImage(
+                                                data,
+                                                compression: compression,
+                                                format: format,
+                                                sizeKB: sizeKB
+                                            )
+                                            break
+                                        }
+                                        
+                                        // Need more compression
+                                        compression += 10
+                                    }
+                                } catch {
+                                    // Try JPEG if WebP fails
+                                    if format == "webp" {
+                                        format = "jpeg"
+                                        compression = 10
+                                    } else {
+                                        throw error
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
             }
             
             @Step {
-                Choose between vivid and natural styles.
+                Leverage token usage tracking for cost optimization.
                 
-                @Code(name: "ImageOptions.swift", file: options-03-style.swift)
+                @Code(name: "AdvancedImageGen.swift", file: advanced-03-tokens.swift) {
+                    extension AdvancedImageGenerator {
+                        @Published var totalTokensUsed = 0
+                        @Published var estimatedCost: Double = 0
+                        
+                        func generateWithTokenTracking(prompt: String) async {
+                            do {
+                                let request = ImageGenerationRequest(
+                                    prompt: prompt,
+                                    model: Models.Images.gptImage1
+                                )
+                                
+                                let response = try await openAI.images.generations(request)
+                                
+                                // gpt-image-1 provides detailed usage
+                                if let usage = response.usage {
+                                    await MainActor.run {
+                                        totalTokensUsed += usage.totalTokens ?? 0
+                                        
+                                        // Estimate cost (example rates)
+                                        let inputCost = Double(usage.inputTokens ?? 0) * 0.00001
+                                        let outputCost = Double(usage.outputTokens ?? 0) * 0.00003
+                                        estimatedCost += inputCost + outputCost
+                                    }
+                                    
+                                    // Log detailed usage
+                                    print("""
+                                    Token Usage:
+                                    - Input: \(usage.inputTokens ?? 0)
+                                    - Output: \(usage.outputTokens ?? 0)
+                                    - Total: \(usage.totalTokens ?? 0)
+                                    - Input Details: \(usage.inputTokensDetails ?? [:])
+                                    """)
+                                }
+                                
+                                await processResponse(response, model: Models.Images.gptImage1, prompt: prompt)
+                                
+                            } catch {
+                                await handleError(error)
+                            }
+                        }
+                    }
+                }
             }
             
             @Step {
-                Generate multiple images in a single request.
+                Implement batch generation with concurrency control.
                 
-                @Code(name: "ImageOptions.swift", file: options-04-multiple.swift)
-            }
-            
-            @Step {
-                Add response format options (url or base64).
-                
-                @Code(name: "ImageOptions.swift", file: options-05-format.swift)
+                @Code(name: "AdvancedImageGen.swift", file: advanced-04-batch.swift) {
+                    extension AdvancedImageGenerator {
+                        func generateBatch(
+                            prompts: [String],
+                            maxConcurrent: Int = 3
+                        ) async {
+                            await withTaskGroup(of: GeneratedImage?.self) { group in
+                                // Limit concurrent requests
+                                var activeCount = 0
+                                var promptIndex = 0
+                                
+                                while promptIndex < prompts.count || activeCount > 0 {
+                                    // Add tasks up to limit
+                                    while activeCount < maxConcurrent && promptIndex < prompts.count {
+                                        let prompt = prompts[promptIndex]
+                                        promptIndex += 1
+                                        activeCount += 1
+                                        
+                                        group.addTask {
+                                            defer { activeCount -= 1 }
+                                            return await self.generateSingleImage(prompt: prompt)
+                                        }
+                                    }
+                                    
+                                    // Collect completed results
+                                    if let result = await group.next() {
+                                        if let image = result {
+                                            await MainActor.run {
+                                                self.generatedImages.append(image)
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                        
+                        private func generateSingleImage(prompt: String) async -> GeneratedImage? {
+                            do {
+                                let request = ImageGenerationRequest(
+                                    prompt: prompt,
+                                    model: Models.Images.gptImage1,
+                                    outputCompression: 50
+                                )
+                                
+                                let response = try await openAI.images.generations(request)
+                                
+                                if let data = response.data.first {
+                                    return GeneratedImage(
+                                        prompt: prompt,
+                                        model: Models.Images.gptImage1,
+                                        imageData: data
+                                    )
+                                }
+                            } catch {
+                                print("Batch generation error for '\(prompt)': \(error)")
+                            }
+                            
+                            return nil
+                        }
+                    }
+                }
             }
         }
     }
     
-    @Section(title: "Building an Image Generation UI") {
+    @Section(title: "Comprehensive Error Handling") {
         @ContentAndMedia {
-            Create a SwiftUI interface for generating and displaying AI images.
+            Implement robust error handling specific to image generation, including content policy violations, rate limits, and model-specific errors.
             
         }
         
         @Steps {
             @Step {
-                Create a view model for image generation.
+                Create comprehensive error types for image generation.
                 
-                @Code(name: "ImageGeneratorView.swift", file: ui-01-viewmodel.swift)
+                @Code(name: "ImageErrors.swift", file: errors-01-types.swift) {
+                    enum ImageError: LocalizedError {
+                        case unsupportedModel(String)
+                        case contentPolicyViolation(String)
+                        case rateLimitExceeded(retryAfter: TimeInterval)
+                        case invalidImageData
+                        case sizeLimitExceeded(maxSize: Int, requested: Int)
+                        case formatNotSupported(String)
+                        case quotaExceeded
+                        case modelSpecificError(model: String, details: String)
+                        case networkError(Error)
+                        case apiError(OpenAIError)
+                        
+                        var errorDescription: String? {
+                            switch self {
+                            case .unsupportedModel(let model):
+                                return "Model '\(model)' is not supported for image generation"
+                            case .contentPolicyViolation(let reason):
+                                return "Content policy violation: \(reason)"
+                            case .rateLimitExceeded(let retryAfter):
+                                return "Rate limit exceeded. Try again in \(Int(retryAfter)) seconds"
+                            case .invalidImageData:
+                                return "Invalid or corrupted image data received"
+                            case .sizeLimitExceeded(let max, let requested):
+                                return "Image size \(requested) exceeds maximum of \(max)"
+                            case .formatNotSupported(let format):
+                                return "Format '\(format)' is not supported"
+                            case .quotaExceeded:
+                                return "Monthly image generation quota exceeded"
+                            case .modelSpecificError(let model, let details):
+                                return "\(model) error: \(details)"
+                            case .networkError(let error):
+                                return "Network error: \(error.localizedDescription)"
+                            case .apiError(let error):
+                                return error.userFriendlyMessage
+                            }
+                        }
+                        
+                        static func from(_ error: Error) -> ImageError {
+                            if let openAIError = error as? OpenAIError {
+                                return .apiError(openAIError)
+                            }
+                            return .networkError(error)
+                        }
+                    }
+                }
             }
             
             @Step {
-                Build the prompt input interface.
+                Implement content policy error recovery.
                 
-                @Code(name: "ImageGeneratorView.swift", file: ui-02-prompt.swift)
+                @Code(name: "ImageErrors.swift", file: errors-02-policy.swift) {
+                    extension ImageGenerator {
+                        func handleContentPolicyError(
+                            originalPrompt: String,
+                            error: OpenAIError
+                        ) async -> String? {
+                            // Extract violation reason
+                            guard case .apiError(let apiError) = error,
+                                  apiError.error.code == "content_policy_violation" else {
+                                return nil
+                            }
+                            
+                            // Suggest modifications
+                            let modifications = [
+                                "artistic representation",
+                                "stylized version",
+                                "abstract interpretation",
+                                "conceptual art style"
+                            ]
+                            
+                            for modification in modifications {
+                                let modifiedPrompt = "\(originalPrompt), \(modification)"
+                                
+                                // Test if modified prompt passes
+                                if await testPromptSafety(modifiedPrompt) {
+                                    return modifiedPrompt
+                                }
+                            }
+                            
+                            return nil
+                        }
+                        
+                        private func testPromptSafety(_ prompt: String) async -> Bool {
+                            do {
+                                let response = try await openAI.moderations.create(
+                                    ModerationRequest(
+                                        input: prompt,
+                                        model: Models.Moderation.textModerationLatest
+                                    )
+                                )
+                                
+                                return !(response.results.first?.flagged ?? true)
+                            } catch {
+                                return false
+                            }
+                        }
+                    }
+                }
             }
             
             @Step {
-                Add image display with loading states.
+                Add rate limit handling with exponential backoff.
                 
-                @Code(name: "ImageGeneratorView.swift", file: ui-03-display.swift)
+                @Code(name: "ImageErrors.swift", file: errors-03-ratelimit.swift) {
+                    class RateLimitHandler {
+                        private var retryCount = 0
+                        private let maxRetries = 5
+                        
+                        func handleRateLimit<T>(
+                            operation: () async throws -> T
+                        ) async throws -> T {
+                            while retryCount < maxRetries {
+                                do {
+                                    let result = try await operation()
+                                    retryCount = 0 // Reset on success
+                                    return result
+                                } catch {
+                                    if let imageError = error as? ImageError,
+                                       case .rateLimitExceeded(let retryAfter) = imageError {
+                                        retryCount += 1
+                                        
+                                        // Exponential backoff
+                                        let delay = max(retryAfter, pow(2.0, Double(retryCount)))
+                                        
+                                        print("Rate limited. Retrying in \(delay) seconds...")
+                                        try await Task.sleep(nanoseconds: UInt64(delay * 1_000_000_000))
+                                        
+                                        continue
+                                    }
+                                    
+                                    throw error
+                                }
+                            }
+                            
+                            throw ImageError.rateLimitExceeded(retryAfter: 300) // 5 minutes
+                        }
+                    }
+                }
             }
             
             @Step {
-                Implement image saving and sharing.
+                Create user-friendly error messages with actions.
                 
-                @Code(name: "ImageGeneratorView.swift", file: ui-04-save.swift)
+                @Code(name: "ImageErrors.swift", file: errors-04-userfriendly.swift) {
+                    extension ImageError {
+                        var userFriendlyMessage: String {
+                            switch self {
+                            case .contentPolicyViolation:
+                                return "Your prompt contains content that violates our policies. Try rephrasing or using more general terms."
+                            case .rateLimitExceeded(let retryAfter):
+                                let minutes = Int(retryAfter / 60)
+                                return "You've made too many requests. Please wait \(minutes) minutes before trying again."
+                            case .sizeLimitExceeded:
+                                return "The requested image size is too large. Try a smaller resolution."
+                            case .quotaExceeded:
+                                return "You've reached your monthly image limit. Upgrade your plan for more images."
+                            default:
+                                return "Unable to generate image. Please try again or contact support if the issue persists."
+                            }
+                        }
+                        
+                        var suggestedAction: ErrorAction? {
+                            switch self {
+                            case .contentPolicyViolation:
+                                return .modifyPrompt
+                            case .rateLimitExceeded:
+                                return .retry
+                            case .unsupportedModel:
+                                return .changeModel
+                            case .sizeLimitExceeded:
+                                return .reduceSize
+                            case .quotaExceeded:
+                                return .upgradePlan
+                            default:
+                                return .contactSupport
+                            }
+                        }
+                        
+                        enum ErrorAction {
+                            case modifyPrompt
+                            case retry
+                            case changeModel
+                            case reduceSize
+                            case upgradePlan
+                            case contactSupport
+                        }
+                    }
+                }
             }
             
             @Step {
-                Add generation history and favorites.
+                Implement model-specific error handling.
                 
-                @Code(name: "ImageGeneratorView.swift", file: ui-05-history.swift)
+                @Code(name: "ImageErrors.swift", file: errors-05-modelspecific.swift) {
+                    extension ImageGenerator {
+                        func handleModelSpecificError(
+                            error: Error,
+                            model: String,
+                            request: ImageGenerationRequest
+                        ) async {
+                            switch model {
+                            case Models.Images.dallE3:
+                                // DALL-E 3 specific errors
+                                if error.localizedDescription.contains("size") {
+                                    // Try with supported size
+                                    var modifiedRequest = request
+                                    modifiedRequest.size = "1024x1024" // Default safe size
+                                    await retryWithModifiedRequest(modifiedRequest)
+                                }
+                                
+                            case Models.Images.gptImage1:
+                                // gpt-image-1 specific errors
+                                if error.localizedDescription.contains("organization") {
+                                    await MainActor.run {
+                                        self.error = .modelSpecificError(
+                                            model: "gpt-image-1",
+                                            details: "This model requires organization verification"
+                                        )
+                                    }
+                                }
+                                
+                            case Models.Images.dallE2:
+                                // DALL-E 2 fallback for simpler requests
+                                if request.n ?? 1 > 1 {
+                                    var modifiedRequest = request
+                                    modifiedRequest.n = 1
+                                    await retryWithModifiedRequest(modifiedRequest)
+                                }
+                                
+                            default:
+                                await MainActor.run {
+                                    self.error = .unsupportedModel(model)
+                                }
+                            }
+                        }
+                    }
+                }
             }
         }
     }
     
-    @Section(title: "Image Variations and Editing") {
+    @Section(title: "Advanced Prompt Engineering") {
         @ContentAndMedia {
-            Learn to create variations of existing images and use masks for targeted edits.
+            Master the art of crafting effective prompts for each model, with techniques for style control, composition, and quality optimization.
             
         }
         
         @Steps {
-            @Step {
-                Create an image variation request.
-                
-                @Code(name: "ImageVariations.swift", file: variations-01-request.swift)
-            }
-            
-            @Step {
-                Upload an image for variation generation.
-                
-                @Code(name: "ImageVariations.swift", file: variations-02-upload.swift)
-            }
-            
-            @Step {
-                Generate multiple variations of an image.
-                
-                @Code(name: "ImageVariations.swift", file: variations-03-multiple.swift)
-            }
-            
-            @Step {
-                Implement image editing with masks.
-                
-                @Code(name: "ImageVariations.swift", file: variations-04-edit.swift)
-            }
-            
-            @Step {
-                Create a mask drawing interface.
-                
-                @Code(name: "ImageVariations.swift", file: variations-05-mask.swift)
-            }
-        }
-    }
-    
-    @Section(title: "Prompt Engineering for Images") {
-        @ContentAndMedia {
-            Master the art of writing effective prompts for high-quality image generation.
-            
-        }
-        
-        @Steps {
-            @Step {
-                Create a prompt builder with style templates.
-                
-                @Code(name: "PromptBuilder.swift", file: prompt-01-builder.swift)
-            }
-            
-            @Step {
-                Add artistic style modifiers.
-                
-                @Code(name: "PromptBuilder.swift", file: prompt-02-styles.swift)
-            }
-            
-            @Step {
-                Include composition and lighting options.
-                
-                @Code(name: "PromptBuilder.swift", file: prompt-03-composition.swift)
-            }
-            
             @Step {
                 Build a prompt enhancement system.
                 
-                @Code(name: "PromptBuilder.swift", file: prompt-04-enhance.swift)
+                @Code(name: "PromptEngineering.swift", file: prompt-01-enhancer.swift) {
+                    struct PromptEnhancer {
+                        static func enhance(
+                            _ basePrompt: String,
+                            for model: String,
+                            style: ImageStyle = .default
+                        ) -> String {
+                            var enhanced = basePrompt
+                            
+                            // Model-specific enhancements
+                            switch model {
+                            case Models.Images.dallE2:
+                                // DALL-E 2 benefits from specific style keywords
+                                enhanced = addDallE2Keywords(to: enhanced, style: style)
+                                
+                            case Models.Images.dallE3:
+                                // DALL-E 3 understands natural language better
+                                enhanced = addNaturalLanguageContext(to: enhanced, style: style)
+                                
+                            case Models.Images.gptImage1:
+                                // gpt-image-1 excels with detailed descriptions
+                                enhanced = addDetailedDescription(to: enhanced, style: style)
+                                
+                            default:
+                                break
+                            }
+                            
+                            // Add quality modifiers
+                            enhanced = addQualityModifiers(to: enhanced, style: style)
+                            
+                            // Add technical specifications
+                            enhanced = addTechnicalSpecs(to: enhanced, style: style)
+                            
+                            return enhanced
+                        }
+                        
+                        private static func addDallE2Keywords(
+                            to prompt: String,
+                            style: ImageStyle
+                        ) -> String {
+                            let keywords = [
+                                style.artStyle,
+                                style.mood,
+                                "high quality",
+                                "detailed"
+                            ].compactMap { $0 }.joined(separator: ", ")
+                            
+                            return "\(prompt), \(keywords)"
+                        }
+                    }
+                    
+                    struct ImageStyle {
+                        let artStyle: String?
+                        let mood: String?
+                        let lighting: String?
+                        let camera: String?
+                        let colors: [String]
+                        
+                        static let `default` = ImageStyle(
+                            artStyle: nil,
+                            mood: nil,
+                            lighting: nil,
+                            camera: nil,
+                            colors: []
+                        )
+                    }
+                }
             }
             
             @Step {
-                Add prompt history and suggestions.
+                Add style modifiers and artistic techniques.
                 
-                @Code(name: "PromptBuilder.swift", file: prompt-05-history.swift)
+                @Code(name: "PromptEngineering.swift", file: prompt-02-styles.swift) {
+                    extension PromptEnhancer {
+                        enum ArtisticStyle: String, CaseIterable {
+                            case photorealistic = "photorealistic, 8k resolution"
+                            case digitalArt = "digital art, trending on artstation"
+                            case oilPainting = "oil painting, classical style"
+                            case watercolor = "watercolor painting, soft edges"
+                            case anime = "anime style, studio ghibli inspired"
+                            case cyberpunk = "cyberpunk, neon lights, futuristic"
+                            case minimalist = "minimalist, clean lines, simple"
+                            case surreal = "surrealist, salvador dali inspired"
+                            
+                            var modelCompatibility: [String] {
+                                switch self {
+                                case .photorealistic:
+                                    return [Models.Images.gptImage1, Models.Images.dallE3]
+                                case .anime:
+                                    return [Models.Images.dallE3, Models.Images.dallE2]
+                                default:
+                                    return [Models.Images.dallE2, Models.Images.dallE3, Models.Images.gptImage1]
+                                }
+                            }
+                        }
+                        
+                        static func applyArtisticStyle(
+                            to prompt: String,
+                            style: ArtisticStyle,
+                            model: String
+                        ) -> String {
+                            // Check compatibility
+                            guard style.modelCompatibility.contains(model) else {
+                                return prompt
+                            }
+                            
+                            // Apply style with model-specific adjustments
+                            switch model {
+                            case Models.Images.gptImage1:
+                                // More detailed for gpt-image-1
+                                return "\(prompt), \(style.rawValue), ultra detailed, professional quality"
+                                
+                            case Models.Images.dallE3:
+                                // Natural language for DALL-E 3
+                                return "\(prompt) in the style of \(style.rawValue)"
+                                
+                            default:
+                                // Simple concatenation for DALL-E 2
+                                return "\(prompt), \(style.rawValue)"
+                            }
+                        }
+                    }
+                }
+            }
+            
+            @Step {
+                Implement composition and camera controls.
+                
+                @Code(name: "PromptEngineering.swift", file: prompt-03-composition.swift) {
+                    extension PromptEnhancer {
+                        struct CompositionGuide {
+                            let angle: CameraAngle
+                            let shot: ShotType
+                            let focus: FocusType
+                            let lighting: LightingSetup
+                            
+                            enum CameraAngle: String {
+                                case eye = "eye level view"
+                                case low = "low angle shot, looking up"
+                                case high = "high angle shot, looking down"
+                                case birds = "bird's eye view, aerial perspective"
+                                case dutch = "dutch angle, tilted camera"
+                            }
+                            
+                            enum ShotType: String {
+                                case extreme = "extreme close-up"
+                                case close = "close-up shot"
+                                case medium = "medium shot"
+                                case full = "full shot"
+                                case wide = "wide shot, landscape"
+                            }
+                            
+                            enum FocusType: String {
+                                case sharp = "sharp focus, f/1.4"
+                                case soft = "soft focus, dreamy"
+                                case selective = "selective focus, bokeh background"
+                                case tiltShift = "tilt-shift photography"
+                            }
+                            
+                            enum LightingSetup: String {
+                                case golden = "golden hour lighting"
+                                case studio = "studio lighting, three-point setup"
+                                case natural = "natural lighting, soft shadows"
+                                case dramatic = "dramatic lighting, chiaroscuro"
+                                case neon = "neon lighting, vibrant colors"
+                            }
+                        }
+                        
+                        static func applyComposition(
+                            to prompt: String,
+                            guide: CompositionGuide
+                        ) -> String {
+                            let composition = [
+                                guide.angle.rawValue,
+                                guide.shot.rawValue,
+                                guide.focus.rawValue,
+                                guide.lighting.rawValue
+                            ].joined(separator: ", ")
+                            
+                            return "\(prompt), \(composition)"
+                        }
+                    }
+                }
+            }
+            
+            @Step {
+                Create a prompt validation and safety system.
+                
+                @Code(name: "PromptEngineering.swift", file: prompt-04-validation.swift) {
+                    struct PromptValidator {
+                        static func validate(_ prompt: String) -> ValidationResult {
+                            var issues: [ValidationIssue] = []
+                            
+                            // Length check
+                            if prompt.count < 10 {
+                                issues.append(.tooShort)
+                            } else if prompt.count > 1000 {
+                                issues.append(.tooLong)
+                            }
+                            
+                            // Specificity check
+                            let words = prompt.split(separator: " ")
+                            if words.count < 5 {
+                                issues.append(.notSpecificEnough)
+                            }
+                            
+                            // Check for problematic terms
+                            let problematicTerms = [
+                                "celebrity name", "brand", "logo", 
+                                "violent", "explicit"
+                            ]
+                            
+                            for term in problematicTerms {
+                                if prompt.lowercased().contains(term) {
+                                    issues.append(.potentialPolicyViolation(term))
+                                }
+                            }
+                            
+                            // Check for quality indicators
+                            let qualityTerms = [
+                                "detailed", "high quality", "professional",
+                                "4k", "8k", "hd"
+                            ]
+                            
+                            let hasQualityTerms = qualityTerms.contains { 
+                                prompt.lowercased().contains($0) 
+                            }
+                            
+                            if !hasQualityTerms {
+                                issues.append(.missingQualityTerms)
+                            }
+                            
+                            return ValidationResult(
+                                isValid: issues.isEmpty,
+                                issues: issues,
+                                suggestions: generateSuggestions(for: issues)
+                            )
+                        }
+                        
+                        enum ValidationIssue {
+                            case tooShort
+                            case tooLong
+                            case notSpecificEnough
+                            case potentialPolicyViolation(String)
+                            case missingQualityTerms
+                        }
+                        
+                        struct ValidationResult {
+                            let isValid: Bool
+                            let issues: [ValidationIssue]
+                            let suggestions: [String]
+                        }
+                    }
+                }
+            }
+            
+            @Step {
+                Build a prompt template library.
+                
+                @Code(name: "PromptEngineering.swift", file: prompt-05-templates.swift) {
+                    struct PromptTemplates {
+                        enum Category: String, CaseIterable {
+                            case portrait = "Portrait"
+                            case landscape = "Landscape"
+                            case product = "Product"
+                            case architecture = "Architecture"
+                            case food = "Food"
+                            case abstract = "Abstract"
+                            
+                            var templates: [Template] {
+                                switch self {
+                                case .portrait:
+                                    return [
+                                        Template(
+                                            name: "Professional Headshot",
+                                            prompt: "{subject} professional portrait, studio lighting, clean background, sharp focus, 85mm lens",
+                                            variables: ["subject"],
+                                            recommendedModel: Models.Images.gptImage1
+                                        ),
+                                        Template(
+                                            name: "Artistic Portrait",
+                                            prompt: "{subject} portrait in {style} style, {mood} mood, artistic interpretation",
+                                            variables: ["subject", "style", "mood"],
+                                            recommendedModel: Models.Images.dallE3
+                                        )
+                                    ]
+                                    
+                                case .landscape:
+                                    return [
+                                        Template(
+                                            name: "Epic Landscape",
+                                            prompt: "{location} landscape, {time} lighting, epic scale, panoramic view, high detail",
+                                            variables: ["location", "time"],
+                                            recommendedModel: Models.Images.dallE3
+                                        )
+                                    ]
+                                    
+                                // ... more categories
+                                default:
+                                    return []
+                                }
+                            }
+                        }
+                        
+                        struct Template {
+                            let name: String
+                            let prompt: String
+                            let variables: [String]
+                            let recommendedModel: String
+                            
+                            func generate(with values: [String: String]) -> String {
+                                var result = prompt
+                                for (key, value) in values {
+                                    result = result.replacingOccurrences(
+                                        of: "{\(key)}", 
+                                        with: value
+                                    )
+                                }
+                                return result
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+    
+    @Section(title: "Building a Professional Image App") {
+        @ContentAndMedia {
+            Combine all the concepts to build a production-ready image generation app with proper architecture, state management, and user experience.
+            
+        }
+        
+        @Steps {
+            @Step {
+                Create the app architecture with dependency injection.
+                
+                @Code(name: "ImageApp.swift", file: app-01-architecture.swift) {
+                    // AppContainer.swift
+                    @MainActor
+                    class AppContainer: ObservableObject {
+                        let imageService: ImageService
+                        let storageService: StorageService
+                        let analyticsService: AnalyticsService
+                        
+                        @Published var imageGenerator: ImageGenerator
+                        @Published var galleryManager: GalleryManager
+                        @Published var settingsManager: SettingsManager
+                        
+                        init() {
+                            // Initialize services
+                            self.imageService = ImageService(
+                                apiKey: ProcessInfo.processInfo.environment["OPENAI_API_KEY"] ?? ""
+                            )
+                            self.storageService = StorageService()
+                            self.analyticsService = AnalyticsService()
+                            
+                            // Initialize managers
+                            self.imageGenerator = ImageGenerator(
+                                imageService: imageService,
+                                analytics: analyticsService
+                            )
+                            self.galleryManager = GalleryManager(
+                                storage: storageService
+                            )
+                            self.settingsManager = SettingsManager()
+                        }
+                    }
+                    
+                    // ImageApp.swift
+                    @main
+                    struct ImageApp: App {
+                        @StateObject private var container = AppContainer()
+                        
+                        var body: some Scene {
+                            WindowGroup {
+                                ContentView()
+                                    .environmentObject(container)
+                                    .environmentObject(container.imageGenerator)
+                                    .environmentObject(container.galleryManager)
+                                    .environmentObject(container.settingsManager)
+                            }
+                        }
+                    }
+                }
+            }
+            
+            @Step {
+                Implement the main generation interface.
+                
+                @Code(name: "ImageApp.swift", file: app-02-mainview.swift) {
+                    struct ImageGenerationView: View {
+                        @EnvironmentObject var generator: ImageGenerator
+                        @EnvironmentObject var settings: SettingsManager
+                        
+                        @State private var prompt = ""
+                        @State private var selectedModel = Models.Images.dallE3
+                        @State private var showingOptions = false
+                        @State private var generationTask: Task<Void, Never>?
+                        
+                        var body: some View {
+                            NavigationView {
+                                VStack(spacing: 20) {
+                                    // Prompt input
+                                    PromptInputView(
+                                        prompt: $prompt,
+                                        onSubmit: generateImage
+                                    )
+                                    
+                                    // Model selection
+                                    ModelSelectorView(
+                                        selectedModel: $selectedModel,
+                                        availableModels: settings.availableModels
+                                    )
+                                    
+                                    // Generation button
+                                    GenerateButton(
+                                        isGenerating: generator.isGenerating,
+                                        canGenerate: !prompt.isEmpty
+                                    ) {
+                                        generateImage()
+                                    }
+                                    
+                                    // Results
+                                    if !generator.generatedImages.isEmpty {
+                                        GeneratedImagesGrid(
+                                            images: generator.generatedImages
+                                        )
+                                    }
+                                    
+                                    // Error handling
+                                    if let error = generator.error {
+                                        ErrorBanner(error: error) {
+                                            generator.error = nil
+                                        }
+                                    }
+                                }
+                                .navigationTitle("AI Image Generator")
+                                .toolbar {
+                                    ToolbarItem(placement: .navigationBarTrailing) {
+                                        Button(action: { showingOptions = true }) {
+                                            Image(systemName: "slider.horizontal.3")
+                                        }
+                                    }
+                                }
+                                .sheet(isPresented: $showingOptions) {
+                                    GenerationOptionsView(model: selectedModel)
+                                }
+                            }
+                        }
+                        
+                        private func generateImage() {
+                            generationTask?.cancel()
+                            
+                            generationTask = Task {
+                                await generator.generateImage(
+                                    prompt: prompt,
+                                    model: selectedModel,
+                                    options: settings.currentOptions(for: selectedModel)
+                                )
+                            }
+                        }
+                    }
+                }
+            }
+            
+            @Step {
+                Add real-time generation progress and cancellation.
+                
+                @Code(name: "ImageApp.swift", file: app-03-progress.swift) {
+                    extension ImageGenerator {
+                        @Published var progress: GenerationProgress = .idle
+                        
+                        enum GenerationProgress {
+                            case idle
+                            case validating
+                            case generating(percentage: Double)
+                            case processing
+                            case complete
+                            
+                            var description: String {
+                                switch self {
+                                case .idle:
+                                    return "Ready"
+                                case .validating:
+                                    return "Validating prompt..."
+                                case .generating(let percentage):
+                                    return "Generating... \(Int(percentage))%"
+                                case .processing:
+                                    return "Processing image..."
+                                case .complete:
+                                    return "Complete!"
+                                }
+                            }
+                        }
+                        
+                        func generateWithProgress(
+                            prompt: String,
+                            model: String
+                        ) async {
+                            await updateProgress(.validating)
+                            
+                            // Validate prompt
+                            let validation = PromptValidator.validate(prompt)
+                            guard validation.isValid else {
+                                await showValidationError(validation)
+                                return
+                            }
+                            
+                            await updateProgress(.generating(percentage: 0))
+                            
+                            // For gpt-image-1, we can track token usage as progress
+                            if model == Models.Images.gptImage1 {
+                                await generateWithTokenTracking(prompt: prompt)
+                            } else {
+                                // Simulate progress for other models
+                                await generateWithSimulatedProgress(
+                                    prompt: prompt,
+                                    model: model
+                                )
+                            }
+                            
+                            await updateProgress(.complete)
+                        }
+                        
+                        @MainActor
+                        private func updateProgress(_ progress: GenerationProgress) {
+                            withAnimation(.easeInOut(duration: 0.3)) {
+                                self.progress = progress
+                            }
+                        }
+                    }
+                    
+                    struct GenerationProgressView: View {
+                        let progress: ImageGenerator.GenerationProgress
+                        let onCancel: () -> Void
+                        
+                        var body: some View {
+                            HStack {
+                                ProgressView()
+                                    .progressViewStyle(CircularProgressViewStyle())
+                                
+                                Text(progress.description)
+                                    .font(.subheadline)
+                                    .foregroundColor(.secondary)
+                                
+                                Spacer()
+                                
+                                Button("Cancel", action: onCancel)
+                                    .foregroundColor(.red)
+                            }
+                            .padding()
+                            .background(Color(.systemGray6))
+                            .cornerRadius(10)
+                        }
+                    }
+                }
+            }
+            
+            @Step {
+                Implement image history and favorites.
+                
+                @Code(name: "ImageApp.swift", file: app-04-gallery.swift) {
+                    class GalleryManager: ObservableObject {
+                        @Published var allImages: [SavedImage] = []
+                        @Published var favorites: Set<UUID> = []
+                        private let storage: StorageService
+                        
+                        init(storage: StorageService) {
+                            self.storage = storage
+                            loadImages()
+                        }
+                        
+                        func saveImage(
+                            _ image: GeneratedImage,
+                            metadata: ImageMetadata
+                        ) async {
+                            let saved = SavedImage(
+                                id: UUID(),
+                                generatedImage: image,
+                                metadata: metadata,
+                                createdAt: Date()
+                            )
+                            
+                            // Save to disk
+                            await storage.save(saved)
+                            
+                            // Update UI
+                            await MainActor.run {
+                                allImages.insert(saved, at: 0)
+                            }
+                        }
+                        
+                        func toggleFavorite(_ imageId: UUID) {
+                            if favorites.contains(imageId) {
+                                favorites.remove(imageId)
+                            } else {
+                                favorites.insert(imageId)
+                            }
+                            
+                            // Persist favorites
+                            storage.saveFavorites(favorites)
+                        }
+                        
+                        var favoriteImages: [SavedImage] {
+                            allImages.filter { favorites.contains($0.id) }
+                        }
+                    }
+                    
+                    struct ImageMetadata: Codable {
+                        let prompt: String
+                        let model: String
+                        let options: [String: Any]
+                        let tokenUsage: TokenUsage?
+                        let generationTime: TimeInterval
+                        
+                        struct TokenUsage: Codable {
+                            let input: Int
+                            let output: Int
+                            let total: Int
+                            let cost: Double
+                        }
+                    }
+                }
+            }
+            
+            @Step {
+                Add export and sharing capabilities.
+                
+                @Code(name: "ImageApp.swift", file: app-05-export.swift) {
+                    extension SavedImage {
+                        func export(format: ExportFormat) async throws -> Data {
+                            switch format {
+                            case .original:
+                                return imageData
+                                
+                            case .compressed(let quality):
+                                return try await compressImage(quality: quality)
+                                
+                            case .resized(let maxDimension):
+                                return try await resizeImage(maxDimension: maxDimension)
+                                
+                            case .withMetadata:
+                                return try await embedMetadata()
+                            }
+                        }
+                        
+                        enum ExportFormat {
+                            case original
+                            case compressed(quality: Double)
+                            case resized(maxDimension: Int)
+                            case withMetadata
+                        }
+                    }
+                    
+                    struct ShareSheet: UIViewControllerRepresentable {
+                        let items: [Any]
+                        
+                        func makeUIViewController(context: Context) -> UIActivityViewController {
+                            let controller = UIActivityViewController(
+                                activityItems: items,
+                                applicationActivities: nil
+                            )
+                            
+                            // Custom activities
+                            controller.applicationActivities = [
+                                SaveToPhotosActivity(),
+                                CopyPromptActivity()
+                            ]
+                            
+                            return controller
+                        }
+                        
+                        func updateUIViewController(
+                            _ uiViewController: UIActivityViewController,
+                            context: Context
+                        ) {}
+                    }
+                }
             }
         }
     }
     
     @Assessments {
         @MultipleChoice {
-            What's the maximum resolution for DALL-E 3 square images?
+            Which model supports transparent backgrounds?
+            
+            @Choice(isCorrect: false) {
+                DALL-E 2
+                
+                @Justification(reaction: "Incorrect") {
+                    DALL-E 2 does not support transparent backgrounds.
+                }
+            }
+            
+            @Choice(isCorrect: false) {
+                DALL-E 3
+                
+                @Justification(reaction: "Incorrect") {
+                    DALL-E 3 does not support transparent backgrounds.
+                }
+            }
             
             @Choice(isCorrect: true) {
-                1024x1024
+                gpt-image-1
                 
                 @Justification(reaction: "Correct!") {
-                    DALL-E 3 supports 1024x1024 for square images.
-                }
-            }
-            
-            @Choice(isCorrect: false) {
-                2048x2048
-                
-                @Justification(reaction: "Incorrect") {
-                    DALL-E 3 doesn't support this resolution.
-                }
-            }
-            
-            @Choice(isCorrect: false) {
-                512x512
-                
-                @Justification(reaction: "Incorrect") {
-                    This was the resolution for DALL-E 2, not DALL-E 3.
+                    Only gpt-image-1 supports transparent backgrounds with the background parameter.
                 }
             }
         }
         
         @MultipleChoice {
-            How should you handle image generation errors?
+            What's the best way to handle content policy violations?
             
             @Choice(isCorrect: false) {
-                Retry immediately with the same prompt.
+                Immediately retry with the same prompt
                 
                 @Justification(reaction: "Incorrect") {
-                    This might hit rate limits or repeat the same error.
+                    This will result in the same error.
                 }
             }
             
             @Choice(isCorrect: true) {
-                Check for content policy violations and suggest prompt modifications.
+                Suggest prompt modifications and test with moderation API
                 
                 @Justification(reaction: "Correct!") {
-                    Many errors are due to content policies, and modifying the prompt often helps.
+                    Modifying the prompt and pre-checking with moderation helps avoid repeated failures.
                 }
             }
             
             @Choice(isCorrect: false) {
-                Always use a different model.
+                Switch to a different model
                 
                 @Justification(reaction: "Incorrect") {
-                    The model isn't usually the issue; it's often the prompt or temporary errors.
+                    Content policies apply to all models equally.
+                }
+            }
+        }
+        
+        @MultipleChoice {
+            How should you handle rate limits in production?
+            
+            @Choice(isCorrect: false) {
+                Show an error and stop
+                
+                @Justification(reaction: "Incorrect") {
+                    This provides a poor user experience.
+                }
+            }
+            
+            @Choice(isCorrect: true) {
+                Implement exponential backoff with automatic retry
+                
+                @Justification(reaction: "Correct!") {
+                    Exponential backoff prevents overwhelming the API while providing automatic recovery.
+                }
+            }
+            
+            @Choice(isCorrect: false) {
+                Create multiple API keys
+                
+                @Justification(reaction: "Incorrect") {
+                    This violates OpenAI's terms of service.
                 }
             }
         }
