@@ -47,9 +47,9 @@ jobs:
             --hosting-base-path OpenAIKit \
             --enable-inherited-docs
           
-          # Create landing page
-          cat > docs/index.html << 'EOF'
-<!DOCTYPE html>
+          # Create landing page HTML file directly
+          mkdir -p docs
+          echo '<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="utf-8">
@@ -178,7 +178,7 @@ jobs:
         <div class="features">
             <div class="feature">
                 <h3>🚀 Type-Safe</h3>
-                <p>Fully type-safe API with Swift's powerful type system</p>
+                <p>Fully type-safe API with Swift'"'"'s powerful type system</p>
             </div>
             <div class="feature">
                 <h3>🌍 Cross-Platform</h3>
@@ -213,8 +213,7 @@ jobs:
         
     </div>
 </body>
-</html>
-EOF
+</html>' > docs/index.html
           
           
       - name: Upload Pages Artifact
