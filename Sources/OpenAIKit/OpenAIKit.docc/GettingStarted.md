@@ -87,7 +87,7 @@ let response = try await openAI.chat.completions(
         messages: [
             ChatMessage(role: .user, content: "Hello, how are you?")
         ],
-        model: "gpt-4o-mini"
+        model: Models.Chat.gpt4oMini
     )
 )
 
@@ -103,7 +103,7 @@ let request = ChatCompletionRequest(
     messages: [
         ChatMessage(role: .user, content: "Write a short story about a robot.")
     ],
-    model: "gpt-4o",
+    model: Models.Chat.gpt4o,
     stream: true
 )
 
@@ -131,7 +131,7 @@ let response = try await openAI.chat.completions(
                 content: "Write a haiku about programming."
             )
         ],
-        model: "gpt-4o",
+        model: Models.Chat.gpt4o,
         temperature: 0.8
     )
 )
@@ -152,7 +152,7 @@ let response = try await openAI.chat.completions(
                 content: "Write a function to validate email addresses."
             )
         ],
-        model: "gpt-4o",
+        model: Models.Chat.gpt4o,
         temperature: 0.2
     )
 )
@@ -164,7 +164,7 @@ let response = try await openAI.chat.completions(
 let imageResponse = try await openAI.images.generations(
     ImageGenerationRequest(
         prompt: "A futuristic city at sunset, digital art style",
-        model: "dall-e-3",
+        model: Models.Images.dallE3,
         size: "1024x1024",
         quality: "hd"
     )
@@ -184,7 +184,7 @@ let transcription = try await openAI.audio.transcriptions(
     TranscriptionRequest(
         file: audioData,
         fileName: "recording.mp3",
-        model: "whisper-1"
+        model: Models.Audio.whisper1
     )
 )
 
@@ -197,7 +197,7 @@ print(transcription.text)
 let embedding = try await openAI.embeddings.create(
     EmbeddingRequest(
         input: "OpenAI provides powerful AI models.",
-        model: "text-embedding-3-small"
+        model: Models.Embeddings.textEmbedding3Small
     )
 )
 

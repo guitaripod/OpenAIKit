@@ -40,7 +40,7 @@ let response = try await openAI.chat.completions(
             ChatMessage(role: .system, content: "You are a helpful assistant."),
             ChatMessage(role: .user, content: "Explain quantum computing in simple terms.")
         ],
-        model: "gpt-4o"
+        model: Models.Chat.gpt4o
     )
 )
 
