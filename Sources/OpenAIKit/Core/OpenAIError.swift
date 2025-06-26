@@ -354,6 +354,187 @@ public enum OpenAIError: LocalizedError, Sendable {
             return "Invalid file data provided"
         }
     }
+    
+    /// A user-friendly title for the error suitable for UI display.
+    public var userFriendlyTitle: String {
+        switch self {
+        case .invalidURL, .invalidResponse:
+            return "Connection Error"
+        case .authenticationFailed:
+            return "Authentication Error"
+        case .rateLimitExceeded:
+            return "Rate Limit Exceeded"
+        case .apiError(let error):
+            return errorTypeTitle(for: error.error.type)
+        case .decodingFailed, .encodingFailed:
+            return "Data Processing Error"
+        case .clientError:
+            return "Request Error"
+        case .serverError:
+            return "Server Error"
+        case .unknownError:
+            return "Unknown Error"
+        case .streamingNotSupported:
+            return "Feature Not Supported"
+        case .invalidFileData:
+            return "Invalid File"
+        }
+    }
+    
+    /// A user-friendly message suitable for display in UI.
+    public var userFriendlyMessage: String {
+        switch self {
+        case .invalidURL:
+            return "Unable to connect to OpenAI. Please check your internet connection."
+        case .invalidResponse:
+            return "Received an unexpected response. Please try again."
+        case .authenticationFailed:
+            return "Your API key appears to be invalid. Please check your OpenAI account settings."
+        case .rateLimitExceeded:
+            return "You've made too many requests. Please wait a moment before trying again."
+        case .apiError(let error):
+            return error.error.message
+        case .decodingFailed:
+            return "Unable to process the response. Please try again or contact support if this persists."
+        case .encodingFailed:
+            return "Unable to process your request. Please check your input and try again."
+        case .clientError(let statusCode):
+            return clientErrorMessage(for: statusCode)
+        case .serverError:
+            return "OpenAI is experiencing issues. Please try again in a few moments."
+        case .unknownError:
+            return "An unexpected error occurred. Please try again."
+        case .streamingNotSupported:
+            return "This feature doesn't support real-time streaming."
+        case .invalidFileData:
+            return "The file appears to be invalid or corrupted. Please check the file and try again."
+        }
+    }
+    
+    /// Indicates if the error is temporary and the request should be retried.
+    public var isRetryable: Bool {
+        switch self {
+        case .rateLimitExceeded, .serverError:
+            return true
+        case .apiError(let error):
+            // Some API errors are retryable
+            return error.error.type == "server_error" || error.error.code == "server_error"
+        default:
+            return false
+        }
+    }
+    
+    /// Suggested retry delay in seconds, if applicable.
+    public var suggestedRetryDelay: TimeInterval? {
+        switch self {
+        case .rateLimitExceeded:
+            return 60.0 // 1 minute for rate limits
+        case .serverError:
+            return 5.0 // 5 seconds for server errors
+        case .apiError(let error) where isRetryable:
+            return error.error.type == "rate_limit_error" ? 60.0 : 5.0
+        default:
+            return nil
+        }
+    }
+    
+    /// The HTTP status code associated with the error, if any.
+    public var httpStatusCode: Int? {
+        switch self {
+        case .authenticationFailed:
+            return 401
+        case .rateLimitExceeded:
+            return 429
+        case .clientError(let code), .serverError(let code), .unknownError(let code):
+            return code
+        case .apiError:
+            // API errors can have various status codes
+            return nil
+        default:
+            return nil
+        }
+    }
+    
+    /// Indicates if this error requires user action (e.g., fixing API key).
+    public var requiresUserAction: Bool {
+        switch self {
+        case .authenticationFailed, .invalidFileData:
+            return true
+        case .apiError(let error):
+            return error.error.type == "invalid_request_error" || 
+                   error.error.type == "authentication_error"
+        default:
+            return false
+        }
+    }
+    
+    /// The specific parameter that caused the error, if available.
+    public var affectedParameter: String? {
+        switch self {
+        case .apiError(let error):
+            return error.error.param
+        default:
+            return nil
+        }
+    }
+    
+    /// The error code for programmatic handling, if available.
+    public var errorCode: String? {
+        switch self {
+        case .apiError(let error):
+            return error.error.code
+        case .authenticationFailed:
+            return "authentication_failed"
+        case .rateLimitExceeded:
+            return "rate_limit_exceeded"
+        case .invalidURL:
+            return "invalid_url"
+        case .invalidResponse:
+            return "invalid_response"
+        case .streamingNotSupported:
+            return "streaming_not_supported"
+        case .invalidFileData:
+            return "invalid_file_data"
+        default:
+            return nil
+        }
+    }
+    
+    // MARK: - Private Helpers
+    
+    private func errorTypeTitle(for type: String?) -> String {
+        switch type {
+        case "invalid_request_error":
+            return "Invalid Request"
+        case "authentication_error":
+            return "Authentication Error"
+        case "rate_limit_error":
+            return "Rate Limit"
+        case "server_error":
+            return "Server Error"
+        case "engine_error":
+            return "Model Error"
+        default:
+            return "API Error"
+        }
+    }
+    
+    private func clientErrorMessage(for statusCode: Int) -> String {
+        switch statusCode {
+        case 400:
+            return "The request was invalid. Please check your parameters and try again."
+        case 403:
+            return "Access forbidden. You don't have permission to access this resource."
+        case 404:
+            return "The requested resource was not found."
+        case 413:
+            return "The request is too large. Please reduce the size and try again."
+        case 422:
+            return "The request couldn't be processed. Please check your input."
+        default:
+            return "The request failed. Please check your input and try again."
+        }
+    }
 }
 
 /// A structured error response from the OpenAI API.
