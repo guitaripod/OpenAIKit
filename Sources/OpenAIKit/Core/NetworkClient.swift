@@ -31,6 +31,43 @@ public final class NetworkClient: NetworkClientProtocol, @unchecked Sendable {
     public func execute<T: Decodable>(_ request: any Request) async throws -> T {
         let urlRequest = try await buildURLRequest(from: request)
         
+        #if canImport(FoundationNetworking)
+        // Linux implementation
+        return try await withCheckedThrowingContinuation { continuation in
+            let task = session.dataTask(with: urlRequest) { data, response, error in
+                if let error = error {
+                    continuation.resume(throwing: error)
+                    return
+                }
+                
+                guard let data = data, let response = response else {
+                    continuation.resume(throwing: OpenAIError.invalidResponse)
+                    return
+                }
+                
+                do {
+                    try self.validateResponse(response, data: data)
+                    
+                    // Special handling for Data type
+                    if T.self == Data.self {
+                        continuation.resume(returning: data as! T)
+                        return
+                    }
+                    
+                    let decoded = try self.decoder.decode(T.self, from: data)
+                    continuation.resume(returning: decoded)
+                } catch {
+                    if let apiError = try? self.decoder.decode(APIError.self, from: data) {
+                        continuation.resume(throwing: OpenAIError.apiError(apiError))
+                    } else {
+                        continuation.resume(throwing: error)
+                    }
+                }
+            }
+            task.resume()
+        }
+        #else
+        // macOS/iOS implementation
         let (data, response) = try await session.data(for: urlRequest)
         
         try validateResponse(response, data: data)
@@ -48,6 +85,7 @@ public final class NetworkClient: NetworkClientProtocol, @unchecked Sendable {
             }
             throw OpenAIError.decodingFailed(error)
         }
+        #endif
     }
     
     public func stream<T: Decodable>(_ request: any Request) -> AsyncThrowingStream<T, Error> {
@@ -160,6 +198,36 @@ public final class NetworkClient: NetworkClientProtocol, @unchecked Sendable {
     public func upload<T: Decodable>(_ request: any UploadRequest) async throws -> T {
         let urlRequest = try await buildUploadURLRequest(from: request)
         
+        #if canImport(FoundationNetworking)
+        // Linux implementation
+        return try await withCheckedThrowingContinuation { continuation in
+            let task = session.dataTask(with: urlRequest) { data, response, error in
+                if let error = error {
+                    continuation.resume(throwing: error)
+                    return
+                }
+                
+                guard let data = data, let response = response else {
+                    continuation.resume(throwing: OpenAIError.invalidResponse)
+                    return
+                }
+                
+                do {
+                    try self.validateResponse(response, data: data)
+                    let decoded = try self.decoder.decode(T.self, from: data)
+                    continuation.resume(returning: decoded)
+                } catch {
+                    if let apiError = try? self.decoder.decode(APIError.self, from: data) {
+                        continuation.resume(throwing: OpenAIError.apiError(apiError))
+                    } else {
+                        continuation.resume(throwing: error)
+                    }
+                }
+            }
+            task.resume()
+        }
+        #else
+        // macOS/iOS implementation
         let (data, response) = try await session.data(for: urlRequest)
         
         try validateResponse(response, data: data)
@@ -172,6 +240,7 @@ public final class NetworkClient: NetworkClientProtocol, @unchecked Sendable {
             }
             throw OpenAIError.decodingFailed(error)
         }
+        #endif
     }
     
     private func buildURLRequest(from request: any Request) async throws -> URLRequest {

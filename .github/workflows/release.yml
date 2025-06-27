@@ -1,0 +1,103 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - '*.*.*'
+
+permissions:
+  contents: write
+
+jobs:
+  create-release:
+    name: Create Release
+    runs-on: macos-14
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+    
+    - name: Setup Swift
+      uses: swift-actions/setup-swift@v2
+      with:
+        swift-version: '5.9'
+    
+    - name: Cache Swift packages
+      uses: actions/cache@v4
+      with:
+        path: .build
+        key: ${{ runner.os }}-spm-release-${{ hashFiles('**/Package.resolved') }}
+        restore-keys: |
+          ${{ runner.os }}-spm-release-
+          ${{ runner.os }}-spm-
+    
+    - name: Run all tests
+      run: |
+        echo "🧪 Running final test suite before release..."
+        swift test --parallel
+    
+    - name: Build release artifacts
+      run: |
+        echo "📦 Building release artifacts..."
+        swift build -c release --arch arm64 --arch x86_64
+        
+        # Create universal binary for the executable
+        echo "🔨 Creating universal binary..."
+        mkdir -p artifacts
+        lipo -create \
+          .build/apple/Products/Release/OpenAIKitTester \
+          -output artifacts/OpenAIKitTester-universal
+        chmod +x artifacts/OpenAIKitTester-universal
+        
+        # Create a source archive
+        echo "📁 Creating source archive..."
+        git archive --format=tar.gz --prefix=OpenAIKit-${{ github.ref_name }}/ \
+          -o artifacts/OpenAIKit-${{ github.ref_name }}-source.tar.gz HEAD
+    
+    - name: Generate release notes
+      id: release_notes
+      run: |
+        echo "📝 Generating release notes..."
+        # Get the previous tag
+        PREV_TAG=$(git describe --tags --abbrev=0 HEAD^ 2>/dev/null || echo "")
+        
+        # Generate changelog
+        if [ -n "$PREV_TAG" ]; then
+          echo "## What's Changed" > release_notes.md
+          echo "" >> release_notes.md
+          git log ${PREV_TAG}..HEAD --pretty=format:"* %s (%an)" >> release_notes.md
+        else
+          echo "## Initial Release" > release_notes.md
+          echo "" >> release_notes.md
+          echo "First release of OpenAIKit!" >> release_notes.md
+        fi
+        
+        echo "" >> release_notes.md
+        echo "## Installation" >> release_notes.md
+        echo "" >> release_notes.md
+        echo "### Swift Package Manager" >> release_notes.md
+        echo '```swift' >> release_notes.md
+        echo 'dependencies: [' >> release_notes.md
+        echo '    .package(url: "https://github.com/marcosgriselli/OpenAIKit.git", from: "${{ github.ref_name }}")' >> release_notes.md
+        echo ']' >> release_notes.md
+        echo '```' >> release_notes.md
+        
+        # Output the notes for the action
+        echo "notes<<EOF" >> $GITHUB_OUTPUT
+        cat release_notes.md >> $GITHUB_OUTPUT
+        echo "EOF" >> $GITHUB_OUTPUT
+    
+    - name: Create GitHub Release
+      uses: softprops/action-gh-release@v1
+      with:
+        name: OpenAIKit ${{ github.ref_name }}
+        body: ${{ steps.release_notes.outputs.notes }}
+        draft: false
+        prerelease: ${{ contains(github.ref_name, 'beta') || contains(github.ref_name, 'alpha') }}
+        files: |
+          artifacts/OpenAIKitTester-universal
+          artifacts/OpenAIKit-${{ github.ref_name }}-source.tar.gz
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

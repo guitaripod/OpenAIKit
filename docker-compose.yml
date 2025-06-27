@@ -1,0 +1,34 @@
+version: '3.8'
+
+services:
+  test-swift-5-9:
+    build:
+      context: .
+      args:
+        SWIFT_VERSION: 5.9
+    container_name: openaikit-test-5.9
+    command: swift test --parallel
+
+  test-swift-5-10:
+    build:
+      context: .
+      args:
+        SWIFT_VERSION: 5.10
+    container_name: openaikit-test-5.10
+    command: swift test --parallel
+
+  test-swift-6-0:
+    build:
+      context: .
+      args:
+        SWIFT_VERSION: 6.0
+    container_name: openaikit-test-6.0
+    command: swift test --parallel
+
+  build-executable:
+    build:
+      context: .
+      args:
+        SWIFT_VERSION: 5.9
+    container_name: openaikit-build
+    command: swift build --product OpenAIKitTester -c release
