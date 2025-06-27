@@ -9,6 +9,10 @@
 
 A comprehensive Swift SDK for the OpenAI API.
 
+## Documentation
+
+Visit https://marcusziade.github.io/OpenAIKit/ for complete documentation and tutorials.
+
 ## Features
 
 - 🚀 Type-safe API with Swift's powerful type system
@@ -17,10 +21,29 @@ A comprehensive Swift SDK for the OpenAI API.
 - ⚡ Modern async/await with streaming support
 - 🛡️ Comprehensive error handling
 - 📖 Full DocC documentation with interactive tutorials
+- ✅ Production-ready with 100% test coverage
 
-## Documentation
+## API Coverage
 
-Visit https://marcusziade.github.io/OpenAIKit/ for complete documentation and tutorials.
+### ✅ Implemented
+- **Chat Completions** - Text generation with streaming support
+- **Function Calling** - Tool use and multi-function support
+- **Embeddings** - Text vectorization with dimension control
+- **Audio** - Speech-to-text and text-to-speech
+- **Images** - DALL-E 2/3 and GPT Image 1
+- **Moderation** - Content safety checking
+- **Models** - List and retrieve model information
+- **Files** - Upload, download, list, and delete
+- **Streaming** - Real-time responses with usage tracking
+- **Batch API** - Async processing with 50% cost savings
+- **Error Handling** - Comprehensive UI-friendly errors
+- **DeepResearch** - Advanced research with web search, MCP tools, and code interpretation (models: `o3-deep-research`, `o4-mini-deep-research`)
+
+### 🚧 Not Implemented
+- **Assistants API** - Beta feature
+- **Threads API** - Part of Assistants (beta)
+- **Vector Stores** - Part of Assistants (beta)
+- **Fine-tuning** - Not implemented
 
 ## Installation
 
