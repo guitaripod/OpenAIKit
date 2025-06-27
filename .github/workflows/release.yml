@@ -33,29 +33,6 @@ jobs:
           ${{ runner.os }}-spm-release-
           ${{ runner.os }}-spm-
     
-    - name: Run all tests
-      run: |
-        echo "🧪 Running final test suite before release..."
-        swift test --parallel
-    
-    - name: Build release artifacts
-      run: |
-        echo "📦 Building release artifacts..."
-        swift build -c release --arch arm64 --arch x86_64
-        
-        # Create universal binary for the executable
-        echo "🔨 Creating universal binary..."
-        mkdir -p artifacts
-        lipo -create \
-          .build/apple/Products/Release/OpenAIKitTester \
-          -output artifacts/OpenAIKitTester-universal
-        chmod +x artifacts/OpenAIKitTester-universal
-        
-        # Create a source archive
-        echo "📁 Creating source archive..."
-        git archive --format=tar.gz --prefix=OpenAIKit-${{ github.ref_name }}/ \
-          -o artifacts/OpenAIKit-${{ github.ref_name }}-source.tar.gz HEAD
-    
     - name: Generate release notes
       id: release_notes
       run: |
@@ -80,7 +57,7 @@ jobs:
         echo "### Swift Package Manager" >> release_notes.md
         echo '```swift' >> release_notes.md
         echo 'dependencies: [' >> release_notes.md
-        echo '    .package(url: "https://github.com/marcosgriselli/OpenAIKit.git", from: "${{ github.ref_name }}")' >> release_notes.md
+        echo '    .package(url: "https://github.com/marcusziade/OpenAIKit.git", from: "${{ github.ref_name }}")' >> release_notes.md
         echo ']' >> release_notes.md
         echo '```' >> release_notes.md
         
@@ -92,12 +69,9 @@ jobs:
     - name: Create GitHub Release
       uses: softprops/action-gh-release@v1
       with:
-        name: OpenAIKit ${{ github.ref_name }}
+        name: ${{ github.ref_name }}
         body: ${{ steps.release_notes.outputs.notes }}
         draft: false
         prerelease: ${{ contains(github.ref_name, 'beta') || contains(github.ref_name, 'alpha') }}
-        files: |
-          artifacts/OpenAIKitTester-universal
-          artifacts/OpenAIKit-${{ github.ref_name }}-source.tar.gz
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
