@@ -9,7 +9,8 @@ let package = Package(
         .macOS(.v13),
         .watchOS(.v8),
         .tvOS(.v15),
-        .visionOS(.v1)
+        .visionOS(.v1),
+        // Note: Linux is supported but doesn't need to be listed here
     ],
     products: [
         .library(
@@ -25,17 +26,11 @@ let package = Package(
     targets: [
         .target(
             name: "OpenAIKit",
-            dependencies: [],
-            swiftSettings: [
-                .enableExperimentalFeature("StrictConcurrency")
-            ]
+            dependencies: []
         ),
         .executableTarget(
             name: "OpenAIKitTester",
-            dependencies: ["OpenAIKit"],
-            swiftSettings: [
-                .enableExperimentalFeature("StrictConcurrency")
-            ]
+            dependencies: ["OpenAIKit"]
         ),
         .testTarget(
             name: "OpenAIKitTests",

@@ -611,6 +611,11 @@ struct DeepResearchTests {
             
             print("  Raw request JSON: \(String(data: jsonData, encoding: .utf8) ?? "invalid")")
             
+            #if canImport(FoundationNetworking)
+            // Linux doesn't support async URLSession, skip this test
+            print("  Skipping API validation on Linux")
+            return
+            #else
             let (data, httpResponse) = try await URLSession.shared.data(for: request)
             
             if let response = httpResponse as? HTTPURLResponse {
@@ -629,7 +634,7 @@ struct DeepResearchTests {
                             if line.hasPrefix("data: ") && eventCount < 3 {
                                 let jsonStr = String(line.dropFirst(6))
                                 if jsonStr != "[DONE]",
-                                   let jsonData = jsonStr.data(using: .utf8),
+                                   let jsonData = jsonStr.data(using: String.Encoding.utf8),
                                    let json = try? JSONSerialization.jsonObject(with: jsonData) as? [String: Any] {
                                     eventCount += 1
                                     print("\n  Chunk #\(eventCount) structure:")
@@ -652,6 +657,7 @@ struct DeepResearchTests {
                     }
                 }
             }
+            #endif
         } catch {
             print("  API validation failed: \(error)")
         }

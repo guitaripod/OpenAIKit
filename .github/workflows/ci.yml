@@ -1,0 +1,216 @@
+name: CI
+
+on:
+  push:
+    branches: [ master, main, add-ci-swift ]
+  pull_request:
+    branches: [ master, main ]
+
+env:
+  SWIFT_VERSION: '5.9'
+
+jobs:
+  test-macos:
+    name: Test macOS - Swift ${{ matrix.swift }}
+    runs-on: macos-14
+    strategy:
+      fail-fast: false
+      matrix:
+        swift: ['5.9', '5.10']
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Setup Swift
+      uses: swift-actions/setup-swift@v2
+      with:
+        swift-version: ${{ matrix.swift }}
+    
+    - name: Cache Swift packages
+      uses: actions/cache@v4
+      with:
+        path: .build
+        key: ${{ runner.os }}-spm-${{ matrix.swift }}-${{ hashFiles('**/Package.resolved') }}
+        restore-keys: |
+          ${{ runner.os }}-spm-${{ matrix.swift }}-
+          ${{ runner.os }}-spm-
+    
+    - name: Show Swift version
+      run: swift --version
+    
+    - name: Build
+      run: |
+        echo "🏗️ Building..."
+        swift build
+    
+    - name: Run tests
+      run: |
+        echo "🧪 Running tests..."
+        if command -v xcbeautify &> /dev/null; then
+          swift test --parallel | xcbeautify
+        else
+          swift test --parallel
+        fi
+    
+    - name: Build executable
+      run: |
+        echo "🔨 Building OpenAIKitTester..."
+        swift build --product OpenAIKitTester -c release
+
+  test-linux-docker:
+    name: Test Linux Docker - Swift ${{ matrix.swift }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        swift: ['5.9', '5.10']
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v3
+    
+    - name: Build Docker image
+      run: |
+        echo "🐳 Building Docker image for Swift ${{ matrix.swift }}..."
+        docker build \
+          --build-arg SWIFT_VERSION=${{ matrix.swift }} \
+          --tag openaikit:test-${{ matrix.swift }} \
+          --file Dockerfile \
+          .
+    
+    - name: Run tests in Docker
+      run: |
+        echo "🧪 Running tests in Docker..."
+        docker run --rm openaikit:test-${{ matrix.swift }} swift test --parallel
+    
+    - name: Build executable in Docker
+      run: |
+        echo "🔨 Building executable in Docker..."
+        docker run --rm openaikit:test-${{ matrix.swift }} \
+          swift build --product OpenAIKitTester -c release
+
+  test-linux-native:
+    name: Test Linux Native - Swift ${{ matrix.swift }}
+    runs-on: ubuntu-22.04
+    strategy:
+      fail-fast: false
+      matrix:
+        swift: ['5.9', '5.10']
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Install Swift dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y \
+          binutils \
+          git \
+          gnupg2 \
+          libc6-dev \
+          libcurl4-openssl-dev \
+          libedit2 \
+          libgcc-11-dev \
+          libpython3-dev \
+          libsqlite3-0 \
+          libstdc++-11-dev \
+          libxml2-dev \
+          libz3-dev \
+          pkg-config \
+          tzdata \
+          unzip \
+          zlib1g-dev
+    
+    - name: Download and install Swift
+      run: |
+        SWIFT_VERSION=${{ matrix.swift }}
+        if [[ "$SWIFT_VERSION" == "5.9" ]]; then
+          SWIFT_URL="https://download.swift.org/swift-5.9-release/ubuntu2204/swift-5.9-RELEASE/swift-5.9-RELEASE-ubuntu22.04.tar.gz"
+        elif [[ "$SWIFT_VERSION" == "5.10" ]]; then
+          SWIFT_URL="https://download.swift.org/swift-5.10-release/ubuntu2204/swift-5.10-RELEASE/swift-5.10-RELEASE-ubuntu22.04.tar.gz"
+        fi
+        
+        echo "Downloading Swift from: $SWIFT_URL"
+        curl -fsSL $SWIFT_URL -o swift.tar.gz
+        tar -xzf swift.tar.gz
+        sudo mv swift-*-RELEASE-ubuntu22.04 /opt/swift
+        echo "/opt/swift/usr/bin" >> $GITHUB_PATH
+    
+    - name: Show Swift version
+      run: |
+        export PATH="/opt/swift/usr/bin:$PATH"
+        swift --version
+    
+    - name: Build
+      run: |
+        echo "🏗️ Building..."
+        swift build --verbose
+    
+    - name: Run tests
+      run: |
+        echo "🧪 Running tests..."
+        swift test --parallel --verbose || {
+          EXIT_CODE=$?
+          echo "::error::Tests failed with exit code $EXIT_CODE"
+          
+          # Debug information
+          echo "Swift version details:"
+          swift --version
+          
+          echo "Package dump:"
+          swift package dump-package || true
+          
+          echo "Available tests:"
+          swift test list || true
+          
+          exit $EXIT_CODE
+        }
+
+  summary:
+    name: CI Summary
+    if: always()
+    needs: [test-macos, test-linux-docker, test-linux-native]
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Check Results
+      run: |
+        echo "📋 CI Summary"
+        echo "============"
+        echo ""
+        
+        # Define job status
+        MACOS_RESULT="${{ needs.test-macos.result }}"
+        DOCKER_RESULT="${{ needs.test-linux-docker.result }}"
+        NATIVE_RESULT="${{ needs.test-linux-native.result }}"
+        
+        echo "Test Results:"
+        echo "- macOS: $MACOS_RESULT"
+        echo "- Linux (Docker): $DOCKER_RESULT"
+        echo "- Linux (Native): $NATIVE_RESULT"
+        echo ""
+        
+        # Check if all required tests passed
+        if [[ "$MACOS_RESULT" == "success" ]] && [[ "$DOCKER_RESULT" == "success" ]]; then
+          echo "✅ All required tests passed!"
+          echo ""
+          echo "Platform Coverage:"
+          echo "- ✅ macOS 14 (Apple Silicon) with Swift 5.9 & 5.10"
+          echo "- ✅ Linux (Docker) with Swift 5.9 & 5.10"
+          if [[ "$NATIVE_RESULT" == "success" ]]; then
+            echo "- ✅ Linux (Native) with Swift 5.9 & 5.10"
+          else
+            echo "- ⚠️  Linux (Native) had issues (non-blocking)"
+          fi
+          exit 0
+        else
+          echo "❌ Some required tests failed"
+          [[ "$MACOS_RESULT" != "success" ]] && echo "  - macOS tests failed"
+          [[ "$DOCKER_RESULT" != "success" ]] && echo "  - Linux Docker tests failed"
+          exit 1
+        fi

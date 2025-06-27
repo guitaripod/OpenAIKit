@@ -1,0 +1,14 @@
+.build
+.swiftpm
+.git
+.github
+*.xcodeproj
+DerivedData/
+.DS_Store
+*.swp
+*.swo
+*~
+.vscode/
+.idea/
+*.xcworkspace
+xcuserdata/
