@@ -7,19 +7,34 @@ class ResearchAssistant {
     let openAI: OpenAIKit
     
     init(apiKey: String) {
-        self.openAI = OpenAIKit(apiKey: apiKey)
+        // Configure with extended timeout for DeepResearch
+        let config = Configuration(
+            apiKey: apiKey,
+            timeoutInterval: 1800  // 30 minutes for DeepResearch
+        )
+        self.openAI = OpenAIKit(configuration: config)
     }
     
-    /// Performs deep research on a given topic
+    /// Performs deep research on a given topic using the Responses API
     func performResearch(topic: String) async throws -> String {
-        let request = ChatRequest(
-            model: .gpt4o,
-            messages: [
-                .user(content: "Research the following topic: \(topic)")
-            ]
+        // Create a DeepResearch request with web search capability
+        let request = ResponseRequest(
+            input: "Research the following topic: \(topic)",
+            model: Models.DeepResearch.o4MiniDeepResearch,
+            tools: [.webSearchPreview(WebSearchPreviewTool())],
+            maxOutputTokens: 10000  // High limit for comprehensive research
         )
         
-        let response = try await openAI.chat.completions(request: request)
-        return response.choices.first?.message.content ?? ""
+        let response = try await openAI.responses.create(request)
+        
+        // Extract message content from output items
+        var content = ""
+        if let output = response.output {
+            for item in output where item.type == "message" {
+                content += item.content ?? ""
+            }
+        }
+        
+        return content.isEmpty ? "Research incomplete - increase token limit" : content
     }
 }

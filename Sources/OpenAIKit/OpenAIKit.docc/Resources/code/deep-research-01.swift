@@ -11,15 +11,17 @@ class ResearchAssistant {
         let enableWebSearch: Bool
         let enableCodeInterpreter: Bool
         let enableMCPServers: Bool
-        let maxSearchResults: Int
+        let maxOutputTokens: Int
+        let useBackgroundMode: Bool
         let timeout: TimeInterval
         
         static let `default` = ResearchConfig(
             enableWebSearch: true,
             enableCodeInterpreter: true,
             enableMCPServers: false,
-            maxSearchResults: 10,
-            timeout: 60.0
+            maxOutputTokens: 10000,  // DeepResearch needs high token limits
+            useBackgroundMode: false,
+            timeout: 1800.0  // 30 minutes for DeepResearch
         )
     }
     
@@ -29,35 +31,58 @@ class ResearchAssistant {
         self.config = config
     }
     
-    /// Performs deep research on a given topic
+    /// Performs deep research on a given topic using the Responses API
     func performResearch(topic: String) async throws -> ResearchResult {
-        // Create a research request with DeepResearch capabilities
-        let systemPrompt = """
-        You are a comprehensive research assistant with access to:
-        - Web search for current information
-        - Code interpreter for data analysis
-        - Custom data sources through MCP servers
+        // Configure tools for DeepResearch
+        var tools: [ResponseTool] = []
         
-        Provide thorough, well-researched responses with citations.
-        """
+        if config.enableWebSearch {
+            tools.append(.webSearchPreview(WebSearchPreviewTool()))
+        }
         
-        let request = ChatRequest(
-            model: .gpt4o,
-            messages: [
-                .system(content: systemPrompt),
-                .user(content: "Research the following topic thoroughly: \(topic)")
-            ],
-            temperature: 0.7,
-            maxTokens: 4000
+        if config.enableCodeInterpreter {
+            tools.append(.codeInterpreter(CodeInterpreterTool(
+                container: CodeContainer(type: "auto")
+            )))
+        }
+        
+        // Create a DeepResearch request
+        let request = ResponseRequest(
+            input: "Research the following topic thoroughly: \(topic). Provide comprehensive findings with citations.",
+            model: Models.DeepResearch.o4MiniDeepResearch,  // Or .o3DeepResearch for more comprehensive
+            tools: tools,
+            maxOutputTokens: config.maxOutputTokens,
+            background: config.useBackgroundMode
         )
         
-        let response = try await openAI.chat.completions(request: request)
+        let response = try await openAI.responses.create(request)
+        
+        // Extract findings from output items
+        var findings = ""
+        var sources: [ResearchSource] = []
+        
+        if let output = response.output {
+            for item in output {
+                switch item.type {
+                case "message":
+                    findings += item.content ?? ""
+                case "web_search_call":
+                    // Extract search results as sources
+                    if let toolCall = item.toolCall,
+                       let query = toolCall.arguments {
+                        // Process web search results
+                    }
+                default:
+                    break
+                }
+            }
+        }
         
         return ResearchResult(
             topic: topic,
-            findings: response.choices.first?.message.content ?? "",
-            sources: [],
-            confidence: 0.0
+            findings: findings,
+            sources: sources,
+            status: response.status ?? "unknown"
         )
     }
 }
@@ -67,7 +92,7 @@ struct ResearchResult {
     let topic: String
     let findings: String
     let sources: [ResearchSource]
-    let confidence: Double
+    let status: String  // "complete", "incomplete", etc.
 }
 
 /// Represents a source used in research
