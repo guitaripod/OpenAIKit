@@ -17,10 +17,10 @@ struct DeepResearchTests {
         
         // Create a simple test request
         let request = ResponseRequest(
-            input: "What is 2+2? Just give the number.",
+            input: "Hello, respond with: Hi there!",
             model: Models.DeepResearch.o4MiniDeepResearch,
             tools: [.webSearchPreview(WebSearchPreviewTool())],
-            maxOutputTokens: 50
+            maxOutputTokens: 1000  // Testing with lower limit
         )
         
         let config = Configuration(
@@ -97,19 +97,27 @@ struct DeepResearchTests {
             print("  Using o4-mini-deep-research for faster testing...")
             
             // Test with a simple, focused query using the faster model
+            // Note: DeepResearch models require very high token limits (10,000+) to complete
+            // For testing, we'll use a lower limit and expect incomplete status
             let request = ResponseRequest(
-                input: "What is the capital of France? Provide a brief answer.",
+                input: "What is the capital of France? Just answer: Paris.",
                 model: Models.DeepResearch.o4MiniDeepResearch,
                 tools: [
                     .webSearchPreview(WebSearchPreviewTool())
                 ],
-                maxOutputTokens: 100  // Limit response for faster completion
+                maxOutputTokens: 1000  // Lower limit for testing - real usage needs 10,000+
             )
             
             print("\n  Starting DeepResearch query...")
             print("  Model: \(Models.DeepResearch.o4MiniDeepResearch)")
             print("  Query: Simple geography question (for quick testing)")
-            print("\n  🔍 Research in progress (this may take several minutes)...")
+            print("\n  ⚠️  Important: DeepResearch models are designed for extensive research tasks.")
+            print("  They perform multiple web searches and reasoning steps.")
+            print("  For complete responses, use:")
+            print("    - max_output_tokens: 10,000+ (minimum 16)")
+            print("    - background mode for long-running tasks")
+            print("    - Expect 'incomplete' status with lower token limits")
+            print("\n  🔍 Research in progress...")
             print("  " + String(repeating: "-", count: 60))
             
             // For testing, we'll use a non-streaming request with explicit timeout handling
@@ -145,6 +153,14 @@ struct DeepResearchTests {
                 
                 if !messageContent.isEmpty {
                     print("\n  Response content: \(messageContent)")
+                } else if response.status == "incomplete" {
+                    print("\n  ⚠️  Response incomplete - DeepResearch hit token limit before generating message.")
+                    print("  This is expected behavior with limited tokens.")
+                    if let outputItems = response.output {
+                        let searchCount = outputItems.filter { $0.type == "web_search_call" }.count
+                        let reasoningCount = outputItems.filter { $0.type == "reasoning" }.count
+                        print("  DeepResearch performed \(searchCount) web searches and \(reasoningCount) reasoning steps.")
+                    }
                 }
                 
                 if let usage = response.usage {
