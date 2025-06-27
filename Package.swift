@@ -6,7 +6,7 @@ let package = Package(
     name: "OpenAIKit",
     platforms: [
         .iOS(.v15),
-        .macOS(.v12),
+        .macOS(.v13),
         .watchOS(.v8),
         .tvOS(.v15),
         .visionOS(.v1)
