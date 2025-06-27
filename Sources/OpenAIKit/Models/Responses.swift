@@ -88,6 +88,12 @@ public struct ResponseRequest: Codable, Sendable {
     /// When true, partial message deltas will be sent. Tokens will be sent as they become available.
     public let stream: Bool?
     
+    /// Whether to run this request in background mode.
+    ///
+    /// Background mode is recommended for DeepResearch tasks that may take tens of minutes.
+    /// When true, the response will include a task ID that can be polled for completion.
+    public let background: Bool?
+    
     /// Creates a new response request.
     ///
     /// - Parameters:
@@ -106,7 +112,8 @@ public struct ResponseRequest: Codable, Sendable {
         maxOutputTokens: Int? = nil,
         responseFormat: ResponseFormat? = nil,
         metadata: [String: String]? = nil,
-        stream: Bool? = nil
+        stream: Bool? = nil,
+        background: Bool? = nil
     ) {
         self.input = input
         self.model = model
@@ -116,6 +123,19 @@ public struct ResponseRequest: Codable, Sendable {
         self.responseFormat = responseFormat
         self.metadata = metadata
         self.stream = stream
+        self.background = background
+    }
+    
+    private enum CodingKeys: String, CodingKey {
+        case input
+        case model
+        case tools
+        case temperature
+        case maxOutputTokens = "max_output_tokens"
+        case responseFormat = "response_format"
+        case metadata
+        case stream
+        case background
     }
 }
 
