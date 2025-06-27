@@ -73,8 +73,17 @@ DeepResearch capabilities are tested through:
 - ✅ Non-streaming DeepResearch requests work correctly
 - ✅ Proper model structure with all required fields
 - ✅ Tool configuration support (web_search_preview required)
-- ⚠️  Streaming implementation updated but requires further testing
-- ⚠️  DeepResearch responses often return with "incomplete" status quickly
+- ✅ Streaming implementation works with proper SSE parsing
+- ✅ Background mode support added for long-running tasks
+- ⚠️  DeepResearch responses require high token limits (10,000+) to complete
+- ⚠️  With lower token limits, responses return "incomplete" status
+
+### Key Findings
+DeepResearch models operate differently from standard chat models:
+1. **Token Requirements**: Minimum 16 tokens, but typically need 10,000+ for complete responses
+2. **Research Process**: Models perform multiple web searches and reasoning steps before generating final output
+3. **Incomplete Status**: With limited tokens, models will return "incomplete" with only reasoning/search outputs
+4. **Background Mode**: Recommended for production use due to long execution times (tens of minutes)
 
 ## Quick Start
 
@@ -107,6 +116,15 @@ swift run OpenAIKitTester deepresearch
    - Enable web search for current information
    - Configure MCP tools for domain-specific data
    - Use code interpreter for data analysis tasks
+
+### DeepResearch Usage Guidelines
+When using DeepResearch models (`o3-deep-research`, `o4-mini-deep-research`):
+1. **Set High Token Limits**: Use `maxOutputTokens: 10000` or higher for complete responses
+2. **Use Background Mode**: For production, set `background: true` and implement webhook/polling
+3. **Expect Long Execution**: DeepResearch can take tens of minutes to complete
+4. **Handle Incomplete Status**: With lower token limits, expect "incomplete" status with partial results
+5. **Required Tools**: Always include at least one tool (typically `web_search_preview`)
+6. **Monitor Progress**: In streaming mode, track web searches and reasoning steps
 
 ### Known Limitations
 - Fine-tuning API not implemented
