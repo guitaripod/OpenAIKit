@@ -52,7 +52,7 @@ class DeepResearchStreaming {
                 if let item = chunk.item {
                     switch item.type {
                     case "message":
-                        if let content = item.content {
+                        if let content = item.content?.text {
                             messageContent += content
                             print("\n✉️ Message content received")
                             print(content)

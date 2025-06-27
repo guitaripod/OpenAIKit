@@ -31,7 +31,7 @@ class ResearchAssistant {
         var content = ""
         if let output = response.output {
             for item in output where item.type == "message" {
-                content += item.content ?? ""
+                content += item.content?.text ?? ""
             }
         }
         

@@ -68,7 +68,7 @@ class ResearchAssistant {
             for item in output {
                 switch item.type {
                 case "message":
-                    findings += item.content ?? ""
+                    findings += item.content?.text ?? ""
                 case "web_search_call":
                     searchCount += 1
                 default:

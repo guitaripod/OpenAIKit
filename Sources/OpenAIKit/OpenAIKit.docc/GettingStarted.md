@@ -207,18 +207,22 @@ let vector = embedding.data.first?.embedding.floatValues ?? []
 ### Deep Research
 
 ```swift
-let research = try await openAI.deepResearch.analyze(
-    DeepResearchRequest(
-        query: "What are the latest developments in quantum computing?",
-        model: Models.DeepResearch.researcher1,
-        depth: .comprehensive,
-        sources: [.academic, .news, .technical]
+let response = try await openAI.responses.create(
+    ResponseRequest(
+        input: "What are the latest developments in quantum computing?",
+        model: Models.DeepResearch.o4MiniDeepResearch,
+        tools: [.webSearchPreview(WebSearchPreviewTool())],
+        maxOutputTokens: 20000  // DeepResearch needs high token limits
     )
 )
 
-print(research.summary)
-for finding in research.findings {
-    print("- \(finding.title): \(finding.description)")
+// Extract message content from response
+if let output = response.output {
+    for item in output where item.type == "message" {
+        if let content = item.content?.text {
+            print(content)
+        }
+    }
 }
 ```
 
