@@ -10,6 +10,7 @@ struct DeepResearchTests {
     
     func runAll(openAI: OpenAIKit) async {
         await testDeepResearch(openAI: openAI)
+        await testDeepResearchComplete(openAI: openAI)
     }
     
     func testDeepResearchStreamQuick() async {
@@ -50,7 +51,7 @@ struct DeepResearchTests {
                         
                     case "response.output_item.done":
                         if let item = chunk.item, item.type == "message" {
-                            if let content = item.content {
+                            if let content = item.content?.text {
                                 print("    - Content: \(content)")
                                 hasContent = true
                             }
@@ -97,26 +98,22 @@ struct DeepResearchTests {
             print("  Using o4-mini-deep-research for faster testing...")
             
             // Test with a simple, focused query using the faster model
-            // Note: DeepResearch models require very high token limits (10,000+) to complete
-            // For testing, we'll use a lower limit and expect incomplete status
+            // Using HIGH token limit to ensure we get complete responses
             let request = ResponseRequest(
                 input: "What is the capital of France? Just answer: Paris.",
                 model: Models.DeepResearch.o4MiniDeepResearch,
                 tools: [
                     .webSearchPreview(WebSearchPreviewTool())
                 ],
-                maxOutputTokens: 1000  // Lower limit for testing - real usage needs 10,000+
+                maxOutputTokens: 20000  // HIGH limit to ensure complete response
             )
             
             print("\n  Starting DeepResearch query...")
             print("  Model: \(Models.DeepResearch.o4MiniDeepResearch)")
             print("  Query: Simple geography question (for quick testing)")
-            print("\n  ⚠️  Important: DeepResearch models are designed for extensive research tasks.")
-            print("  They perform multiple web searches and reasoning steps.")
-            print("  For complete responses, use:")
-            print("    - max_output_tokens: 10,000+ (minimum 16)")
-            print("    - background mode for long-running tasks")
-            print("    - Expect 'incomplete' status with lower token limits")
+            print("  Token limit: 20,000 (HIGH - to ensure complete response)")
+            print("\n  ⚠️  Important: Using HIGH token limit (20,000) to demonstrate full capabilities.")
+            print("  DeepResearch will perform web searches and reasoning before generating output.")
             print("\n  🔍 Research in progress...")
             print("  " + String(repeating: "-", count: 60))
             
@@ -145,7 +142,7 @@ struct DeepResearchTests {
                     print("\n  Output items: \(output.count)")
                     for item in output {
                         print("    - Type: \(item.type), ID: \(item.id)")
-                        if let content = item.content {
+                        if let content = item.content?.text {
                             messageContent += content
                         }
                     }
@@ -207,7 +204,7 @@ struct DeepResearchTests {
                 print("  ✅ Minimal request succeeded!")
                 if let output = response.output?.first {
                     print("  Response type: \(output.type)")
-                    if let content = output.content {
+                    if let content = output.content?.text {
                         print("  Content: \(content.prefix(100))...")
                     }
                 }
@@ -227,13 +224,119 @@ struct DeepResearchTests {
                     print("  ✅ Fast model request succeeded!")
                     if let output = response.output?.first {
                         print("  Response type: \(output.type)")
-                        if let content = output.content {
+                        if let content = output.content?.text {
                             print("  Content: \(content.prefix(100))...")
                         }
                     }
                 } catch {
                     print("  ❌ Fast model also failed: \(error)")
                 }
+            }
+        }
+    }
+    
+    func testDeepResearchComplete(openAI: OpenAIKit) async {
+        output.startTest("🚀 Testing DeepResearch with UNLIMITED tokens (Complete Response)...")
+        
+        do {
+            print("\n  💰 Note: This test uses HIGH token limits to demonstrate FULL DeepResearch capabilities.")
+            print("  Users of this SDK have no limits - they pay for what they use!")
+            print("  We're using 30,000 tokens to ensure complete responses.\n")
+            
+            // Use a research question that actually requires some research
+            let researchQuery = """
+            What are the key differences between Swift's async/await and JavaScript's async/await? 
+            Provide a brief comparison with code examples for each.
+            """
+            
+            let request = ResponseRequest(
+                input: researchQuery,
+                model: Models.DeepResearch.o4MiniDeepResearch,
+                tools: [
+                    .webSearchPreview(WebSearchPreviewTool())
+                ],
+                maxOutputTokens: 30000  // VERY HIGH limit - ensures complete response!
+            )
+            
+            print("  🔍 Starting comprehensive research...")
+            print("  Model: \(Models.DeepResearch.o4MiniDeepResearch)")
+            print("  Query: Swift vs JavaScript async/await comparison")
+            print("  Token limit: 30,000 (VERY HIGH - complete response expected)")
+            print("\n  " + String(repeating: "═", count: 70))
+            
+            // Create a client with extended timeout
+            let deepResearchConfig = Configuration(
+                apiKey: config.apiKey,
+                timeoutInterval: 3600  // 1 hour timeout
+            )
+            let deepResearchClient = OpenAIKit(configuration: deepResearchConfig)
+            
+            let startTime = Date()
+            let response = try await deepResearchClient.responses.create(request)
+            let elapsedTime = Date().timeIntervalSince(startTime)
+            
+            print("\n  " + String(repeating: "═", count: 70))
+            print("\n  ✅ DeepResearch COMPLETED!")
+            print("  Time taken: \(String(format: "%.1f", elapsedTime)) seconds")
+            print("  Status: \(response.status ?? "unknown")")
+            
+            // Extract and display the complete response
+            var messageContent = ""
+            var searchCount = 0
+            var reasoningCount = 0
+            
+            if let output = response.output {
+                print("\n  📊 Research Process:")
+                for item in output {
+                    switch item.type {
+                    case "web_search_call":
+                        searchCount += 1
+                    case "reasoning":
+                        reasoningCount += 1
+                    case "message":
+                        if let content = item.content?.text {
+                            messageContent += content
+                        }
+                    default:
+                        break
+                    }
+                }
+                
+                print("    - Web searches performed: \(searchCount)")
+                print("    - Reasoning steps: \(reasoningCount)")
+                print("    - Total output items: \(output.count)")
+            }
+            
+            if !messageContent.isEmpty {
+                print("\n  📝 COMPLETE RESEARCH RESPONSE:")
+                print("  " + String(repeating: "-", count: 70))
+                print(messageContent)
+                print("  " + String(repeating: "-", count: 70))
+                print("\n  ✅ SUCCESS! Got complete response with \(messageContent.count) characters!")
+            } else {
+                print("\n  ⚠️  No message content in response")
+                print("  Status: \(response.status ?? "unknown")")
+            }
+            
+            if let usage = response.usage {
+                print("\n  💰 Token Usage (User pays for this):")
+                print("    - Input tokens: \(usage.inputTokens ?? 0)")
+                print("    - Output tokens: \(usage.outputTokens ?? 0)")
+                print("    - Total tokens: \(usage.totalTokens ?? 0)")
+                
+                // Estimate cost (rough approximation)
+                let outputTokens = Double(usage.outputTokens ?? 0)
+                let estimatedCost = outputTokens / 1_000_000 * 15.0  // $15 per 1M output tokens for o4-mini-deep-research
+                print("    - Estimated cost: $\(String(format: "%.4f", estimatedCost))")
+            }
+            
+            print("\n  💡 Key Takeaway: With sufficient tokens, DeepResearch provides COMPLETE responses!")
+            print("  SDK users have full control over token limits and pay for what they use.")
+            
+        } catch {
+            print("\n  ❌ DeepResearch complete test failed: \(error)")
+            if let openAIError = error as? OpenAIError {
+                print("  Error details: \(openAIError.userFriendlyMessage)")
             }
         }
     }
@@ -352,7 +455,7 @@ struct DeepResearchTests {
                         if let item = chunk.item {
                             if item.type == "message" {
                                 messageCount += 1
-                                if let content = item.content {
+                                if let content = item.content?.text {
                                     fullContent += content
                                     // Print content as it arrives
                                     print(content, terminator: "")

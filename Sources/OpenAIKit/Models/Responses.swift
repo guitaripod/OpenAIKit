@@ -439,20 +439,99 @@ public struct ResponseOutputItem: Codable, Sendable {
     /// Unique identifier for this output item.
     public let id: String
     
-    /// The type of output (e.g., "reasoning", "message", "tool_call").
+    /// The type of output (e.g., "reasoning", "message", "tool_call", "web_search_call").
     public let type: String
     
     /// Summary information for reasoning outputs.
     public let summary: [String]?
     
-    /// Content for message outputs.
-    public let content: String?
+    /// Content for message outputs - can be either a string or array of content objects.
+    public let content: ResponseMessageContent?
+    
+    /// Status of the output item (e.g., "completed").
+    public let status: String?
+    
+    /// Role for message outputs (e.g., "assistant").
+    public let role: String?
+    
+    /// Action information for web search calls.
+    public let action: WebSearchAction?
     
     /// Tool call information.
     public let toolCall: ToolCallInfo?
     
     /// Tool response information.
     public let toolResponse: ToolResponseInfo?
+    
+    private enum CodingKeys: String, CodingKey {
+        case id, type, summary, content, status, role, action
+        case toolCall = "tool_call"
+        case toolResponse = "tool_response"
+    }
+}
+
+/// Message content that can be either a string or array of content objects.
+public enum ResponseMessageContent: Codable, Sendable {
+    case string(String)
+    case array([MessageContentItem])
+    
+    public init(from decoder: Decoder) throws {
+        let container = try decoder.singleValueContainer()
+        if let stringValue = try? container.decode(String.self) {
+            self = .string(stringValue)
+        } else if let arrayValue = try? container.decode([MessageContentItem].self) {
+            self = .array(arrayValue)
+        } else {
+            throw DecodingError.typeMismatch(ResponseMessageContent.self, DecodingError.Context(
+                codingPath: decoder.codingPath,
+                debugDescription: "Expected String or [MessageContentItem]"
+            ))
+        }
+    }
+    
+    public func encode(to encoder: Encoder) throws {
+        var container = encoder.singleValueContainer()
+        switch self {
+        case .string(let value):
+            try container.encode(value)
+        case .array(let value):
+            try container.encode(value)
+        }
+    }
+    
+    /// Extract text content from the message content.
+    public var text: String? {
+        switch self {
+        case .string(let value):
+            return value
+        case .array(let items):
+            return items.compactMap { $0.text }.joined(separator: "\n")
+        }
+    }
+}
+
+/// A content item within a message.
+public struct MessageContentItem: Codable, Sendable {
+    /// The type of content (e.g., "output_text").
+    public let type: String
+    
+    /// The text content.
+    public let text: String?
+    
+    /// Annotations for the content.
+    public let annotations: [JSONValue]?
+    
+    /// Log probabilities.
+    public let logprobs: [JSONValue]?
+}
+
+/// Web search action information.
+public struct WebSearchAction: Codable, Sendable {
+    /// The type of action (e.g., "search").
+    public let type: String
+    
+    /// The search query.
+    public let query: String?
 }
 
 /// Information about a tool call.
