@@ -2,75 +2,220 @@ import Foundation
 
 /// A request to create embeddings for the given input.
 ///
-/// Embeddings are numerical representations of text that capture semantic meaning,
-/// allowing for tasks like semantic search, clustering, and similarity comparisons.
+/// `EmbeddingRequest` transforms text into high-dimensional numerical vectors that capture
+/// semantic meaning. These embeddings power intelligent applications like semantic search,
+/// recommendation systems, clustering, and classification.
 ///
 /// ## Overview
 ///
-/// Use `EmbeddingRequest` to convert text into high-dimensional vectors that can be
-/// used for various natural language processing tasks. The resulting embeddings can be
-/// stored in vector databases for efficient similarity searches.
+/// Embeddings are the foundation of modern AI applications. They convert text into vectors
+/// where similar meanings are geometrically close. This enables:
+///
+/// - **Semantic Search**: Find related content by meaning, not keywords
+/// - **Clustering**: Group similar documents automatically
+/// - **Classification**: Categorize text based on examples
+/// - **Recommendations**: Suggest related items
+/// - **Anomaly Detection**: Identify outliers in text data
 ///
 /// ## Example Usage
 ///
-/// ### Single Text Embedding
+/// ### Basic Embedding
 /// ```swift
+/// // Simple text embedding
 /// let request = EmbeddingRequest(
-///     input: "What is the meaning of life?",
-///     model: "text-embedding-3-small"
+///     input: "What is machine learning?",
+///     model: Models.Embeddings.textEmbedding3Small
+/// )
+///
+/// let response = try await openAI.embeddings.create(request)
+/// let vector = response.data.first?.embedding
+/// ```
+///
+/// ### Batch Processing
+/// ```swift
+/// // Embed multiple documents efficiently
+/// let documents = [
+///     "Introduction to Swift programming",
+///     "Advanced iOS development techniques",
+///     "SwiftUI best practices"
+/// ]
+///
+/// let request = EmbeddingRequest(
+///     input: documents,
+///     model: Models.Embeddings.textEmbedding3Small
 /// )
 /// ```
 ///
-/// ### Multiple Text Embeddings
+/// ### Optimized for Storage
 /// ```swift
+/// // Reduce dimensions and use base64 encoding
 /// let request = EmbeddingRequest(
-///     input: ["Apple", "Orange", "Banana"],
-///     model: "text-embedding-3-small",
-///     dimensions: 256  // Reduce dimensions for efficiency
+///     input: "Large corpus of text",
+///     model: Models.Embeddings.textEmbedding3Small,
+///     dimensions: 512,           // Reduce from 1536
+///     encodingFormat: .base64    // Compact transfer
 /// )
 /// ```
 ///
-/// ### With Custom Encoding
-/// ```swift
-/// let request = EmbeddingRequest(
-///     input: .string("Neural networks are fascinating"),
-///     model: "text-embedding-3-large",
-///     encodingFormat: .base64  // For more efficient data transfer
-/// )
-/// ```
+/// ## Model Selection
 ///
-/// - Note: Different models have different dimension outputs. The `text-embedding-3-small`
-///   model outputs 1536 dimensions by default, while `text-embedding-3-large` outputs 3072.
+/// - **text-embedding-3-small**: 1536 dimensions, best value
+/// - **text-embedding-3-large**: 3072 dimensions, highest accuracy
+/// - **text-embedding-ada-002**: 1536 dimensions, legacy
 ///
-/// - SeeAlso: ``EmbeddingResponse``, ``EmbeddingsEndpoint``
+/// ## Best Practices
+///
+/// 1. Batch requests when possible (up to 2048 inputs)
+/// 2. Use dimension reduction for large-scale applications
+/// 3. Normalize vectors for cosine similarity
+/// 4. Store embeddings in vector databases
+///
+/// - SeeAlso: ``EmbeddingResponse``, ``Embedding``, ``EmbeddingsEndpoint``
 public struct EmbeddingRequest: Codable, Sendable {
-    /// The input text to embed, provided as a string, array of strings, or token arrays.
+    /// The input text to embed.
+    ///
+    /// Supports flexible input formats:
+    /// - Single text string
+    /// - Array of text strings (batch processing)
+    /// - Pre-tokenized integer arrays (advanced use)
+    ///
+    /// ## Input Limits
+    ///
+    /// - Maximum 2048 inputs per request
+    /// - Each input limited by model's context window
+    /// - Longer texts are truncated, not errored
+    ///
+    /// ## Examples
+    ///
+    /// ```swift
+    /// // Single text
+    /// input: .string("Hello world")
+    ///
+    /// // Batch processing
+    /// input: .array(["Text 1", "Text 2", "Text 3"])
+    ///
+    /// // Pre-tokenized (advanced)
+    /// input: .intArray([1234, 5678, 9012])
+    /// ```
     ///
     /// - SeeAlso: ``EmbeddingInput``
     public let input: EmbeddingInput
     
     /// The ID of the model to use.
     ///
-    /// Available models include:
-    /// - `"text-embedding-3-small"`: Efficient model with good performance
-    /// - `"text-embedding-3-large"`: Higher accuracy model with more dimensions
-    /// - `"text-embedding-ada-002"`: Legacy model (not recommended for new applications)
+    /// Choose based on your performance, accuracy, and cost requirements.
+    ///
+    /// ## Available Models
+    ///
+    /// **text-embedding-3-small** (Recommended)
+    /// - Dimensions: 1536 (reducible)
+    /// - Performance: Excellent
+    /// - Cost: Lower
+    /// - Use for: Most applications
+    ///
+    /// **text-embedding-3-large**
+    /// - Dimensions: 3072 (reducible)
+    /// - Performance: Superior
+    /// - Cost: Higher
+    /// - Use for: Maximum accuracy needs
+    ///
+    /// **text-embedding-ada-002** (Legacy)
+    /// - Dimensions: 1536 (fixed)
+    /// - Performance: Good
+    /// - Cost: Lowest
+    /// - Use for: Existing systems only
+    ///
+    /// ## Model Comparison
+    ///
+    /// ```swift
+    /// // Best value
+    /// model: Models.Embeddings.textEmbedding3Small
+    ///
+    /// // Maximum accuracy
+    /// model: Models.Embeddings.textEmbedding3Large
+    /// ```
+    ///
+    /// - Note: Newer models support dimension reduction
     public let model: String
     
     /// The number of dimensions for the output embeddings.
     ///
-    /// This parameter is only supported in `text-embedding-3` and later models.
-    /// Reducing dimensions can improve performance and reduce storage costs while
-    /// maintaining most of the semantic information.
+    /// Reduce embedding dimensions to optimize storage and computation while preserving
+    /// most semantic information. Only supported by text-embedding-3 models.
     ///
-    /// - Note: The dimensions must be less than or equal to the model's native dimension count.
+    /// ## Dimension Trade-offs
+    ///
+    /// | Dimensions | Quality | Storage | Speed |
+    /// |------------|---------|---------|-------|
+    /// | Full (1536/3072) | 100% | 1x | Baseline |
+    /// | 1024 | ~99% | 0.67x | Faster |
+    /// | 512 | ~97% | 0.33x | Much faster |
+    /// | 256 | ~94% | 0.17x | Very fast |
+    ///
+    /// ## Examples
+    ///
+    /// ```swift
+    /// // Full quality
+    /// dimensions: nil  // Uses model default
+    ///
+    /// // Balanced (recommended)
+    /// dimensions: 1024
+    ///
+    /// // Storage optimized
+    /// dimensions: 512
+    ///
+    /// // Maximum efficiency
+    /// dimensions: 256
+    /// ```
+    ///
+    /// ## Guidelines
+    ///
+    /// - Start with full dimensions
+    /// - Test quality with your data
+    /// - Reduce until quality drops
+    /// - Consider 512-1024 for most uses
+    ///
+    /// - Maximum: Model's native size
+    /// - Minimum: ~256 for useful results
     public let dimensions: Int?
     
     /// The format to return the embeddings in.
     ///
-    /// Can be either `float` (default) or `base64`. Base64 encoding can reduce
-    /// the size of the response when transferring large amounts of embedding data.
+    /// Choose based on your data transfer and processing needs.
     ///
+    /// ## Format Options
+    ///
+    /// **Float** (Default)
+    /// - JSON array of numbers
+    /// - Human-readable
+    /// - Larger transfer size
+    /// - Direct use in code
+    ///
+    /// **Base64**
+    /// - Compact binary encoding  
+    /// - ~25% smaller transfers
+    /// - Requires decoding
+    /// - Better for large batches
+    ///
+    /// ## Usage Examples
+    ///
+    /// ```swift
+    /// // Standard format
+    /// encodingFormat: .float
+    /// // Response: [0.123, -0.456, ...]
+    ///
+    /// // Optimized transfer
+    /// encodingFormat: .base64
+    /// // Response: "Pczji0a3..."
+    ///
+    /// // Decode base64
+    /// let data = Data(base64Encoded: base64String)!
+    /// let floats = data.withUnsafeBytes {
+    ///     Array($0.bindMemory(to: Float32.self))
+    /// }
+    /// ```
+    ///
+    /// - Tip: Use base64 for >100 embeddings
     /// - SeeAlso: ``EncodingFormat``
     public let encodingFormat: EncodingFormat?
     
@@ -180,23 +325,54 @@ public struct EmbeddingRequest: Codable, Sendable {
 
 /// Represents the various input formats supported for creating embeddings.
 ///
-/// The embedding API accepts different input formats to accommodate various use cases,
-/// from simple text strings to pre-tokenized inputs.
+/// `EmbeddingInput` provides flexibility in how you submit text for embedding, from simple
+/// strings to pre-tokenized formats for advanced control.
 ///
-/// ## Cases
+/// ## Input Types
 ///
-/// - `string`: A single text string to embed
-/// - `array`: Multiple text strings to embed in batch
-/// - `intArray`: A single array of token IDs (for pre-tokenized input)
-/// - `nestedIntArray`: Multiple arrays of token IDs (for batch pre-tokenized input)
+/// ### Text Inputs (Common)
 ///
-/// ## Usage Examples
-///
-/// ### Text Input
+/// **Single String**
 /// ```swift
-/// let singleText = EmbeddingInput.string("Hello, world!")
-/// let multipleTexts = EmbeddingInput.array(["Hello", "World"])
+/// let input = EmbeddingInput.string("What is artificial intelligence?")
 /// ```
+///
+/// **Multiple Strings** (Batch)
+/// ```swift
+/// let input = EmbeddingInput.array([
+///     "Document 1: Introduction to ML",
+///     "Document 2: Deep Learning Basics",
+///     "Document 3: Neural Networks"
+/// ])
+/// ```
+///
+/// ### Token Inputs (Advanced)
+///
+/// **Pre-tokenized Single Input**
+/// ```swift
+/// let tokens = tokenizer.encode("Hello world")
+/// let input = EmbeddingInput.intArray(tokens)
+/// ```
+///
+/// **Pre-tokenized Batch**
+/// ```swift
+/// let tokenBatches = texts.map { tokenizer.encode($0) }
+/// let input = EmbeddingInput.nestedIntArray(tokenBatches)
+/// ```
+///
+/// ## When to Use Each Type
+///
+/// - **string**: Single text, simple use cases
+/// - **array**: Batch processing, efficiency
+/// - **intArray**: Control over tokenization
+/// - **nestedIntArray**: Batch with token control
+///
+/// ## Performance Tips
+///
+/// - Batch similar-length texts together
+/// - Use batching for >10 texts
+/// - Pre-tokenize for consistency
+/// - Maximum 2048 inputs per request
 ///
 /// ### Token Input
 /// ```swift

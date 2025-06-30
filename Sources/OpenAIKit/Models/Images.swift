@@ -2,29 +2,96 @@ import Foundation
 
 /// A request to generate one or more images from a text prompt.
 ///
-/// The image generation endpoint allows you to create original images based on text descriptions.
-/// You can control various aspects of the generated images including size, style, quality, and format.
+/// `ImageGenerationRequest` enables you to create original, high-quality images using OpenAI's DALL·E models.
+/// From photorealistic scenes to artistic interpretations, you can generate images for any creative need.
 ///
-/// ## Example
+/// ## Overview
+///
+/// Image generation uses advanced AI to transform text descriptions into visual content. The quality
+/// and accuracy of generated images depend on prompt clarity, model selection, and parameter tuning.
+///
+/// ## Basic Example
+///
 /// ```swift
+/// // Simple generation
 /// let request = ImageGenerationRequest(
 ///     prompt: "A serene landscape with mountains and a lake at sunset",
-///     model: "dall-e-3",
-///     size: "1024x1024",
-///     quality: "hd",
-///     style: "natural"
+///     model: Models.Images.dallE3
+/// )
+///
+/// // With full customization
+/// let request = ImageGenerationRequest(
+///     prompt: "A futuristic city with flying cars, neon lights, cyberpunk style",
+///     model: Models.Images.dallE3,
+///     size: "1792x1024",     // Wide aspect ratio
+///     quality: "hd",         // High definition
+///     style: "vivid",        // Dramatic rendering
+///     n: 1                   // Number of variations
 /// )
 /// ```
 ///
-/// - Important: The `prompt` parameter is required and should be descriptive.
-/// Longer, more detailed prompts generally produce better results.
+/// ## Prompt Engineering
+///
+/// Better prompts produce better images:
+///
+/// ```swift
+/// // ❌ Vague prompt
+/// "A dog"
+///
+/// // ✅ Detailed prompt
+/// "A golden retriever puppy playing in a sunlit meadow with butterflies,
+///  soft focus background, warm afternoon light, photorealistic style"
+///
+/// // ✅ Artistic prompt
+/// "Abstract representation of time, swirling cosmic colors, Salvador Dali inspired,
+///  surrealist style, dramatic lighting, oil painting texture"
+/// ```
+///
+/// ## Model Comparison
+///
+/// - **DALL·E 3**: Latest model with best quality, prompt adherence, and creative control
+/// - **DALL·E 2**: Previous generation, faster and cheaper, good for simple images
+///
+/// - Important: Prompts are automatically enhanced by DALL·E 3 for better results
 public struct ImageGenerationRequest: Codable, Sendable {
     /// The text prompt describing the desired image(s).
     ///
-    /// This is the primary input that guides the image generation.
-    /// Be specific and descriptive for best results.
+    /// The prompt is the most important parameter - it determines what will be generated.
+    /// DALL·E 3 automatically enhances prompts for better results, while DALL·E 2 uses them as-is.
     ///
-    /// - Example: "A futuristic city skyline at night with flying cars"
+    /// ## Prompt Tips
+    ///
+    /// **Structure**: Subject + Style + Details + Lighting + Mood
+    ///
+    /// **Good Prompts Include**:
+    /// - Clear subject description
+    /// - Art style or medium
+    /// - Color palette
+    /// - Lighting conditions  
+    /// - Camera angle/perspective
+    /// - Mood or atmosphere
+    ///
+    /// ## Examples
+    ///
+    /// ```swift
+    /// // Photorealistic
+    /// "A majestic snow leopard resting on a rocky outcrop, Himalayan mountains
+    ///  in background, golden hour lighting, National Geographic photography style"
+    ///
+    /// // Artistic
+    /// "Art nouveau poster of a woman with flowing hair intertwined with flowers,
+    ///  gold and emerald color scheme, decorative border, Alphonse Mucha style"
+    ///
+    /// // Technical/Diagram
+    /// "Technical cutaway diagram of a spacecraft engine, labeled components,
+    ///  clean white background, engineering blueprint style, high detail"
+    ///
+    /// // Fantasy/Gaming
+    /// "Epic fantasy battle scene with dragon breathing fire over castle,
+    ///  dramatic storm clouds, cinematic lighting, concept art style"
+    /// ```
+    ///
+    /// - Note: Maximum 1000 characters for DALL·E 2, 4000 for DALL·E 3
     public let prompt: String
     
     /// The background setting for the generated image.
@@ -34,13 +101,36 @@ public struct ImageGenerationRequest: Codable, Sendable {
     
     /// The model to use for image generation.
     ///
-    /// Available models:
-    /// - `"dall-e-2"`: Standard DALL·E 2 model (256x256, 512x512, or 1024x1024)
-    /// - `"dall-e-3"`: Advanced DALL·E 3 model with improved quality and coherence
-    /// - `"gpt-image-1"`: Latest multimodal model with photorealistic results and advanced features
+    /// Choose based on your quality, speed, and budget requirements.
     ///
-    /// Use `Models.Images` constants for type-safe model selection.
-    /// Defaults to `"dall-e-2"` if not specified.
+    /// ## Available Models
+    ///
+    /// **DALL·E 3** (`dall-e-3`)
+    /// - Latest generation with best quality
+    /// - Superior prompt understanding
+    /// - Automatic prompt enhancement
+    /// - Supports HD quality and style options
+    /// - More expensive but worth it for quality
+    ///
+    /// **DALL·E 2** (`dall-e-2`)
+    /// - Previous generation model
+    /// - Faster generation time
+    /// - Lower cost per image
+    /// - Good for simple images
+    /// - Limited to 1024x1024 maximum
+    ///
+    /// ## Usage
+    ///
+    /// ```swift
+    /// // For best quality
+    /// model: Models.Images.dallE3
+    ///
+    /// // For budget/speed
+    /// model: Models.Images.dallE2
+    /// ```
+    ///
+    /// - Default: `dall-e-2` if not specified
+    /// - Tip: Always use DALL·E 3 for production applications
     public let model: String?
     
     /// Content moderation level for the generated images.
@@ -50,10 +140,32 @@ public struct ImageGenerationRequest: Codable, Sendable {
     
     /// The number of images to generate.
     ///
-    /// - For DALL·E 2: Must be between 1 and 10
-    /// - For DALL·E 3: Only 1 is supported
+    /// Generate multiple variations of your prompt in a single request.
     ///
-    /// Defaults to 1 if not specified.
+    /// ## Model Limits
+    ///
+    /// - **DALL·E 2**: 1-10 images per request
+    /// - **DALL·E 3**: Only 1 image per request
+    ///
+    /// ## Cost Considerations
+    ///
+    /// You're charged for each image generated:
+    /// - Generating n=4 images costs 4x a single image
+    /// - Consider generating one and iterating on the prompt
+    ///
+    /// ## Example
+    ///
+    /// ```swift
+    /// // Generate variations (DALL·E 2 only)
+    /// let request = ImageGenerationRequest(
+    ///     prompt: "Abstract geometric patterns",
+    ///     model: Models.Images.dallE2,
+    ///     n: 4  // Get 4 different interpretations
+    /// )
+    /// ```
+    ///
+    /// - Default: 1
+    /// - Note: Each image may interpret the prompt differently
     public let n: Int?
     
     /// The compression level for the output image.
@@ -69,11 +181,40 @@ public struct ImageGenerationRequest: Codable, Sendable {
     
     /// The quality of the generated image.
     ///
-    /// Available options:
-    /// - `"standard"`: Standard quality (faster)
-    /// - `"hd"`: High definition quality (slower, DALL·E 3 only)
+    /// Controls the detail level and rendering quality of generated images.
     ///
-    /// Defaults to `"standard"` if not specified.
+    /// ## Options
+    ///
+    /// **Standard Quality** (`"standard"`)
+    /// - Faster generation (5-10 seconds)
+    /// - Good for drafts and iterations
+    /// - Lower computational cost
+    /// - Sufficient for most use cases
+    ///
+    /// **HD Quality** (`"hd"`) - DALL·E 3 only
+    /// - Higher detail and clarity
+    /// - Better for fine details and text
+    /// - Slower generation (10-20 seconds)
+    /// - 2x the cost of standard
+    ///
+    /// ## When to Use HD
+    ///
+    /// ```swift
+    /// // HD for detailed work
+    /// quality: "hd"  // When you need:
+    ///               // - Text in images
+    ///               // - Fine details
+    ///               // - Print quality
+    ///               // - Professional use
+    ///
+    /// // Standard for iterations
+    /// quality: "standard"  // When you need:
+    ///                    // - Quick drafts
+    ///                    // - Concept exploration
+    ///                    // - Budget consciousness
+    /// ```
+    ///
+    /// - Default: `"standard"`
     public let quality: String?
     
     /// The format in which the generated images are returned.
@@ -83,20 +224,85 @@ public struct ImageGenerationRequest: Codable, Sendable {
     
     /// The size of the generated images.
     ///
-    /// Available sizes:
-    /// - DALL·E 2: `"256x256"`, `"512x512"`, `"1024x1024"`
-    /// - DALL·E 3: `"1024x1024"`, `"1792x1024"`, `"1024x1792"`
+    /// Different sizes suit different use cases and aspect ratios.
     ///
-    /// Defaults to `"1024x1024"` if not specified.
+    /// ## DALL·E 2 Sizes
+    ///
+    /// - `"256x256"`: Thumbnails, avatars (cheapest)
+    /// - `"512x512"`: Medium size, web graphics
+    /// - `"1024x1024"`: Full size, detailed images (default)
+    ///
+    /// ## DALL·E 3 Sizes
+    ///
+    /// - `"1024x1024"`: Square format (default)
+    ///   - Instagram posts
+    ///   - Profile pictures
+    ///   - App icons
+    ///
+    /// - `"1792x1024"`: Landscape format (16:9 approx)
+    ///   - Desktop wallpapers
+    ///   - Website headers
+    ///   - Presentation slides
+    ///
+    /// - `"1024x1792"`: Portrait format (9:16 approx)
+    ///   - Mobile wallpapers
+    ///   - Story posts
+    ///   - Book covers
+    ///
+    /// ## Examples
+    ///
+    /// ```swift
+    /// // Desktop wallpaper
+    /// size: "1792x1024"
+    ///
+    /// // Mobile wallpaper
+    /// size: "1024x1792"
+    ///
+    /// // Social media post
+    /// size: "1024x1024"
+    /// ```
+    ///
+    /// - Note: Larger sizes cost more and take longer
     public let size: String?
     
     /// The style of the generated images.
     ///
-    /// Available styles for DALL·E 3:
-    /// - `"vivid"`: More hyper-real and dramatic images
-    /// - `"natural"`: More natural, less hyper-real looking images
+    /// Controls the artistic interpretation and rendering style (DALL·E 3 only).
     ///
-    /// This parameter is only supported for DALL·E 3.
+    /// ## Style Options
+    ///
+    /// **Vivid** (`"vivid"`)
+    /// - Hyper-real and dramatic
+    /// - Enhanced colors and contrast
+    /// - More artistic interpretation
+    /// - Great for:
+    ///   - Fantasy art
+    ///   - Concept designs
+    ///   - Eye-catching visuals
+    ///   - Marketing materials
+    ///
+    /// **Natural** (`"natural"`) - Default
+    /// - Realistic and balanced
+    /// - True-to-life colors
+    /// - Photographic quality
+    /// - Great for:
+    ///   - Product images
+    ///   - Portraits
+    ///   - Documentary style
+    ///   - Educational content
+    ///
+    /// ## Examples
+    ///
+    /// ```swift
+    /// // Dramatic fantasy art
+    /// style: "vivid"
+    ///
+    /// // Realistic product shot
+    /// style: "natural"
+    /// ```
+    ///
+    /// - Note: Only available for DALL·E 3
+    /// - Default: `"vivid"` for DALL·E 3
     public let style: String?
     
     /// A unique identifier representing your end-user.
@@ -106,19 +312,51 @@ public struct ImageGenerationRequest: Codable, Sendable {
     
     /// Creates a new image generation request.
     ///
+    /// Most parameters have sensible defaults, so you can start with just a prompt.
+    ///
+    /// ## Common Patterns
+    ///
+    /// ```swift
+    /// // Simple generation
+    /// ImageGenerationRequest(prompt: "A beautiful sunset")
+    ///
+    /// // High quality portrait
+    /// ImageGenerationRequest(
+    ///     prompt: "Professional headshot of a scientist",
+    ///     model: Models.Images.dallE3,
+    ///     size: "1024x1792",
+    ///     quality: "hd",
+    ///     style: "natural"
+    /// )
+    ///
+    /// // Multiple variations (DALL·E 2)
+    /// ImageGenerationRequest(
+    ///     prompt: "Abstract geometric patterns",
+    ///     model: Models.Images.dallE2,
+    ///     n: 4,
+    ///     size: "512x512"
+    /// )
+    ///
+    /// // For immediate use (base64)
+    /// ImageGenerationRequest(
+    ///     prompt: "App icon with rocket",
+    ///     responseFormat: .b64Json
+    /// )
+    /// ```
+    ///
     /// - Parameters:
-    ///   - prompt: The text description of the desired image(s)
-    ///   - background: Optional background setting for the image
-    ///   - model: The model to use (e.g., "dall-e-2", "dall-e-3")
+    ///   - prompt: Text description of the desired image(s)
+    ///   - background: Background setting for the image
+    ///   - model: Model to use (defaults to dall-e-2)
     ///   - moderation: Content moderation level
-    ///   - n: Number of images to generate (1-10 for DALL·E 2, only 1 for DALL·E 3)
-    ///   - outputCompression: Compression level for output images
-    ///   - outputFormat: Output image format (e.g., "png", "jpg")
-    ///   - quality: Image quality ("standard" or "hd")
-    ///   - responseFormat: Format for the response (URL or base64)
-    ///   - size: Size of generated images
-    ///   - style: Style preset ("vivid" or "natural", DALL·E 3 only)
-    ///   - user: Unique identifier for the end-user
+    ///   - n: Number of images (1-10 for DALL·E 2, 1 for DALL·E 3)
+    ///   - outputCompression: Compression level (0-100)
+    ///   - outputFormat: Image format (png, jpg, webp)
+    ///   - quality: Quality level (standard or hd)
+    ///   - responseFormat: Response format (url or b64_json)
+    ///   - size: Image dimensions
+    ///   - style: Artistic style (vivid or natural)
+    ///   - user: End-user identifier for abuse monitoring
     public init(
         prompt: String,
         background: String? = nil,
@@ -150,13 +388,42 @@ public struct ImageGenerationRequest: Codable, Sendable {
 
 /// The format in which generated images are returned.
 ///
-/// This enum determines whether images are returned as URLs or as base64-encoded JSON strings.
+/// Choose between temporary URLs or embedded base64 data based on your application's needs.
 ///
-/// ## Usage Considerations
-/// - Use `.url` when you want to download images separately or display them directly in web contexts
-/// - Use `.b64Json` when you need the image data immediately embedded in the response
+/// ## Format Comparison
 ///
-/// - Note: URLs are temporary and will expire after a short period (typically 1 hour)
+/// **URL Format** (`.url`)
+/// - Returns temporary hosted URLs
+/// - Smaller response size
+/// - Requires additional HTTP request to download
+/// - URLs expire after ~1 hour
+/// - Best for: Web display, deferred downloading
+///
+/// **Base64 Format** (`.b64Json`)
+/// - Returns image data in response
+/// - Larger response size (~33% overhead)
+/// - Immediate access to image data
+/// - No expiration concerns
+/// - Best for: Direct processing, storage, offline use
+///
+/// ## Usage Examples
+///
+/// ```swift
+/// // For web display
+/// responseFormat: .url
+/// // Response: {"url": "https://..."}
+///
+/// // For immediate processing
+/// responseFormat: .b64Json  
+/// // Response: {"b64_json": "iVBORw0KGgo..."}
+///
+/// // Convert base64 to Data
+/// if case .b64Json = responseFormat,
+///    let b64String = response.data.first?.b64Json {
+///     let imageData = Data(base64Encoded: b64String)!
+///     let image = UIImage(data: imageData)
+/// }
+/// ```
 public enum ImageResponseFormat: String, Codable, Sendable {
     /// Return images as temporary URLs.
     ///
@@ -173,31 +440,92 @@ public enum ImageResponseFormat: String, Codable, Sendable {
 
 /// A request to edit an existing image based on a text prompt.
 ///
-/// Image editing allows you to modify specific parts of an image by providing
-/// a text description of the desired changes. You can optionally provide a mask
-/// to specify which areas of the image should be edited.
+/// `ImageEditRequest` enables AI-powered image editing by replacing masked regions with new content
+/// generated from your text description. Perfect for removing objects, changing backgrounds, or
+/// adding new elements to existing images.
 ///
-/// ## Example
+/// ## Overview
+///
+/// Image editing works by:
+/// 1. Providing an original image
+/// 2. Specifying areas to edit (via mask)
+/// 3. Describing desired changes (via prompt)
+/// 4. AI generates new content for masked areas
+///
+/// ## Basic Example
+///
 /// ```swift
 /// let imageData = try Data(contentsOf: imageURL)
 /// let maskData = try Data(contentsOf: maskURL)
 /// 
 /// let request = ImageEditRequest(
 ///     image: imageData,
-///     imageName: "landscape.png",
-///     prompt: "Add a rainbow in the sky",
+///     imageName: "photo.png",
+///     prompt: "Replace with a sunny beach",
 ///     mask: maskData,
-///     maskName: "sky-mask.png",
-///     size: "1024x1024"
+///     maskName: "mask.png"
 /// )
 /// ```
 ///
-/// ## Mask Usage
-/// The mask should be a PNG image where:
-/// - Fully transparent areas (alpha = 0) indicate regions to edit
-/// - Opaque areas (alpha = 1) indicate regions to preserve
+/// ## Mask Creation
 ///
-/// - Important: Both the image and mask must have the same dimensions.
+/// The mask is a PNG image that defines editable areas:
+///
+/// - **Transparent pixels** (alpha = 0): Areas to edit/replace
+/// - **Opaque pixels** (alpha = 255): Areas to preserve
+/// - **Semi-transparent**: Partial editing (not recommended)
+///
+/// ### Creating Masks Programmatically
+///
+/// ```swift
+/// // Example: Create a circular mask
+/// func createCircularMask(size: CGSize, center: CGPoint, radius: CGFloat) -> Data? {
+///     UIGraphicsBeginImageContextWithOptions(size, false, 1.0)
+///     defer { UIGraphicsEndImageContext() }
+///     
+///     let context = UIGraphicsGetCurrentContext()
+///     
+///     // Fill with black (preserve)
+///     context?.setFillColor(UIColor.black.cgColor)
+///     context?.fill(CGRect(origin: .zero, size: size))
+///     
+///     // Cut out circle (edit area)
+///     context?.setBlendMode(.clear)
+///     context?.fillEllipse(in: CGRect(
+///         x: center.x - radius,
+///         y: center.y - radius,
+///         width: radius * 2,
+///         height: radius * 2
+///     ))
+///     
+///     return UIGraphicsGetImageFromCurrentImageContext()?.pngData()
+/// }
+/// ```
+///
+/// ## Common Use Cases
+///
+/// ```swift
+/// // Remove object
+/// prompt: "seamless background"
+///
+/// // Replace sky
+/// prompt: "dramatic sunset with clouds"
+///
+/// // Add object
+/// prompt: "modern glass coffee table"
+///
+/// // Change clothing
+/// prompt: "red business suit"
+/// ```
+///
+/// ## Best Practices
+///
+/// - **Mask precision**: Clean masks produce better results
+/// - **Prompt clarity**: Describe what should appear, not what to remove
+/// - **Context**: Include surrounding context in prompts
+/// - **Size match**: Image and mask must have identical dimensions
+///
+/// - Important: Only available for DALL·E 2
 /// - Note: Only PNG images are supported for both image and mask.
 public struct ImageEditRequest: Sendable {
     /// The image data to edit.

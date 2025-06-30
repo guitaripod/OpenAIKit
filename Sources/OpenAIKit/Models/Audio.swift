@@ -2,36 +2,127 @@ import Foundation
 
 /// A request to generate audio from text using OpenAI's text-to-speech models.
 ///
-/// Use this type to convert text into lifelike spoken audio. The API provides multiple voices
-/// and supports various audio formats.
+/// `SpeechRequest` enables you to convert text into natural-sounding speech with multiple voice options
+/// and audio formats. Perfect for accessibility features, audio content creation, and voice interfaces.
 ///
-/// ## Example
+/// ## Overview
+///
+/// OpenAI's TTS models produce lifelike speech from text, supporting multiple languages and voices.
+/// Choose between standard quality for real-time applications or HD quality for premium audio content.
+///
+/// ## Basic Example
+///
 /// ```swift
+/// // Simple speech generation
 /// let request = SpeechRequest(
-///     input: "Hello, welcome to OpenAI!",
-///     voice: .nova,
-///     responseFormat: .mp3,
-///     speed: 1.0
+///     input: "Hello, welcome to our application!",
+///     voice: .nova
+/// )
+///
+/// // With customization
+/// let request = SpeechRequest(
+///     input: "The quick brown fox jumps over the lazy dog.",
+///     model: Models.Audio.tts1HD,  // Higher quality
+///     voice: .alloy,
+///     responseFormat: .opus,       // Optimized for streaming
+///     speed: 0.9                   // Slightly slower for clarity
 /// )
 /// ```
 ///
-/// - Important: The `input` text should be no longer than 4096 characters.
+/// ## Use Cases
+///
+/// - **Accessibility**: Screen readers and audio descriptions
+/// - **Content Creation**: Podcasts, audiobooks, videos
+/// - **Voice Interfaces**: IVR systems, voice assistants
+/// - **Education**: Language learning, pronunciation guides
+/// - **Notifications**: Audio alerts and announcements
+///
+/// - Important: Input text is limited to 4096 characters per request
 public struct SpeechRequest: Codable, Sendable {
     /// The text to generate audio for.
     ///
-    /// Maximum length is 4096 characters.
+    /// The input text will be converted to speech. For best results:
+    /// - Use clear, grammatically correct text
+    /// - Include punctuation for natural pauses
+    /// - Spell out numbers and abbreviations as needed
+    /// - Use phonetic spelling for unusual names
+    ///
+    /// ## Examples
+    ///
+    /// ```swift
+    /// // Clear narration
+    /// "Welcome to Chapter 1. Today we'll explore the fundamentals of Swift programming."
+    ///
+    /// // With emphasis (using punctuation)
+    /// "This is important! Please pay careful attention to the following instructions."
+    ///
+    /// // Phonetic guidance
+    /// "The CEO, John Doe (pronounced 'doh'), will speak at 3 PM."
+    /// ```
+    ///
+    /// - Maximum: 4096 characters
+    /// - Tip: For longer content, split into multiple requests
     public let input: String
     
     /// The TTS model to use.
     ///
-    /// Available models:
-    /// - `"tts-1"`: Standard quality, lower latency
-    /// - `"tts-1-hd"`: Higher quality, higher latency
+    /// Choose based on your quality and latency requirements.
+    ///
+    /// ## Available Models
+    ///
+    /// **TTS-1** (`tts-1`) - Standard Quality
+    /// - Lower latency (~1 second)
+    /// - Good for real-time applications
+    /// - Slightly more robotic sound
+    /// - Lower cost per character
+    /// - Use for: Chat responses, notifications
+    ///
+    /// **TTS-1-HD** (`tts-1-hd`) - High Definition
+    /// - Higher latency (~2-3 seconds)
+    /// - Superior audio quality
+    /// - More natural intonation
+    /// - Higher cost per character
+    /// - Use for: Audiobooks, podcasts, premium content
+    ///
+    /// ## Example
+    ///
+    /// ```swift
+    /// // For real-time response
+    /// model: Models.Audio.tts1
+    ///
+    /// // For production content
+    /// model: Models.Audio.tts1HD
+    /// ```
     public let model: String
     
     /// The voice to use for audio generation.
     ///
-    /// See ``Voice`` for available options.
+    /// Each voice has unique characteristics. Experiment to find the best match
+    /// for your content and audience.
+    ///
+    /// ## Voice Selection Guide
+    ///
+    /// - **nova**: Friendly and conversational (recommended for most uses)
+    /// - **alloy**: Balanced and versatile
+    /// - **echo**: Smooth and steady
+    /// - **fable**: Warm storytelling voice
+    /// - **onyx**: Deep and authoritative
+    /// - **shimmer**: Soft and gentle
+    ///
+    /// ## Example
+    ///
+    /// ```swift
+    /// // For customer service
+    /// voice: .nova
+    ///
+    /// // For audiobooks
+    /// voice: .fable
+    ///
+    /// // For announcements
+    /// voice: .onyx
+    /// ```
+    ///
+    /// - SeeAlso: ``Voice``
     public let voice: Voice
     
     /// Custom pronunciation instructions for the model.
@@ -46,9 +137,34 @@ public struct SpeechRequest: Codable, Sendable {
     
     /// The speed of the generated audio.
     ///
-    /// Valid range is 0.25 to 4.0. Default is 1.0.
-    /// - Values below 1.0 slow down the speech
-    /// - Values above 1.0 speed up the speech
+    /// Adjust playback speed without affecting pitch.
+    ///
+    /// ## Speed Scale
+    ///
+    /// - `0.25`: Very slow (25% speed) - Language learning
+    /// - `0.5`: Half speed - Complex instructions
+    /// - `0.75`: Slightly slow - Clear enunciation
+    /// - `1.0`: Normal speed (default)
+    /// - `1.25`: Slightly fast - Efficient listening
+    /// - `1.5`: Fast - Quick updates
+    /// - `2.0`: Double speed - Rapid playback
+    /// - `4.0`: Maximum speed - Testing only
+    ///
+    /// ## Use Cases
+    ///
+    /// ```swift
+    /// // For elderly users
+    /// speed: 0.85
+    ///
+    /// // For technical content
+    /// speed: 0.9
+    ///
+    /// // For quick notifications
+    /// speed: 1.2
+    /// ```
+    ///
+    /// - Range: 0.25 to 4.0
+    /// - Default: 1.0
     public let speed: Double?
     
     /// Creates a new speech generation request.
@@ -79,20 +195,48 @@ public struct SpeechRequest: Codable, Sendable {
 
 /// Available voices for text-to-speech generation.
 ///
-/// Each voice has unique characteristics suitable for different use cases.
-/// Experiment with different voices to find the one that best fits your needs.
+/// OpenAI offers a diverse set of voices, each with distinct characteristics. All voices
+/// support multiple languages, though they're optimized for English.
 ///
-/// ## Voice Characteristics
-/// - **Alloy, Echo, Fable, Onyx, Nova, Shimmer**: Optimized for English
-/// - **Ash, Ballad, Coral, Sage, Verse**: Additional voices with varied tones
+/// ## Voice Selection Guide
 ///
-/// ## Example
+/// ### Primary Voices (Most Popular)
+///
+/// - **nova**: Clear, friendly, conversational - Great for assistants
+/// - **alloy**: Balanced, neutral - Versatile for any content
+/// - **echo**: Smooth, consistent - Professional narration
+/// - **fable**: Warm, engaging - Storytelling and long content
+/// - **onyx**: Deep, authoritative - News and announcements  
+/// - **shimmer**: Soft, calming - Meditation and relaxation
+///
+/// ### Additional Voices
+///
+/// - **ash**: Youthful and energetic
+/// - **ballad**: Melodic and expressive
+/// - **coral**: Bright and cheerful
+/// - **sage**: Mature and wise
+/// - **verse**: Dynamic and versatile
+///
+/// ## Usage Examples
+///
 /// ```swift
-/// let request = SpeechRequest(
-///     input: "Hello world!",
-///     voice: .nova  // Clear and friendly voice
-/// )
+/// // Customer service bot
+/// voice: .nova
+///
+/// // News reader
+/// voice: .onyx
+///
+/// // Children's stories
+/// voice: .fable
+///
+/// // Meditation app
+/// voice: .shimmer
 /// ```
+///
+/// ## Language Support
+///
+/// All voices support multiple languages with automatic detection.
+/// Quality is best for English but good for major languages.
 public enum Voice: String, Codable, Sendable {
     /// A versatile, balanced voice suitable for general use.
     case alloy
@@ -130,23 +274,62 @@ public enum Voice: String, Codable, Sendable {
 
 /// Supported audio formats for speech generation and transcription.
 ///
-/// Choose a format based on your quality, size, and compatibility requirements.
+/// Choose the optimal format based on your use case, balancing quality, file size, and compatibility.
 ///
-/// ## Format Characteristics
-/// - **MP3**: Good compression, widely supported (default)
-/// - **Opus**: Excellent compression, low latency, ideal for streaming
-/// - **AAC**: Good quality and compression, Apple ecosystem friendly
-/// - **FLAC**: Lossless compression, larger files
-/// - **WAV**: Uncompressed, highest quality, largest files
-/// - **PCM**: Raw audio data, 24kHz 16-bit signed little-endian
+/// ## Format Comparison
 ///
-/// ## Example
+/// | Format | Quality | Size | Use Case |
+/// |--------|---------|------|----------|
+/// | MP3    | Good    | Small | General use, web |
+/// | Opus   | Good    | Smallest | Streaming, VoIP |
+/// | AAC    | Better  | Small | Apple devices |
+/// | FLAC   | Perfect | Large | Archival |
+/// | WAV    | Perfect | Largest | Pro audio |
+/// | PCM    | Raw     | Large | Processing |
+///
+/// ## Format Details
+///
+/// **MP3** - MPEG Audio Layer 3
+/// - Bitrate: 128-320 kbps
+/// - Universal compatibility
+/// - Best for: Web playback, downloads
+///
+/// **Opus** - Modern codec
+/// - Bitrate: 6-510 kbps
+/// - Excellent at low bitrates
+/// - Best for: Real-time streaming, mobile
+///
+/// **AAC** - Advanced Audio Coding
+/// - Better than MP3 at same bitrate
+/// - Native Apple support
+/// - Best for: iOS/macOS apps
+///
+/// **FLAC** - Free Lossless Audio Codec
+/// - Lossless compression (~50% of WAV)
+/// - Preserves full quality
+/// - Best for: Archival, high-quality needs
+///
+/// **WAV** - Waveform Audio
+/// - Uncompressed PCM
+/// - No quality loss
+/// - Best for: Audio editing, maximum quality
+///
+/// **PCM** - Pulse Code Modulation
+/// - Raw 24kHz 16-bit little-endian
+/// - Direct audio samples
+/// - Best for: Custom processing
+///
+/// ## Examples
+///
 /// ```swift
-/// let request = SpeechRequest(
-///     input: "Hello!",
-///     voice: .nova,
-///     responseFormat: .opus  // Best for streaming
-/// )
+/// // For web streaming
+/// responseFormat: .opus
+///
+/// // For iOS app
+/// responseFormat: .aac
+///
+/// // For highest quality
+/// responseFormat: .wav
 /// ```
 public enum AudioFormat: String, Codable, Sendable {
     /// MP3 format - Good balance of quality and file size.
@@ -170,23 +353,61 @@ public enum AudioFormat: String, Codable, Sendable {
 
 /// A request to transcribe audio into text using OpenAI's Whisper model.
 ///
-/// Transcribes audio files in various formats and languages into text.
-/// Supports timestamps, different output formats, and streaming responses.
+/// `TranscriptionRequest` converts speech to text with high accuracy across multiple languages.
+/// Whisper is a state-of-the-art speech recognition model that handles accents, background noise,
+/// and technical terminology exceptionally well.
+///
+/// ## Overview
+///
+/// Whisper can:
+/// - Transcribe in 50+ languages
+/// - Add punctuation and capitalization
+/// - Handle multiple speakers
+/// - Work with noisy audio
+/// - Provide word-level timestamps
+/// - Output in various formats
 ///
 /// ## Supported File Formats
-/// flac, mp3, mp4, mpeg, mpga, m4a, ogg, wav, or webm
 ///
-/// ## Example
+/// - **Compressed**: mp3, mp4, mpeg, mpga, m4a, ogg, webm
+/// - **Uncompressed**: wav, flac
+/// - **Maximum size**: 25 MB
+/// - **Recommended**: mp3 or m4a for balance of quality and size
+///
+/// ## Basic Examples
+///
 /// ```swift
+/// // Simple transcription
 /// let audioData = try Data(contentsOf: audioFileURL)
 /// let request = TranscriptionRequest(
 ///     file: audioData,
-///     fileName: "audio.mp3",
+///     fileName: "interview.mp3"
+/// )
+///
+/// // With language and timestamps
+/// let request = TranscriptionRequest(
+///     file: audioData,
+///     fileName: "podcast.mp3",
 ///     language: "en",
 ///     responseFormat: .verboseJson,
 ///     timestampGranularities: [.word, .segment]
 /// )
+///
+/// // For translation to English
+/// let request = TranscriptionRequest(
+///     file: audioData,
+///     fileName: "speech_spanish.mp3",
+///     language: "es",
+///     responseFormat: .text
+/// )
 /// ```
+///
+/// ## Best Practices
+///
+/// - **Audio Quality**: Higher quality audio produces better results
+/// - **File Size**: Split long audio into <25MB chunks
+/// - **Language**: Specify if known for better accuracy
+/// - **Format**: Use verboseJson for detailed output with confidence scores
 public struct TranscriptionRequest: Sendable {
     /// The audio file data to transcribe.
     ///

@@ -2,21 +2,61 @@ import Foundation
 
 /// Constants for OpenAI model identifiers.
 ///
-/// This struct provides type-safe access to OpenAI model names,
-/// avoiding string literals throughout the codebase.
+/// `Models` provides type-safe access to all OpenAI model identifiers, eliminating error-prone
+/// string literals and providing autocomplete support. Models are organized by capability
+/// (chat, embeddings, audio, etc.) with convenient aliases for common selections.
 ///
-/// ## Usage
+/// ## Overview
+///
+/// OpenAI offers various models optimized for different tasks:
+/// - **Chat Models**: Conversational AI and text generation
+/// - **Embedding Models**: Semantic search and similarity
+/// - **Audio Models**: Speech-to-text and text-to-speech
+/// - **Image Models**: Image generation and editing
+/// - **Moderation Models**: Content safety checks
+///
+/// ## Basic Usage
+///
 /// ```swift
+/// // Using specific models
 /// let request = ChatCompletionRequest(
 ///     messages: messages,
-///     model: Models.Chat.gpt4o
+///     model: Models.Chat.gpt4o  // Latest GPT-4o
 /// )
+///
+/// // Using convenience aliases
+/// let request = ChatCompletionRequest(
+///     messages: messages,
+///     model: Models.latest  // Always the newest model
+/// )
+///
+/// // Checking model capabilities
+/// if let info = Models.info(for: Models.Chat.gpt4o) {
+///     print("Context window: \(info.contextWindow) tokens")
+///     print("Supports vision: \(info.capabilities.contains(.vision))")
+/// }
 /// ```
+///
+/// ## Model Selection Guide
+///
+/// - **Performance**: `gpt-4o` > `gpt-4-turbo` > `gpt-3.5-turbo`
+/// - **Cost**: `gpt-3.5-turbo` < `gpt-4o-mini` < `gpt-4o`
+/// - **Speed**: `gpt-3.5-turbo` > `gpt-4o-mini` > `gpt-4o`
+/// - **Reasoning**: `o1` > `o1-mini` > `gpt-4o`
 public struct Models: Sendable {
     
-    /// Chat completion models
+    /// Chat completion models for conversational AI and text generation.
+    ///
+    /// Models are listed from newest to oldest within each family.
+    /// Check availability as older models may be deprecated.
     public struct Chat: Sendable {
-        /// GPT-4o models
+        // MARK: - GPT-4o Family
+        
+        /// GPT-4o - Latest multimodal model (Recommended)
+        /// - Context: 128K tokens
+        /// - Output: 16K tokens
+        /// - Features: Vision, function calling, JSON mode
+        /// - Best for: General use, complex tasks
         public static let gpt4o = "gpt-4o"
         public static let gpt4oMini = "gpt-4o-mini"
         public static let gpt4oAudio = "gpt-4o-audio-preview"
@@ -26,19 +66,35 @@ public struct Models: Sendable {
         public static let gpt4o20240806 = "gpt-4o-2024-08-06"
         public static let gpt4o20241120 = "gpt-4o-2024-11-20"
         
-        /// GPT-4 Turbo models
+        // MARK: - GPT-4 Turbo Family
+        
+        /// GPT-4 Turbo - Previous generation high-performance model
+        /// - Context: 128K tokens
+        /// - Output: 4K tokens  
+        /// - Features: Vision, function calling, JSON mode
+        /// - Best for: When GPT-4o unavailable
         public static let gpt4Turbo = "gpt-4-turbo"
         public static let gpt4TurboPreview = "gpt-4-turbo-preview"
         public static let gpt4Turbo20240409 = "gpt-4-turbo-2024-04-09"
         public static let gpt40125Preview = "gpt-4-0125-preview"
         public static let gpt41106Preview = "gpt-4-1106-preview"
         
-        /// GPT-4 models
+        // MARK: - GPT-4 Family
+        
+        /// Original GPT-4 models (Legacy)
+        /// - Context: 8K tokens
+        /// - Features: Function calling, JSON mode
+        /// - Note: Consider using GPT-4o instead
         public static let gpt4 = "gpt-4"
         public static let gpt40314 = "gpt-4-0314"
         public static let gpt40613 = "gpt-4-0613"
         
-        /// GPT-3.5 Turbo models
+        // MARK: - GPT-3.5 Turbo Family
+        
+        /// GPT-3.5 Turbo - Fast, cost-effective model
+        /// - Context: 16K tokens
+        /// - Features: Function calling, JSON mode
+        /// - Best for: Simple tasks, high volume
         public static let gpt35Turbo = "gpt-3.5-turbo"
         public static let gpt35Turbo0125 = "gpt-3.5-turbo-0125"
         public static let gpt35Turbo1106 = "gpt-3.5-turbo-1106"
@@ -47,7 +103,12 @@ public struct Models: Sendable {
         public static let gpt35Turbo16k0613 = "gpt-3.5-turbo-16k-0613"
         public static let gpt35Turbo0301 = "gpt-3.5-turbo-0301"
         
-        /// O1 models (reasoning models)
+        // MARK: - O1 Reasoning Models
+        
+        /// O1 models - Advanced reasoning capabilities
+        /// - Specialty: Multi-step reasoning, complex problem solving
+        /// - Note: No streaming, function calling, or system messages
+        /// - Best for: Math, coding, scientific analysis
         public static let o1 = "o1"
         public static let o1Mini = "o1-mini"
         public static let o1Preview = "o1-preview"
@@ -57,20 +118,32 @@ public struct Models: Sendable {
         public static let o120241217 = "o1-2024-12-17"
     }
     
-    /// Embedding models
+    /// Embedding models for semantic search and similarity.
+    ///
+    /// Convert text to numerical vectors for ML applications.
     public struct Embeddings: Sendable {
-        /// Text embedding models
+        /// Text Embedding 3 Small - Balanced performance
+        /// - Dimensions: 1536 (reducible)
+        /// - Best for: Most applications
         public static let textEmbedding3Small = "text-embedding-3-small"
         public static let textEmbedding3Large = "text-embedding-3-large"
         public static let textEmbeddingAda002 = "text-embedding-ada-002"
     }
     
-    /// Audio models
+    /// Audio models for speech recognition and synthesis.
+    ///
+    /// Handle speech-to-text and text-to-speech conversions.
     public struct Audio: Sendable {
-        /// Whisper models for transcription/translation
+        /// Whisper - Universal speech recognition
+        /// - Languages: 50+
+        /// - Features: Transcription, translation to English
+        /// - Formats: mp3, mp4, mpeg, mpga, m4a, wav, webm
         public static let whisper1 = "whisper-1"
         
-        /// TTS models
+        /// Text-to-Speech models
+        /// - Voices: 6 options (nova, alloy, echo, fable, onyx, shimmer)
+        /// - Languages: Multiple
+        /// - Formats: mp3, opus, aac, flac, wav
         public static let tts1 = "tts-1"
         public static let tts1HD = "tts-1-hd"
     }
@@ -100,7 +173,9 @@ public struct Models: Sendable {
         public static let gptImage1 = "gpt-image-1"
     }
     
-    /// Moderation models
+    /// Moderation models for content safety.
+    ///
+    /// Detect potentially harmful content across multiple categories.
     public struct Moderation: Sendable {
         public static let textModerationLatest = "text-moderation-latest"
         public static let textModerationStable = "text-moderation-stable"
@@ -135,7 +210,12 @@ public struct Models: Sendable {
     }
 }
 
-/// Convenience type aliases for common model selections
+// MARK: - Convenience Aliases
+
+/// Convenience type aliases for common model selections.
+///
+/// These aliases make it easier to select appropriate models without
+/// memorizing specific model names. They're updated as new models release.
 public extension Models {
     /// The latest and most capable GPT-4o model
     static let latest = Chat.gpt4o
@@ -171,27 +251,68 @@ public extension Models {
     static let deepResearchFast = DeepResearch.o4MiniDeepResearch
 }
 
-/// Model capabilities and metadata
+// MARK: - Model Information
+
+/// Model capabilities and metadata.
+///
+/// Query detailed information about model capabilities, limits, and features.
 public extension Models {
+    /// Detailed information about a model's capabilities and limits.
     struct ModelInfo: Sendable {
+        /// The model identifier
         public let id: String
+        
+        /// Maximum input context size in tokens
         public let contextWindow: Int
+        
+        /// Maximum output tokens (if limited)
         public let maxOutputTokens: Int?
+        
+        /// Training data cutoff date (YYYY-MM format)
         public let trainingDataCutoff: String?
+        
+        /// Set of capabilities this model supports
         public let capabilities: Set<Capability>
         
+        /// Model capabilities
         public enum Capability: String, Sendable {
+            /// Standard chat completions
             case chat
+            /// Function/tool calling
             case functionCalling
+            /// Image understanding
             case vision
+            /// Structured JSON output
             case jsonMode
+            /// Server-sent events streaming
             case streaming
+            /// Audio input/output
             case audio
+            /// Advanced reasoning (O1 models)
             case reasoning
         }
     }
     
-    /// Get detailed information about a model
+    /// Get detailed information about a model.
+    ///
+    /// Returns nil for unknown models. Information includes context limits,
+    /// capabilities, and training data cutoff.
+    ///
+    /// - Parameter modelId: The model identifier to query
+    /// - Returns: Model information if available
+    ///
+    /// ## Example
+    ///
+    /// ```swift
+    /// if let info = Models.info(for: "gpt-4o") {
+    ///     print("Max input: \(info.contextWindow) tokens")
+    ///     print("Max output: \(info.maxOutputTokens ?? 0) tokens")
+    ///     
+    ///     if info.capabilities.contains(.vision) {
+    ///         print("Supports image inputs")
+    ///     }
+    /// }
+    /// ```
     static func info(for modelId: String) -> ModelInfo? {
         switch modelId {
         case Chat.gpt4o, Chat.gpt4o20241120:

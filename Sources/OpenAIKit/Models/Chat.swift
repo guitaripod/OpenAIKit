@@ -2,59 +2,159 @@ import Foundation
 
 /// A request to create a chat completion with OpenAI's chat models.
 ///
-/// This struct represents the complete set of parameters you can send to the OpenAI Chat Completions API.
-/// At minimum, you need to provide a model identifier and an array of messages representing the conversation.
+/// `ChatCompletionRequest` is the primary way to interact with OpenAI's language models. It encapsulates
+/// all parameters needed to generate text, engage in conversations, call functions, and process multimodal content.
 ///
-/// ## Example
+/// ## Overview
+///
+/// Chat completions power most AI interactions in OpenAIKit. The API is designed to be simple for basic use cases
+/// while offering extensive customization for advanced scenarios.
+///
+/// ## Basic Usage
+///
 /// ```swift
+/// // Simple request
+/// let request = ChatCompletionRequest(
+///     messages: [ChatMessage(role: .user, content: "Hello!")],
+///     model: Models.Chat.gpt4o
+/// )
+///
+/// // With system prompt
 /// let request = ChatCompletionRequest(
 ///     messages: [
 ///         ChatMessage(role: .system, content: "You are a helpful assistant."),
 ///         ChatMessage(role: .user, content: "What is the capital of France?")
 ///     ],
-///     model: "gpt-4"
+///     model: Models.Chat.gpt4o
+/// )
+///
+/// // With parameters
+/// let request = ChatCompletionRequest(
+///     messages: messages,
+///     model: Models.Chat.gpt4o,
+///     temperature: 0.7,
+///     maxTokens: 500
 /// )
 /// ```
 ///
 /// ## Topics
+///
 /// ### Essential Properties
 /// - ``messages``
 /// - ``model``
 ///
 /// ### Response Control
 /// - ``temperature``
+/// - ``topP``
 /// - ``maxTokens``
+/// - ``maxCompletionTokens``
 /// - ``stop``
+/// - ``seed``
+///
+/// ### Output Formatting
 /// - ``responseFormat``
+/// - ``streamOptions``
+///
+/// ### Content Moderation
+/// - ``frequencyPenalty``
+/// - ``presencePenalty``
+/// - ``logitBias``
 ///
 /// ### Advanced Features
 /// - ``tools``
-/// - ``functions``
+/// - ``toolChoice``
+/// - ``parallelToolCalls``
+/// - ``functions`` (deprecated)
+/// - ``functionCall`` (deprecated)
+///
+/// ### Streaming & Real-time
 /// - ``stream``
+/// - ``streamOptions``
+///
+/// ### Multimodal
 /// - ``audio``
+/// - ``modalities``
+///
+/// ### Metadata & Tracking
+/// - ``metadata``
+/// - ``user``
+/// - ``store``
 public struct ChatCompletionRequest: Codable, Sendable {
     /// The messages to generate a chat completion for.
     ///
-    /// This array represents the conversation history and must contain at least one message.
-    /// Messages are processed in the order they appear, with each message having a specific role.
+    /// Messages form the conversation context that guides the model's response. The array must contain
+    /// at least one message and represents the full conversation history.
     ///
-    /// ## Example
+    /// ## Message Roles
+    ///
+    /// - **System**: Instructions that define the assistant's behavior
+    /// - **User**: Input from the human user
+    /// - **Assistant**: Previous responses from the model
+    /// - **Tool**: Results from function/tool calls
+    ///
+    /// ## Best Practices
+    ///
+    /// - Start with a system message to set behavior
+    /// - Maintain conversation history for context
+    /// - Trim old messages to stay within token limits
+    /// - Include relevant tool responses in sequence
+    ///
+    /// ## Examples
+    ///
     /// ```swift
+    /// // Basic conversation
     /// let messages = [
     ///     ChatMessage(role: .system, content: "You are a helpful assistant."),
-    ///     ChatMessage(role: .user, content: "Hello!"),
-    ///     ChatMessage(role: .assistant, content: "Hi! How can I help you today?"),
-    ///     ChatMessage(role: .user, content: "What's the weather like?")
+    ///     ChatMessage(role: .user, content: "Hello!")
+    /// ]
+    ///
+    /// // Multi-turn conversation
+    /// let messages = [
+    ///     ChatMessage(role: .system, content: "You are a coding expert."),
+    ///     ChatMessage(role: .user, content: "How do I sort an array?"),
+    ///     ChatMessage(role: .assistant, content: "In Swift, use the sorted() method..."),
+    ///     ChatMessage(role: .user, content: "What about descending order?")
+    /// ]
+    ///
+    /// // With tool calls
+    /// let messages = [
+    ///     ChatMessage(role: .user, content: "What's the weather in Tokyo?"),
+    ///     ChatMessage(role: .assistant, content: nil, toolCalls: [weatherToolCall]),
+    ///     ChatMessage(role: .tool, content: "72°F and sunny", toolCallId: "call_123")
     /// ]
     /// ```
     public let messages: [ChatMessage]
     
     /// The ID of the model to use.
     ///
-    /// Common model IDs include:
-    /// - `"gpt-4"` - Most capable model for complex tasks
-    /// - `"gpt-4-turbo"` - Optimized for speed and cost
-    /// - `"gpt-3.5-turbo"` - Fast and cost-effective for simpler tasks
+    /// Choose models based on your needs for capability, speed, and cost.
+    ///
+    /// ## Available Models
+    ///
+    /// **GPT-4 Family**
+    /// - `gpt-4o` - Most capable, multimodal (128K context)
+    /// - `gpt-4o-mini` - Affordable, fast, great for most tasks
+    /// - `gpt-4-turbo` - High performance, vision capable
+    /// - `gpt-4` - Original GPT-4 (8K context)
+    ///
+    /// **GPT-3.5 Family**
+    /// - `gpt-3.5-turbo` - Fast, affordable, good for simple tasks
+    /// - `gpt-3.5-turbo-16k` - Extended context window
+    ///
+    /// ## Model Selection
+    ///
+    /// ```swift
+    /// // For complex reasoning, coding, or analysis
+    /// model: Models.Chat.gpt4o
+    ///
+    /// // For most applications with good cost/performance
+    /// model: Models.Chat.gpt4oMini
+    ///
+    /// // For simple, high-volume tasks
+    /// model: Models.Chat.gpt35Turbo
+    /// ```
+    ///
+    /// - Note: Model availability may vary based on your API access
     public let model: String
     
     /// Audio input or output configuration.
@@ -62,10 +162,27 @@ public struct ChatCompletionRequest: Codable, Sendable {
     /// Enables the model to process audio inputs or generate audio outputs.
     public let audio: ChatAudio?
     
-    /// Number between -2.0 and 2.0.
+    /// Penalty for token frequency to reduce repetition.
     ///
-    /// Positive values penalize new tokens based on their existing frequency in the text so far,
-    /// decreasing the model's likelihood to repeat the same line verbatim.
+    /// Range: -2.0 to 2.0
+    ///
+    /// Positive values penalize tokens based on how often they've appeared, discouraging repetition.
+    /// Negative values encourage repetition.
+    ///
+    /// ## Examples
+    ///
+    /// - `0.0`: No penalty (default)
+    /// - `0.5`: Moderate reduction of repetition
+    /// - `1.0`: Strong reduction of repetition
+    /// - `2.0`: Maximum penalty, very diverse output
+    ///
+    /// ```swift
+    /// // For creative writing (reduce repetition)
+    /// frequencyPenalty: 0.8
+    ///
+    /// // For technical documentation (allow repetition)
+    /// frequencyPenalty: 0.0
+    /// ```
     public let frequencyPenalty: Double?
     
     /// Deprecated. Use ``tools`` or ``toolChoice`` instead.
@@ -86,7 +203,24 @@ public struct ChatCompletionRequest: Codable, Sendable {
     
     /// Whether to return log probabilities of the output tokens.
     ///
-    /// If true, returns the log probabilities of each output token returned in the content of message.
+    /// When enabled, provides confidence scores for each generated token, useful for:
+    /// - Analyzing model uncertainty
+    /// - Building custom scoring systems
+    /// - Debugging token generation
+    /// - Implementing alternative sampling strategies
+    ///
+    /// ## Example
+    ///
+    /// ```swift
+    /// let request = ChatCompletionRequest(
+    ///     messages: messages,
+    ///     model: model,
+    ///     logprobs: true,
+    ///     topLogprobs: 5  // Get top 5 alternatives for each token
+    /// )
+    /// ```
+    ///
+    /// - Note: Increases response size and processing time
     public let logprobs: Bool?
     
     /// The maximum number of completion tokens.
@@ -97,8 +231,36 @@ public struct ChatCompletionRequest: Codable, Sendable {
     
     /// The maximum number of tokens to generate in the completion.
     ///
-    /// The token count of your prompt plus `maxTokens` cannot exceed the model's context length.
-    /// Use ``maxCompletionTokens`` for newer models.
+    /// Limits the length of the generated response. The total tokens (prompt + completion)
+    /// cannot exceed the model's context window.
+    ///
+    /// ## Token Estimates
+    ///
+    /// - 1 token ≈ 4 characters in English
+    /// - 1 token ≈ ¾ words
+    /// - 100 tokens ≈ 75 words
+    /// - 1,000 tokens ≈ 750 words
+    /// - 2,048 tokens ≈ 1,500 words
+    ///
+    /// ## Model Limits
+    ///
+    /// - GPT-4o: 128,000 token context
+    /// - GPT-4: 8,192 token context
+    /// - GPT-3.5: 4,096 token context
+    ///
+    /// ```swift
+    /// // Short response
+    /// maxTokens: 100
+    ///
+    /// // Paragraph
+    /// maxTokens: 500
+    ///
+    /// // Full article
+    /// maxTokens: 2000
+    /// ```
+    ///
+    /// - Important: Prefer ``maxCompletionTokens`` for newer models
+    /// - Note: You're charged for all tokens generated, even if hitting the limit
     public let maxTokens: Int?
     
     /// Developer-defined tags and values for filtering completions.
@@ -127,10 +289,29 @@ public struct ChatCompletionRequest: Codable, Sendable {
     /// Allows the model to skip processing of predicted content for faster responses.
     public let prediction: Prediction?
     
-    /// Number between -2.0 and 2.0.
+    /// Penalty for token presence to encourage topic diversity.
     ///
-    /// Positive values penalize new tokens based on whether they appear in the text so far,
-    /// increasing the model's likelihood to talk about new topics.
+    /// Range: -2.0 to 2.0
+    ///
+    /// Positive values penalize tokens that have appeared at all, encouraging new topics.
+    /// Negative values encourage sticking to mentioned topics.
+    ///
+    /// ## Use Cases
+    ///
+    /// - `0.0`: No penalty (default)
+    /// - `0.6`: Encourage exploring new topics
+    /// - `1.2`: Strong push for topic variety
+    /// - `-0.5`: Stay focused on current topics
+    ///
+    /// ```swift
+    /// // For brainstorming (explore new ideas)
+    /// presencePenalty: 0.8
+    ///
+    /// // For focused analysis (stay on topic)
+    /// presencePenalty: -0.3
+    /// ```
+    ///
+    /// - Tip: Use with ``frequencyPenalty`` for fine control
     public let presencePenalty: Double?
     
     /// The reasoning effort for the model.
@@ -140,9 +321,44 @@ public struct ChatCompletionRequest: Codable, Sendable {
     
     /// The format that the model must output.
     ///
-    /// Setting to `{ "type": "json_object" }` enables JSON mode, which ensures the model
-    /// generates valid JSON. Important: When using JSON mode, instruct the model to produce
-    /// JSON via a system or user message.
+    /// Controls the structure of the model's response, ensuring consistent output format.
+    ///
+    /// ## Modes
+    ///
+    /// - **Text** (default): Free-form text response
+    /// - **JSON Object**: Guaranteed valid JSON output
+    /// - **JSON Schema**: Structured JSON matching your schema
+    ///
+    /// ## JSON Mode Example
+    ///
+    /// ```swift
+    /// let request = ChatCompletionRequest(
+    ///     messages: [
+    ///         ChatMessage(
+    ///             role: .system,
+    ///             content: "You are a helpful assistant. Always respond with valid JSON."
+    ///         ),
+    ///         ChatMessage(
+    ///             role: .user,
+    ///             content: "List 3 programming languages with their year of creation"
+    ///         )
+    ///     ],
+    ///     model: model,
+    ///     responseFormat: ResponseFormat(type: .jsonObject)
+    /// )
+    ///
+    /// // Response will be valid JSON like:
+    /// // {
+    /// //   "languages": [
+    /// //     {"name": "Python", "year": 1991},
+    /// //     {"name": "Swift", "year": 2014},
+    /// //     {"name": "Rust", "year": 2010}
+    /// //   ]
+    /// // }
+    /// ```
+    ///
+    /// - Important: Must instruct the model to output JSON in the messages
+    /// - Warning: JSON mode may use more tokens
     public let responseFormat: ResponseFormat?
     
     /// Random seed for deterministic output.
@@ -179,23 +395,118 @@ public struct ChatCompletionRequest: Codable, Sendable {
     
     /// The sampling temperature between 0 and 2.
     ///
-    /// Higher values like 0.8 will make the output more random, while lower values like 0.2
-    /// will make it more focused and deterministic. Generally recommend altering this or
-    /// ``topP`` but not both.
+    /// Controls randomness in the model's output. This is one of the most important parameters
+    /// for controlling response quality and creativity.
+    ///
+    /// ## Temperature Scale
+    ///
+    /// - `0.0`: Deterministic, always picks most likely token
+    /// - `0.2`: Very focused, minimal variation
+    /// - `0.7`: Balanced creativity and coherence (default)
+    /// - `1.0`: Creative, more variation
+    /// - `1.5`: Very creative, occasional surprises
+    /// - `2.0`: Maximum randomness, may be incoherent
+    ///
+    /// ## Use Cases
+    ///
+    /// ```swift
+    /// // Code generation (precise)
+    /// temperature: 0.2
+    ///
+    /// // General assistance (balanced)
+    /// temperature: 0.7
+    ///
+    /// // Creative writing (imaginative)
+    /// temperature: 0.9
+    ///
+    /// // Brainstorming (exploratory)
+    /// temperature: 1.2
+    /// ```
+    ///
+    /// ## Best Practices
+    ///
+    /// - Lower for: Facts, code, analysis, instructions
+    /// - Higher for: Stories, ideas, jokes, creativity
+    /// - Test different values for your use case
+    /// - Use either temperature OR ``topP``, not both
     public let temperature: Double?
     
     /// Controls which (if any) tool is called by the model.
     ///
-    /// - `none`: The model will not call any tool
-    /// - `auto`: The model can pick between generating a message or calling tools
-    /// - `required`: The model must call one or more tools
-    /// - `function`: Forces the model to call a specific function
+    /// Fine-tune how the model interacts with available tools/functions.
+    ///
+    /// ## Options
+    ///
+    /// - **none**: Disable all tool calls, text response only
+    /// - **auto**: Model decides whether to call tools (default)
+    /// - **required**: Force at least one tool call
+    /// - **function**: Call a specific function by name
+    ///
+    /// ## Examples
+    ///
+    /// ```swift
+    /// // Let model decide (default)
+    /// toolChoice: .auto
+    ///
+    /// // Force text response only
+    /// toolChoice: .none
+    ///
+    /// // Must use a tool
+    /// toolChoice: .required
+    ///
+    /// // Call specific function
+    /// toolChoice: .function(name: "get_weather")
+    /// ```
+    ///
+    /// ## Use Cases
+    ///
+    /// - **auto**: General assistants that may or may not need tools
+    /// - **required**: When you need structured data extraction
+    /// - **none**: When you want analysis without tool execution
+    /// - **function**: When you know exactly which tool to use
     public let toolChoice: ToolChoice?
     
     /// A list of tools the model may call.
     ///
-    /// Currently, only functions are supported as a tool. Use this to provide a list of
-    /// functions the model may generate JSON inputs for. A max of 128 functions are supported.
+    /// Tools extend the model's capabilities by allowing it to call functions you define.
+    /// Currently supports function tools, with a maximum of 128 functions per request.
+    ///
+    /// ## Tool Definition
+    ///
+    /// ```swift
+    /// let weatherTool = Tool(
+    ///     type: .function,
+    ///     function: Function(
+    ///         name: "get_weather",
+    ///         description: "Get current weather for a location",
+    ///         parameters: [
+    ///             "type": "object",
+    ///             "properties": [
+    ///                 "location": [
+    ///                     "type": "string",
+    ///                     "description": "City and state, e.g. San Francisco, CA"
+    ///                 ],
+    ///                 "unit": [
+    ///                     "type": "string",
+    ///                     "enum": ["celsius", "fahrenheit"]
+    ///                 ]
+    ///             ],
+    ///             "required": ["location"]
+    ///         ]
+    ///     )
+    /// )
+    ///
+    /// tools: [weatherTool]
+    /// ```
+    ///
+    /// ## Common Use Cases
+    ///
+    /// - **Data Retrieval**: Database queries, API calls
+    /// - **Calculations**: Math, date/time, conversions
+    /// - **External Actions**: Send emails, create tasks
+    /// - **Structured Output**: Extract data in specific format
+    ///
+    /// - SeeAlso: ``Tool``, ``Function``, ``toolChoice``
     public let tools: [Tool]?
     
     /// The number of most likely tokens to return at each token position.
@@ -205,9 +516,33 @@ public struct ChatCompletionRequest: Codable, Sendable {
     
     /// Nucleus sampling parameter between 0 and 1.
     ///
-    /// The model considers the results of the tokens with top_p probability mass.
-    /// So 0.1 means only the tokens comprising the top 10% probability mass are considered.
-    /// Generally recommend altering this or ``temperature`` but not both.
+    /// An alternative to temperature for controlling randomness. The model considers only
+    /// tokens that comprise the top P probability mass.
+    ///
+    /// ## How it Works
+    ///
+    /// - `1.0`: Consider all tokens (default)
+    /// - `0.9`: Consider tokens making up top 90% probability
+    /// - `0.5`: Consider tokens making up top 50% probability
+    /// - `0.1`: Only most likely tokens (top 10%)
+    ///
+    /// ## Comparison with Temperature
+    ///
+    /// ```swift
+    /// // Temperature approach (scales all probabilities)
+    /// temperature: 0.8
+    ///
+    /// // Top-p approach (cuts off unlikely tokens)
+    /// topP: 0.9
+    /// ```
+    ///
+    /// ## When to Use
+    ///
+    /// - **Top-p**: Better for maintaining quality while allowing creativity
+    /// - **Temperature**: More predictable control over randomness
+    ///
+    /// - Important: Use either temperature OR topP, not both
+    /// - Tip: topP often produces more coherent creative text
     public let topP: Double?
     
     /// A unique identifier representing your end-user.
@@ -222,9 +557,46 @@ public struct ChatCompletionRequest: Codable, Sendable {
     
     /// Creates a new chat completion request.
     ///
+    /// Most parameters are optional with sensible defaults, allowing you to start simple
+    /// and add complexity as needed.
+    ///
+    /// ## Common Patterns
+    ///
+    /// ```swift
+    /// // Simple request
+    /// ChatCompletionRequest(
+    ///     messages: [ChatMessage(role: .user, content: "Hello")],
+    ///     model: Models.Chat.gpt4o
+    /// )
+    ///
+    /// // Conversational with control
+    /// ChatCompletionRequest(
+    ///     messages: messages,
+    ///     model: Models.Chat.gpt4o,
+    ///     temperature: 0.7,
+    ///     maxTokens: 1000,
+    ///     user: "user123"
+    /// )
+    ///
+    /// // With tools
+    /// ChatCompletionRequest(
+    ///     messages: messages,
+    ///     model: Models.Chat.gpt4o,
+    ///     tools: [weatherTool, calculatorTool],
+    ///     toolChoice: .auto
+    /// )
+    ///
+    /// // JSON mode
+    /// ChatCompletionRequest(
+    ///     messages: messages,
+    ///     model: Models.Chat.gpt4o,
+    ///     responseFormat: ResponseFormat(type: .jsonObject)
+    /// )
+    /// ```
+    ///
     /// - Parameters:
-    ///   - messages: The conversation history as an array of ``ChatMessage`` objects
-    ///   - model: The model ID to use (e.g., "gpt-4", "gpt-3.5-turbo")
+    ///   - messages: The conversation history
+    ///   - model: The model to use (e.g., "gpt-4o", "gpt-3.5-turbo")
     ///   - audio: Audio configuration for input/output
     ///   - frequencyPenalty: Penalty for token frequency (-2.0 to 2.0)
     ///   - functionCall: Deprecated. Use `tools` instead
@@ -323,40 +695,76 @@ public struct ChatCompletionRequest: Codable, Sendable {
 
 /// A message in a chat conversation.
 ///
-/// Chat messages represent the building blocks of a conversation with the model. Each message
-/// has a role that determines who is speaking and content that contains what was said.
+/// `ChatMessage` represents a single turn in a conversation. Messages form the context that
+/// guides the model's behavior and responses. Each message has a role identifying the speaker
+/// and content containing what was communicated.
 ///
-/// ## Example
+/// ## Message Types
+///
+/// ### System Messages
+/// Set the assistant's behavior and personality:
 /// ```swift
-/// // Simple text message
-/// let userMessage = ChatMessage(role: .user, content: "Hello!")
-/// 
-/// // Message with image
-/// let imageMessage = ChatMessage(
-///     role: .user,
-///     content: .parts([
-///         MessagePart(type: .text, text: "What's in this image?"),
-///         MessagePart(type: .imageUrl, imageUrl: ImageURL(url: "https://example.com/image.jpg"))
-///     ])
+/// ChatMessage(
+///     role: .system,
+///     content: "You are a helpful coding assistant who writes clear, efficient Swift code."
 /// )
-/// 
-/// // Tool response message
-/// let toolMessage = ChatMessage(
+/// ```
+///
+/// ### User Messages
+/// Input from the human user:
+/// ```swift
+/// ChatMessage(role: .user, content: "How do I sort an array in Swift?")
+/// ```
+///
+/// ### Assistant Messages
+/// The model's responses:
+/// ```swift
+/// ChatMessage(
+///     role: .assistant,
+///     content: "You can sort an array using the `sorted()` method..."
+/// )
+/// ```
+///
+/// ### Tool Messages
+/// Results from function calls:
+/// ```swift
+/// ChatMessage(
 ///     role: .tool,
-///     content: "The weather is sunny and 72°F",
-///     toolCallId: "call_123"
+///     content: "Temperature: 72°F, Conditions: Sunny",
+///     toolCallId: "call_abc123"
+/// )
+/// ```
+///
+/// ## Multimodal Messages
+///
+/// Messages can include images for vision-capable models:
+/// ```swift
+/// ChatMessage(
+///     role: .user,
+///     content: [
+///         .text("What's in this image?"),
+///         .imageURL(ChatImageURL(
+///             url: "https://example.com/photo.jpg",
+///             detail: .high
+///         ))
+///     ]
 /// )
 /// ```
 ///
 /// ## Topics
-/// ### Message Components
+///
+/// ### Core Properties
 /// - ``role``
 /// - ``content``
 /// - ``name``
 ///
-/// ### Tool Integration
+/// ### Tool Integration  
 /// - ``toolCalls``
 /// - ``toolCallId``
+///
+/// ### Message Types
+/// - ``ChatRole``
+/// - ``MessageContent``
 public struct ChatMessage: Codable, Sendable {
     /// The role of the message author.
     ///
@@ -380,14 +788,59 @@ public struct ChatMessage: Codable, Sendable {
     
     /// Tool calls made by the assistant.
     ///
-    /// When the assistant decides to use tools, this array contains the details of which
-    /// tools to call and with what arguments.
+    /// When the model decides to use available tools, this array contains the specific
+    /// function calls to make. Each tool call includes:
+    /// - Unique ID for tracking the call
+    /// - Function name to invoke
+    /// - Arguments as a JSON string
+    ///
+    /// ## Example
+    ///
+    /// ```swift
+    /// // Assistant message with tool calls
+    /// ChatMessage(
+    ///     role: .assistant,
+    ///     content: nil,  // Often nil when calling tools
+    ///     toolCalls: [
+    ///         ToolCall(
+    ///             id: "call_abc123",
+    ///             type: .function,
+    ///             function: FunctionCall(
+    ///                 name: "get_weather",
+    ///                 arguments: "{\"location\": \"Tokyo\", \"unit\": \"celsius\"}"
+    ///             )
+    ///         )
+    ///     ]
+    /// )
+    /// ```
+    ///
+    /// - Note: After receiving tool calls, you must execute them and send results back
     public let toolCalls: [ToolCall]?
     
     /// The ID of the tool call this message is responding to.
     ///
-    /// Required when `role` is `.tool`, this links the tool's response back to the
-    /// assistant's original tool call request.
+    /// Required when role is `.tool`. This ID must match the ID from the assistant's
+    /// original tool call, maintaining the conversation flow.
+    ///
+    /// ## Example Flow
+    ///
+    /// ```swift
+    /// // 1. User asks a question
+    /// ChatMessage(role: .user, content: "What's the weather in Tokyo?")
+    ///
+    /// // 2. Assistant calls a tool
+    /// ChatMessage(
+    ///     role: .assistant,
+    ///     toolCalls: [ToolCall(id: "call_123", ...)]
+    /// )
+    ///
+    /// // 3. Tool response (this property)
+    /// ChatMessage(
+    ///     role: .tool,
+    ///     content: "72°F and sunny",
+    ///     toolCallId: "call_123"  // Must match the ID above
+    /// )
+    /// ```
     public let toolCallId: String?
     
     /// Creates a new chat message with full configuration options.
@@ -449,22 +902,66 @@ public struct ChatMessage: Codable, Sendable {
 
 /// The role of a message author in a chat conversation.
 ///
-/// Each role has specific purposes and behaviors in the conversation flow:
+/// Roles define who is speaking in the conversation and how the model should interpret
+/// each message. The role system enables structured conversations with clear context.
 ///
-/// ## Usage
+/// ## Role Behaviors
+///
+/// Each role serves a specific purpose:
+/// - **System**: Persistent instructions (usually first message)
+/// - **User**: Human input driving the conversation
+/// - **Assistant**: Model's responses and reasoning
+/// - **Tool**: External data and function results
+///
+/// ## Conversation Flow
+///
 /// ```swift
-/// let messages = [
-///     ChatMessage(role: .system, content: "You are a helpful coding assistant."),
-///     ChatMessage(role: .user, content: "How do I sort an array in Swift?"),
-///     ChatMessage(role: .assistant, content: "You can use the `sorted()` method..."),
-///     ChatMessage(role: .tool, content: "Code executed successfully.")
+/// let conversation = [
+///     // 1. Set behavior
+///     ChatMessage(role: .system, content: "You are a Swift expert."),
+///     
+///     // 2. User question
+///     ChatMessage(role: .user, content: "How do I handle errors?"),
+///     
+///     // 3. Assistant response
+///     ChatMessage(role: .assistant, content: "Use do-catch blocks..."),
+///     
+///     // 4. Follow-up
+///     ChatMessage(role: .user, content: "Show me an example"),
+///     
+///     // 5. Assistant with code
+///     ChatMessage(role: .assistant, content: "```swift\ndo {\n...") 
 /// ]
 /// ```
 public enum ChatRole: String, Codable, Sendable {
     /// System message that sets the assistant's behavior.
     ///
-    /// System messages are typically placed at the beginning of a conversation to provide
-    /// instructions, set the tone, or define the assistant's persona.
+    /// System messages provide persistent instructions that guide the assistant throughout
+    /// the conversation. They're typically the first message but can appear anywhere.
+    ///
+    /// ## Best Practices
+    ///
+    /// - Be specific and clear about desired behavior
+    /// - Include any constraints or guidelines
+    /// - Define the assistant's expertise or persona
+    /// - Specify output format preferences
+    ///
+    /// ## Examples
+    ///
+    /// ```swift
+    /// // General assistant
+    /// "You are a helpful, harmless, and honest assistant."
+    ///
+    /// // Expert system
+    /// "You are a senior iOS developer with 10 years of Swift experience.
+    ///  Provide code examples using the latest Swift features and best practices."
+    ///
+    /// // Specific format
+    /// "You are a technical writer. Always structure responses with:
+    ///  1. Brief summary
+    ///  2. Detailed explanation
+    ///  3. Code example if applicable"
+    /// ```
     case system
     
     /// Message from the human user.
@@ -475,29 +972,134 @@ public enum ChatRole: String, Codable, Sendable {
     
     /// Message from the AI assistant.
     ///
-    /// Assistant messages contain the model's responses, including text replies and tool calls.
+    /// Assistant messages contain the model's responses. They can include:
+    /// - Text responses to user queries
+    /// - Tool/function calls for extended capabilities
+    /// - Multimodal content in supported models
+    ///
+    /// ## Message Patterns
+    ///
+    /// ```swift
+    /// // Text response
+    /// ChatMessage(
+    ///     role: .assistant,
+    ///     content: "Here's how to solve that problem..."
+    /// )
+    ///
+    /// // Tool call (content often nil)
+    /// ChatMessage(
+    ///     role: .assistant,
+    ///     content: nil,
+    ///     toolCalls: [weatherToolCall]
+    /// )
+    ///
+    /// // Combined response
+    /// ChatMessage(
+    ///     role: .assistant,
+    ///     content: "I'll check the weather for you.",
+    ///     toolCalls: [weatherToolCall]
+    /// )
+    /// ```
     case assistant
     
     /// Message containing results from a tool or function call.
     ///
-    /// Tool messages provide the output from functions called by the assistant, allowing
-    /// the model to use external capabilities and information.
+    /// Tool messages provide results from external functions, enabling the assistant to:
+    /// - Access real-time data (weather, news, prices)
+    /// - Perform calculations or data processing
+    /// - Interact with external systems
+    /// - Retrieve specific information
+    ///
+    /// ## Requirements
+    ///
+    /// - Must include `toolCallId` matching the assistant's call
+    /// - Should contain the result in the `content` field
+    /// - Appears after the assistant's tool call message
+    ///
+    /// ## Example
+    ///
+    /// ```swift
+    /// // Complete tool interaction flow
+    /// let messages = [
+    ///     // User asks
+    ///     ChatMessage(role: .user, content: "Calculate 15% tip on $84"),
+    ///     
+    ///     // Assistant calls tool
+    ///     ChatMessage(
+    ///         role: .assistant,
+    ///         toolCalls: [calculatorCall]
+    ///     ),
+    ///     
+    ///     // Tool responds
+    ///     ChatMessage(
+    ///         role: .tool,
+    ///         content: "$12.60",
+    ///         toolCallId: "call_calc_123"
+    ///     ),
+    ///     
+    ///     // Assistant uses result
+    ///     ChatMessage(
+    ///         role: .assistant,
+    ///         content: "The 15% tip on $84 is $12.60, making your total $96.60."
+    ///     )
+    /// ]
+    /// ```
     case tool
 }
 
 /// The content of a chat message.
 ///
-/// Message content can be either simple text or a collection of multimodal parts including
-/// text and images. This flexibility allows for rich interactions with vision-capable models.
+/// `MessageContent` provides flexibility in message formatting, supporting both simple text
+/// and complex multimodal content. This enables rich interactions including vision capabilities,
+/// structured data, and mixed media.
 ///
-/// ## Examples
+/// ## Content Types
+///
+/// ### Text Content
+/// Simple string for text-only messages:
 /// ```swift
-/// // Simple text content
-/// let textContent: MessageContent = .string("Hello, how can I help?")
-/// 
-/// // Multimodal content with text and image
-/// let multimodalContent: MessageContent = .parts([
-///     MessagePart(type: .text, text: "What's in this image?"),
+/// let content: MessageContent = .string("Hello, how can I help you today?")
+/// ```
+///
+/// ### Multimodal Content
+/// Array of parts for complex messages:
+/// ```swift
+/// let content: MessageContent = .array([
+///     .text("Analyze this chart:"),
+///     .imageURL(ChatImageURL(
+///         url: "https://example.com/chart.png",
+///         detail: .high
+///     )),
+///     .text("What trends do you see?")
+/// ])
+/// ```
+///
+/// ## Usage Examples
+///
+/// ```swift
+/// // Simple text message
+/// ChatMessage(role: .user, content: "What is Swift?")
+///
+/// // Image analysis
+/// ChatMessage(
+///     role: .user,
+///     content: [
+///         .text("What's in this image?"),
+///         .imageURL(ChatImageURL(url: imageURL))
+///     ]
+/// )
+///
+/// // Multiple images
+/// ChatMessage(
+///     role: .user,  
+///     content: [
+///         .text("Compare these designs:"),
+///         .imageURL(ChatImageURL(url: design1URL)),
+///         .imageURL(ChatImageURL(url: design2URL)),
+///         .text("Which is more user-friendly?")
+///     ]
+/// )
+/// ```
 ///     MessagePart(type: .imageUrl, imageUrl: ImageURL(url: "https://example.com/photo.jpg"))
 /// ])
 /// ```
@@ -657,76 +1259,239 @@ public enum ImageDetail: String, Codable, Sendable {
 
 /// The response from a chat completion request.
 ///
-/// Contains the model's response along with metadata about the generation process.
-/// When `n` > 1 in the request, multiple choices will be returned.
+/// `ChatCompletionResponse` contains the model's generated response along with comprehensive
+/// metadata about the generation process. This includes token usage for cost tracking,
+/// finish reasons for understanding completion behavior, and system information for debugging.
 ///
-/// ## Example
+/// ## Overview
+///
+/// Every chat completion returns this structured response, whether you're having a simple
+/// conversation, calling functions, or generating multiple alternatives.
+///
+/// ## Basic Usage
+///
 /// ```swift
-/// // Handling a chat completion response
-/// let response: ChatCompletionResponse = try await openAI.chat(request)
+/// // Standard response handling
+/// let response = try await openAI.chat.completions(request)
 /// 
-/// if let firstChoice = response.choices.first {
-///     print("Assistant: \(firstChoice.message.content)")
-///     print("Tokens used: \(response.usage?.totalTokens ?? 0)")
+/// // Extract the message
+/// if let message = response.choices.first?.message {
+///     print("Role: \(message.role)")
+///     print("Content: \(message.content ?? "")")
+///     
+///     // Handle tool calls
+///     if let toolCalls = message.toolCalls {
+///         for call in toolCalls {
+///             print("Calling function: \(call.function.name)")
+///         }
+///     }
+/// }
+///
+/// // Check completion status
+/// if let finishReason = response.choices.first?.finishReason {
+///     switch finishReason {
+///     case .stop:
+///         print("Completed normally")
+///     case .length:
+///         print("Hit token limit")
+///     case .toolCalls:
+///         print("Calling functions")
+///     case .contentFilter:
+///         print("Content filtered")
+///     }
+/// }
+///
+/// // Monitor costs
+/// if let usage = response.usage {
+///     let cost = calculateCost(usage, model: response.model)
+///     print("Request cost: $\(cost)")
+/// }
+/// ```
+///
+/// ## Multiple Choices
+///
+/// When requesting multiple completions with `n > 1`:
+///
+/// ```swift
+/// let request = ChatCompletionRequest(
+///     messages: messages,
+///     model: model,
+///     n: 3  // Generate 3 alternatives
+/// )
+///
+/// let response = try await openAI.chat.completions(request)
+///
+/// // Process all alternatives
+/// for (index, choice) in response.choices.enumerated() {
+///     print("Alternative \(index + 1): \(choice.message.content ?? "")")
 /// }
 /// ```
 ///
 /// ## Topics
-/// ### Response Data
-/// - ``id``
-/// - ``model``
+///
+/// ### Response Content
 /// - ``choices``
+/// - ``ChatChoice``
+/// - ``FinishReason``
 ///
 /// ### Metadata
-/// - ``usage``
-/// - ``systemFingerprint``
+/// - ``id``
+/// - ``model``
 /// - ``created``
+/// - ``systemFingerprint``
+///
+/// ### Usage Tracking
+/// - ``usage``
+/// - ``Usage``
 public struct ChatCompletionResponse: Codable, Sendable {
     /// Unique identifier for this completion.
+    ///
+    /// Format: `chatcmpl-{unique-id}`
+    ///
+    /// Use this ID to:
+    /// - Track specific completions in logs
+    /// - Reference completions in support requests
+    /// - Implement idempotency checks
     public let id: String
     
     /// Object type, always "chat.completion".
     public let object: String
     
     /// Unix timestamp (in seconds) when the completion was created.
+    ///
+    /// Convert to Date:
+    /// ```swift
+    /// let date = Date(timeIntervalSince1970: TimeInterval(response.created))
+    /// print("Generated at: \(date)")
+    /// ```
     public let created: Int
     
     /// The model used for this completion.
     ///
-    /// May differ from the requested model if a fallback occurred.
+    /// This may differ from the requested model in cases where:
+    /// - A model alias was used (e.g., "gpt-4" -> "gpt-4-0613")
+    /// - A fallback occurred due to availability
+    /// - The model was updated to a newer version
+    ///
+    /// Always check this field for accurate billing and capability information.
     public let model: String
     
     /// The list of completion choices.
     ///
     /// Contains one or more responses based on the `n` parameter in the request.
     /// Each choice represents a different completion for the same prompt.
+    ///
+    /// ## Single Response (Default)
+    /// ```swift
+    /// let message = response.choices.first?.message
+    /// ```
+    ///
+    /// ## Multiple Alternatives
+    /// ```swift
+    /// // When n > 1 in request
+    /// let bestChoice = response.choices.max { choice1, choice2 in
+    ///     scoreResponse(choice1) < scoreResponse(choice2)
+    /// }
+    /// ```
+    ///
+    /// - Note: Choices are ordered by index, not quality
     public let choices: [ChatChoice]
     
     /// Token usage statistics for this completion.
     ///
-    /// Provides detailed information about token consumption for billing
-    /// and optimization purposes.
+    /// Essential for cost tracking and optimization. Includes:
+    /// - Prompt tokens (input)
+    /// - Completion tokens (output)
+    /// - Total tokens (sum)
+    /// - Detailed breakdowns for special features
+    ///
+    /// ## Cost Calculation Example
+    /// ```swift
+    /// func calculateCost(_ usage: Usage, model: String) -> Double {
+    ///     let rates = [
+    ///         "gpt-4o": (input: 0.005, output: 0.015),
+    ///         "gpt-4o-mini": (input: 0.00015, output: 0.0006)
+    ///     ]
+    ///     
+    ///     guard let rate = rates[model] else { return 0 }
+    ///     
+    ///     let inputCost = Double(usage.promptTokens) / 1_000_000 * rate.input
+    ///     let outputCost = Double(usage.completionTokens) / 1_000_000 * rate.output
+    ///     
+    ///     return inputCost + outputCost
+    /// }
+    /// ```
     public let usage: Usage?
     
     /// System fingerprint for this completion.
     ///
-    /// Represents the backend configuration used. Useful for debugging
-    /// and ensuring reproducibility.
+    /// Represents the exact backend configuration used. This includes:
+    /// - Model version
+    /// - System prompts
+    /// - Feature flags
+    ///
+    /// Use for:
+    /// - Debugging inconsistent responses
+    /// - Ensuring reproducibility
+    /// - Tracking system changes
+    ///
+    /// Format: `fp_{hash}`
     public let systemFingerprint: String?
 }
 
 /// A single completion choice from the model.
 ///
-/// Each choice represents one possible response to the prompt. When using `n` > 1
-/// in the request, multiple choices provide alternative completions.
+/// Each `ChatChoice` represents one possible response to your prompt. When generating
+/// multiple alternatives with `n > 1`, each choice provides a different completion
+/// that you can evaluate and select from.
 ///
-/// ## Example
+/// ## Basic Usage
+///
 /// ```swift
+/// // Single choice (most common)
+/// let choice = response.choices.first!
+/// let content = choice.message.content ?? ""
+/// 
+/// // Check why it stopped
+/// switch choice.finishReason {
+/// case .stop:
+///     // Normal completion
+/// case .length:
+///     // Hit token limit - response may be incomplete
+/// case .toolCalls:
+///     // Execute the requested functions
+/// case .contentFilter:
+///     // Content was filtered
+/// default:
+///     break
+/// }
+/// ```
+///
+/// ## Multiple Choices
+///
+/// ```swift
+/// // Evaluate multiple alternatives
 /// for choice in response.choices {
-///     print("Choice \(choice.index): \(choice.message.content)")
+///     print("\n--- Alternative \(choice.index + 1) ---")
+///     print(choice.message.content ?? "")
 ///     
-///     if let reason = choice.finishReason {
-///         print("Stopped because: \(reason)")
+///     // Score based on your criteria
+///     let score = evaluateResponse(choice.message)
+///     print("Quality score: \(score)")
+/// }
+/// ```
+///
+/// ## Tool Calls
+///
+/// ```swift
+/// if choice.finishReason == .toolCalls,
+///    let toolCalls = choice.message.toolCalls {
+///     for call in toolCalls {
+///         let result = try await executeFunction(
+///             name: call.function.name,
+///             arguments: call.function.arguments
+///         )
+///         // Send result back in conversation
 ///     }
 /// }
 /// ```
@@ -743,7 +1508,28 @@ public struct ChatChoice: Codable, Sendable {
     
     /// The reason the model stopped generating.
     ///
-    /// Helps understand whether the completion ended naturally or due to constraints.
+    /// Critical for understanding completion behavior:
+    /// - `.stop`: Natural ending (complete response)
+    /// - `.length`: Token limit reached (may be cut off)
+    /// - `.toolCalls`: Model wants to call functions
+    /// - `.contentFilter`: Content policy triggered
+    ///
+    /// ## Handling Different Reasons
+    ///
+    /// ```swift
+    /// switch finishReason {
+    /// case .stop:
+    ///     // Response is complete
+    /// case .length:
+    ///     // Consider increasing maxTokens or continuing
+    /// case .toolCalls:
+    ///     // Process function calls
+    /// case .contentFilter:
+    ///     // Handle filtered content
+    /// case .none:
+    ///     // Still generating (streaming)
+    /// }
+    /// ```
     public let finishReason: FinishReason?
     
     /// Log probability information.
@@ -754,51 +1540,158 @@ public struct ChatChoice: Codable, Sendable {
 
 /// The reason why the model stopped generating tokens.
 ///
-/// Understanding finish reasons helps handle different completion scenarios appropriately.
+/// `FinishReason` indicates why the model stopped generating, which is crucial for
+/// proper response handling and user experience.
+///
+/// ## Decision Flow
+///
+/// ```swift
+/// func handleCompletion(_ choice: ChatChoice) {
+///     switch choice.finishReason {
+///     case .stop:
+///         // Normal completion - display to user
+///         showResponse(choice.message)
+///         
+///     case .length:
+///         // Incomplete - warn user or continue
+///         showResponse(choice.message)
+///         showWarning("Response was truncated due to length")
+///         
+///     case .toolCalls:
+///         // Execute functions
+///         processFunctionCalls(choice.message.toolCalls)
+///         
+///     case .contentFilter:
+///         // Content filtered
+///         showError("Content was filtered for policy compliance")
+///         
+///     case .none:
+///         // Should not happen in non-streaming
+///         break
+///     }
+/// }
+/// ```
 public enum FinishReason: String, Codable, Sendable {
     /// Natural end of message.
     ///
-    /// The model completed its response naturally.
+    /// The model completed its response naturally. This is the ideal
+    /// finish reason, indicating a complete, uninterrupted response.
     case stop
     
     /// Maximum token limit reached.
     ///
-    /// The response was cut off due to reaching `maxTokens` or model limits.
+    /// The response was truncated due to token limits. This can happen when:
+    /// - `maxTokens` parameter is too low
+    /// - Combined prompt + response exceeds model's context window
+    /// - `maxCompletionTokens` limit is reached
+    ///
+    /// Consider:
+    /// - Increasing token limits
+    /// - Shortening the prompt
+    /// - Using a model with larger context window
     case length
     
     /// Model decided to call tools.
     ///
-    /// The response includes tool calls that need to be executed.
+    /// The model is requesting to use one or more tools/functions.
+    /// Check `message.toolCalls` for the specific calls to execute.
+    ///
+    /// Next steps:
+    /// 1. Execute each requested function
+    /// 2. Send results back as tool messages
+    /// 3. Continue the conversation
     case toolCalls = "tool_calls"
     
     /// Content was filtered.
     ///
-    /// The response was blocked or modified due to content filtering policies.
+    /// The response violated content policy and was blocked. This can occur for:
+    /// - Harmful or inappropriate content
+    /// - Policy violations
+    /// - Safety concerns
+    ///
+    /// Handle gracefully by:
+    /// - Informing the user
+    /// - Rephrasing the request
+    /// - Adjusting system prompts
     case contentFilter = "content_filter"
 }
 
 /// Token usage statistics for a completion.
 ///
-/// Provides detailed breakdown of token consumption, useful for cost tracking
-/// and optimization. All token counts include both text and special tokens.
+/// `Usage` provides comprehensive token consumption data essential for cost management,
+/// optimization, and understanding model behavior. All counts include special tokens
+/// (formatting, function calls, etc.).
 ///
-/// ## Example
+/// ## Token Economics
+///
 /// ```swift
+/// extension Usage {
+///     func estimatedCost(for model: String) -> Double {
+///         let pricing: [String: (input: Double, output: Double)] = [
+///             "gpt-4o": (0.005, 0.015),           // per 1K tokens
+///             "gpt-4o-mini": (0.00015, 0.0006),
+///             "gpt-3.5-turbo": (0.0005, 0.0015)
+///         ]
+///         
+///         guard let rate = pricing[model] else { return 0 }
+///         
+///         let inputCost = Double(promptTokens) / 1000 * rate.input
+///         let outputCost = Double(completionTokens) / 1000 * rate.output
+///         
+///         return inputCost + outputCost
+///     }
+///     
+///     var efficiency: Double {
+///         // Ratio of output to input tokens
+///         return Double(completionTokens) / Double(promptTokens)
+///     }
+/// }
+/// ```
+///
+/// ## Optimization Strategies
+///
+/// ```swift
+/// // Monitor token usage trends
+/// var totalTokensUsed = 0
+/// var totalCost = 0.0
+///
 /// if let usage = response.usage {
-///     print("Prompt tokens: \(usage.promptTokens)")
-///     print("Completion tokens: \(usage.completionTokens)")
-///     print("Total cost: \(usage.totalTokens) tokens")
+///     totalTokensUsed += usage.totalTokens
+///     totalCost += usage.estimatedCost(for: response.model)
+///     
+///     // Alert if exceeding budget
+///     if totalCost > dailyBudget {
+///         print("Daily budget exceeded!")
+///     }
+///     
+///     // Optimize if inefficient
+///     if usage.efficiency < 0.5 {
+///         print("Consider shorter prompts")
+///     }
 /// }
 /// ```
 public struct Usage: Codable, Sendable {
     /// Number of tokens in the prompt.
     ///
-    /// Includes all messages, system prompts, and formatting tokens.
+    /// Includes:
+    /// - All messages in the conversation
+    /// - System prompts
+    /// - Function definitions
+    /// - Formatting tokens
+    /// - Special tokens
+    ///
+    /// This is what you're charged for input.
     public let promptTokens: Int
     
     /// Number of tokens in the completion.
     ///
-    /// The tokens generated by the model in its response.
+    /// The tokens generated by the model, including:
+    /// - Response text
+    /// - Function call syntax
+    /// - Formatting tokens
+    /// - Stop sequences
+    ///
+    /// This is what you're charged for output (typically 2-3x input rate).
     public let completionTokens: Int
     
     /// Total tokens used (prompt + completion).
@@ -860,20 +1753,71 @@ public struct PromptTokensDetails: Codable, Sendable {
 
 /// A chunk of data from a streaming chat completion.
 ///
-/// When streaming is enabled, the response is sent as a series of chunks via
-/// server-sent events. Each chunk contains incremental updates to the completion.
+/// `ChatStreamChunk` represents a single piece of a streaming response. When streaming
+/// is enabled, responses arrive as a series of Server-Sent Events (SSE), each containing
+/// incremental updates that build the complete response.
 ///
-/// ## Example
+/// ## Stream Processing
+///
 /// ```swift
-/// // Processing streaming responses
-/// for try await chunk in stream {
+/// // Basic streaming
+/// var completeResponse = ""
+/// 
+/// for try await chunk in openAI.chat.completionsStream(request) {
+///     // Process text content
 ///     if let content = chunk.choices.first?.delta.content {
-///         print(content, terminator: "")
+///         completeResponse += content
+///         print(content, terminator: "")  // Real-time output
+///     }
+///     
+///     // Check if finished
+///     if let finishReason = chunk.choices.first?.finishReason {
+///         print("\n\nFinished: \(finishReason)")
+///     }
+///     
+///     // Final chunk includes usage
+///     if let usage = chunk.usage {
+///         print("Total tokens: \(usage.totalTokens)")
+///     }
+/// }
+/// ```
+///
+/// ## Advanced Stream Handling
+///
+/// ```swift
+/// class StreamProcessor {
+///     var messages: [String] = []
+///     var toolCalls: [String: ToolCall] = [:]
+///     
+///     func process(_ chunk: ChatStreamChunk) {
+///         for choice in chunk.choices {
+///             // Accumulate content
+///             if let content = choice.delta.content {
+///                 if messages.count <= choice.index {
+///                     messages.append("")
+///                 }
+///                 messages[choice.index] += content
+///             }
+///             
+///             // Merge tool calls
+///             if let calls = choice.delta.toolCalls {
+///                 for call in calls {
+///                     if var existing = toolCalls[call.id] {
+///                         // Merge partial call
+///                         existing.function.arguments += call.function.arguments
+///                         toolCalls[call.id] = existing
+///                     } else {
+///                         toolCalls[call.id] = call
+///                     }
+///                 }
+///             }
+///         }
 ///     }
 /// }
 /// ```
 ///
 /// ## Topics
+///
 /// ### Stream Data
 /// - ``choices``
 /// - ``ChatStreamChoice``
@@ -882,7 +1826,9 @@ public struct PromptTokensDetails: Codable, Sendable {
 /// ### Metadata
 /// - ``id``
 /// - ``model``
+/// - ``created``
 /// - ``usage``
+/// - ``systemFingerprint``
 public struct ChatStreamChunk: Codable, Sendable {
     /// Unique identifier for this completion stream.
     public let id: String
@@ -934,20 +1880,87 @@ public struct ChatStreamChoice: Codable, Sendable {
 
 /// Incremental updates in a streaming response.
 ///
-/// Contains partial content that should be appended to previously received content
-/// to build the complete response.
+/// `ChatDelta` contains partial content that arrives incrementally during streaming.
+/// These deltas must be accumulated to reconstruct the complete message.
 ///
-/// ## Example
+/// ## Delta Types
+///
+/// ### Text Content
+/// Arrives character by character or in small chunks:
 /// ```swift
-/// var fullContent = ""
-/// var toolCalls = [ToolCall]()
-/// 
-/// for chunk in chunks {
-///     if let content = chunk.delta.content {
-///         fullContent += content
+/// // Accumulate text
+/// var fullText = ""
+/// if let content = delta.content {
+///     fullText += content
+/// }
+/// ```
+///
+/// ### Tool Calls
+/// May arrive across multiple chunks:
+/// ```swift
+/// // First chunk: function name and start of arguments
+/// {
+///   "toolCalls": [{
+///     "id": "call_abc",
+///     "type": "function",
+///     "function": {
+///       "name": "get_weather",
+///       "arguments": "{\"loc"
 ///     }
-///     if let calls = chunk.delta.toolCalls {
-///         // Merge or append tool calls
+///   }]
+/// }
+///
+/// // Second chunk: rest of arguments
+/// {
+///   "toolCalls": [{
+///     "id": "call_abc",
+///     "function": {
+///       "arguments": "ation\": \"Tokyo\"}"
+///     }
+///   }]
+/// }
+/// ```
+///
+/// ## Complete Example
+///
+/// ```swift
+/// class MessageBuilder {
+///     var role: ChatRole?
+///     var content = ""
+///     var toolCalls: [String: ToolCall] = [:]
+///     
+///     func addDelta(_ delta: ChatDelta) {
+///         // Set role once
+///         if let deltaRole = delta.role {
+///             role = deltaRole
+///         }
+///         
+///         // Append content
+///         if let deltaContent = delta.content {
+///             content += deltaContent
+///         }
+///         
+///         // Merge tool calls
+///         if let deltaCalls = delta.toolCalls {
+///             for call in deltaCalls {
+///                 if var existing = toolCalls[call.id] {
+///                     // Merge arguments
+///                     existing.function.arguments += call.function.arguments
+///                     toolCalls[call.id] = existing
+///                 } else {
+///                     // New tool call
+///                     toolCalls[call.id] = call
+///                 }
+///             }
+///         }
+///     }
+///     
+///     func buildMessage() -> ChatMessage {
+///         ChatMessage(
+///             role: role ?? .assistant,
+///             content: content.isEmpty ? nil : content,
+///             toolCalls: toolCalls.isEmpty ? nil : Array(toolCalls.values)
+///         )
 ///     }
 /// }
 /// ```
