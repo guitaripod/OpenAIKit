@@ -384,6 +384,44 @@ public struct ImageGenerationRequest: Codable, Sendable {
         self.style = style
         self.user = user
     }
+    
+    private enum CodingKeys: String, CodingKey {
+        case prompt
+        case background
+        case model
+        case moderation
+        case n
+        case outputCompression = "output_compression"
+        case outputFormat = "output_format"
+        case quality
+        case responseFormat = "response_format"
+        case size
+        case style
+        case user
+    }
+    
+    /// Custom encoding to handle gpt-image-1 specific requirements
+    public func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+        
+        try container.encode(prompt, forKey: .prompt)
+        try container.encodeIfPresent(background, forKey: .background)
+        try container.encodeIfPresent(model, forKey: .model)
+        try container.encodeIfPresent(moderation, forKey: .moderation)
+        try container.encodeIfPresent(n, forKey: .n)
+        try container.encodeIfPresent(outputCompression, forKey: .outputCompression)
+        try container.encodeIfPresent(outputFormat, forKey: .outputFormat)
+        try container.encodeIfPresent(quality, forKey: .quality)
+        
+        // Only encode responseFormat if the model is not gpt-image-1
+        if model != "gpt-image-1" {
+            try container.encodeIfPresent(responseFormat, forKey: .responseFormat)
+        }
+        
+        try container.encodeIfPresent(size, forKey: .size)
+        try container.encodeIfPresent(style, forKey: .style)
+        try container.encodeIfPresent(user, forKey: .user)
+    }
 }
 
 /// The format in which generated images are returned.
@@ -851,5 +889,18 @@ public struct ImageUsage: Codable, Sendable {
         
         /// Tokens used for image input.
         public let imageTokens: Int?
+        
+        private enum CodingKeys: String, CodingKey {
+            case textTokens = "text_tokens"
+            case imageTokens = "image_tokens"
+        }
+    }
+    
+    private enum CodingKeys: String, CodingKey {
+        case totalTokens = "total_tokens"
+        case inputTokens = "input_tokens"
+        case outputTokens = "output_tokens"
+        case inputTokensDetails = "input_tokens_details"
+        case promptTokens = "prompt_tokens"
     }
 }
