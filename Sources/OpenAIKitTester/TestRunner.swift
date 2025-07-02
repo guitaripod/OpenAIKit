@@ -36,6 +36,8 @@ struct TestRunner {
             await FileTests().runAll(openAI: openAI)
         case "images":
             await ImageTests().runAll(openAI: openAI)
+        case "gpt-image-1":
+            await ImageTests().runGptImage1ComprehensiveTest(openAI: openAI)
         case "edge-cases":
             await EdgeCaseTests().testEdgeCases(openAI: openAI)
         case "error-handling":
@@ -77,6 +79,7 @@ struct TestRunner {
           models           Test listing models
           files            Test files API
           images           Test image generation
+          gpt-image-1      Test gpt-image-1 comprehensive features
           edge-cases       Test edge cases and corner scenarios
           error-handling   Test error handling
           advanced         Test advanced features

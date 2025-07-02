@@ -180,5 +180,70 @@ struct ImageTests {
         } catch {
             print("  ❌ gpt-image-1 transparent generation failed: \(error)")
         }
+        
+        // Test gpt-image-1 response fields
+        print("\n  Testing gpt-image-1 response fields...")
+        do {
+            let request = ImageGenerationRequest(
+                prompt: "A simple test image",
+                background: "opaque",
+                model: Models.Images.gptImage1,
+                moderation: "auto",
+                n: 1,
+                outputCompression: 85,
+                outputFormat: "jpeg",
+                quality: "medium",
+                size: "1024x1024"
+            )
+            
+            let response = try await openAI.images.generations(request)
+            
+            print("  ✅ gpt-image-1 response fields test successful!")
+            print("  Created: \(response.created)")
+            
+            // Check gpt-image-1 specific response fields
+            if let background = response.background {
+                print("  Response background: \(background)")
+            }
+            if let outputFormat = response.outputFormat {
+                print("  Response output format: \(outputFormat)")
+            }
+            if let quality = response.quality {
+                print("  Response quality: \(quality)")
+            }
+            if let size = response.size {
+                print("  Response size: \(size)")
+            }
+            
+            // Check image data
+            for (index, image) in response.data.enumerated() {
+                if let b64 = image.b64Json {
+                    print("  Image \(index + 1) base64 length: \(b64.count) characters")
+                    
+                    // Verify it's valid base64 by trying to decode
+                    if let data = Data(base64Encoded: b64) {
+                        print("  Image \(index + 1) decoded size: \(data.count) bytes")
+                    } else {
+                        print("  ⚠️  Image \(index + 1) has invalid base64 data")
+                    }
+                }
+            }
+            
+            // Check usage
+            if let usage = response.usage {
+                print("  Usage information available:")
+                if let total = usage.totalTokens {
+                    print("    Total tokens: \(total)")
+                }
+                if let input = usage.inputTokens {
+                    print("    Input tokens: \(input)")
+                }
+                if let output = usage.outputTokens {
+                    print("    Output tokens: \(output)")
+                }
+            }
+        } catch {
+            print("  ❌ gpt-image-1 response fields test failed: \(error)")
+        }
     }
 }

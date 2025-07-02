@@ -755,6 +755,30 @@ public struct ImageResponse: Codable, Sendable {
     ///
     /// Only present for certain models that track token usage.
     public let usage: ImageUsage?
+    
+    // MARK: - gpt-image-1 specific fields
+    
+    /// Background setting used for the image (gpt-image-1 only).
+    public let background: String?
+    
+    /// Output format of the generated image (gpt-image-1 only).
+    public let outputFormat: String?
+    
+    /// Quality level used for generation (gpt-image-1 only).
+    public let quality: String?
+    
+    /// Size of the generated image (gpt-image-1 only).
+    public let size: String?
+    
+    private enum CodingKeys: String, CodingKey {
+        case created
+        case data
+        case usage
+        case background
+        case outputFormat = "output_format"
+        case quality
+        case size
+    }
 }
 
 /// Represents a single generated, edited, or varied image.
