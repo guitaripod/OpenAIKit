@@ -819,16 +819,6 @@ public struct ImageResponse: Codable, Sendable {
     
     /// Size of the generated image (gpt-image-1 only).
     public let size: String?
-    
-    private enum CodingKeys: String, CodingKey {
-        case created
-        case data
-        case usage
-        case background
-        case outputFormat = "output_format"
-        case quality
-        case size
-    }
 }
 
 /// Represents a single generated, edited, or varied image.
@@ -864,12 +854,6 @@ public struct ImageObject: Codable, Sendable {
     /// DALL·E 3 may revise prompts for safety or clarity.
     /// This field shows the actual prompt used if it was modified.
     public let revisedPrompt: String?
-    
-    private enum CodingKeys: String, CodingKey {
-        case url
-        case b64Json = "b64_json"
-        case revisedPrompt = "revised_prompt"
-    }
 }
 
 /// Token usage information for image generation requests.
@@ -901,18 +885,5 @@ public struct ImageUsage: Codable, Sendable {
         
         /// Tokens used for image input.
         public let imageTokens: Int?
-        
-        private enum CodingKeys: String, CodingKey {
-            case textTokens = "text_tokens"
-            case imageTokens = "image_tokens"
-        }
-    }
-    
-    private enum CodingKeys: String, CodingKey {
-        case totalTokens = "total_tokens"
-        case inputTokens = "input_tokens"
-        case outputTokens = "output_tokens"
-        case inputTokensDetails = "input_tokens_details"
-        case promptTokens = "prompt_tokens"
     }
 }

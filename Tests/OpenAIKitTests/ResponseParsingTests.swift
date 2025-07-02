@@ -218,9 +218,9 @@ final class ResponseParsingTests: XCTestCase {
         """
         
         let data = json.data(using: .utf8)!
-        // Use a fresh decoder without snake case conversion for this test
-        // since ImageObject has explicit CodingKeys
+        // Use decoder with snake case conversion to match NetworkClient
         let imageDecoder = JSONDecoder()
+        imageDecoder.keyDecodingStrategy = .convertFromSnakeCase
         let response = try imageDecoder.decode(ImageResponse.self, from: data)
         
         XCTAssertEqual(response.created, 1677858242)
