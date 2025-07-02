@@ -405,22 +405,34 @@ public struct ImageGenerationRequest: Codable, Sendable {
         var container = encoder.container(keyedBy: CodingKeys.self)
         
         try container.encode(prompt, forKey: .prompt)
-        try container.encodeIfPresent(background, forKey: .background)
         try container.encodeIfPresent(model, forKey: .model)
-        try container.encodeIfPresent(moderation, forKey: .moderation)
         try container.encodeIfPresent(n, forKey: .n)
-        try container.encodeIfPresent(outputCompression, forKey: .outputCompression)
-        try container.encodeIfPresent(outputFormat, forKey: .outputFormat)
-        try container.encodeIfPresent(quality, forKey: .quality)
-        
-        // Only encode responseFormat if the model is not gpt-image-1
-        if model != "gpt-image-1" {
-            try container.encodeIfPresent(responseFormat, forKey: .responseFormat)
-        }
-        
         try container.encodeIfPresent(size, forKey: .size)
-        try container.encodeIfPresent(style, forKey: .style)
         try container.encodeIfPresent(user, forKey: .user)
+        
+        // Model-specific parameter handling
+        if model == "gpt-image-1" {
+            // gpt-image-1 specific parameters
+            try container.encodeIfPresent(background, forKey: .background)
+            try container.encodeIfPresent(moderation, forKey: .moderation)
+            try container.encodeIfPresent(outputCompression, forKey: .outputCompression)
+            try container.encodeIfPresent(outputFormat, forKey: .outputFormat)
+            try container.encodeIfPresent(quality, forKey: .quality)
+        } else {
+            // DALL-E parameters
+            if model != "dall-e-2" {
+                // Quality is not supported for DALL-E 2
+                try container.encodeIfPresent(quality, forKey: .quality)
+            }
+            
+            // response_format is only for DALL-E models
+            try container.encodeIfPresent(responseFormat, forKey: .responseFormat)
+            
+            // Only DALL-E 3 supports style
+            if model == "dall-e-3" {
+                try container.encodeIfPresent(style, forKey: .style)
+            }
+        }
     }
 }
 
