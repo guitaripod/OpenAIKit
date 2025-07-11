@@ -644,7 +644,13 @@ let request = ChatCompletionRequest(
 let response = try await openAI.chat.completions(request)
 ```
 
-### JSON Mode
+### JSON Mode and Structured Outputs
+
+OpenAIKit supports two ways to get JSON responses:
+- **JSON Mode** (`.jsonObject`): Ensures valid JSON but requires prompt engineering
+- **Structured Outputs** (`.jsonSchema`): Guarantees responses match your exact schema
+
+#### JSON Mode Example
 
 ```swift
 // Request structured JSON output
@@ -688,6 +694,56 @@ if let content = response.choices.first?.message.content,
     print("Total time: \(recipe.prepTime + recipe.cookTime) minutes")
 }
 ```
+
+#### Structured Outputs with JSON Schema
+
+For guaranteed schema compliance, use `.jsonSchema`:
+
+```swift
+// Define exact schema with JSON Schema
+let recipeSchema = JSONSchema(
+    name: "recipe_schema",
+    schema: [
+        "type": "object",
+        "properties": [
+            "name": ["type": "string", "maxLength": 100],
+            "ingredients": [
+                "type": "array",
+                "items": ["type": "string", "maxLength": 50],
+                "maxItems": 20
+            ],
+            "instructions": [
+                "type": "array", 
+                "items": ["type": "string", "maxLength": 200],
+                "maxItems": 10
+            ],
+            "prepTime": ["type": "integer", "minimum": 0],
+            "cookTime": ["type": "integer", "minimum": 0]
+        ],
+        "required": ["name", "ingredients", "instructions", "prepTime", "cookTime"]
+    ],
+    strict: true
+)
+
+let request = ChatCompletionRequest(
+    messages: [
+        ChatMessage(role: .user, content: "Generate a recipe for chocolate chip cookies")
+    ],
+    model: Models.Chat.gpt4o,
+    responseFormat: ResponseFormat(type: .jsonSchema, jsonSchema: recipeSchema)
+)
+
+// Response will exactly match the schema
+let response = try await openAI.chat.completions(request)
+```
+
+> **Important Schema Limits**: OpenAI has increased structured output limits:
+> - Object properties: Up to 5,000 per object
+> - String length: Up to 120,000 characters
+> - Enum values: Up to 1,000 per enum
+> - Enum string total: For enums with >250 values, up to 15,000 total characters
+>
+> See ``JSONSchema`` documentation for complete details.
 
 ## Error Handling
 

@@ -2411,6 +2411,8 @@ public enum ToolChoice: Codable, Sendable {
 /// Controls the format of the model's output, ensuring it returns text,
 /// JSON objects, or conforms to a specific JSON schema.
 ///
+/// When using `.jsonSchema` type, see ``JSONSchema`` for important schema limits.
+///
 /// ## Example
 /// ```swift
 /// // JSON mode
@@ -2479,6 +2481,14 @@ public enum ResponseFormatType: String, Codable, Sendable {
 ///
 /// Defines the exact structure that the model's JSON response must follow.
 /// This ensures type-safe, predictable outputs that can be reliably parsed.
+///
+/// ## Schema Limits
+///
+/// OpenAI has the following limits for structured output schemas:
+/// - **Object properties**: Up to 5,000 properties per object
+/// - **String length**: Up to 120,000 characters per string
+/// - **Enum values**: Up to 1,000 values per enum
+/// - **Enum string length**: For enums with >250 values, total character count across all values up to 15,000
 ///
 /// ## Example
 /// ```swift
