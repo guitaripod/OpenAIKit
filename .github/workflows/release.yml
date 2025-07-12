@@ -57,7 +57,7 @@ jobs:
         echo "### Swift Package Manager" >> release_notes.md
         echo '```swift' >> release_notes.md
         echo 'dependencies: [' >> release_notes.md
-        echo '    .package(url: "https://github.com/marcusziade/OpenAIKit.git", from: "${{ github.ref_name }}")' >> release_notes.md
+        echo '    .package(url: "https://github.com/guitaripod/OpenAIKit.git", from: "${{ github.ref_name }}")' >> release_notes.md
         echo ']' >> release_notes.md
         echo '```' >> release_notes.md
         

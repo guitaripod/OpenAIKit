@@ -42,7 +42,7 @@ OpenAIKit is distributed exclusively through Swift Package Manager, Apple's offi
 2. Select **File** → **Add Package Dependencies...**
 3. Enter the repository URL:
    ```
-   https://github.com/marcusziade/OpenAIKit.git
+   https://github.com/guitaripod/OpenAIKit.git
    ```
 4. Choose your version requirements:
    - **Up to Next Major**: `1.0.0` (Recommended)
@@ -71,7 +71,7 @@ let package = Package(
     dependencies: [
         // Add OpenAIKit as a dependency
         .package(
-            url: "https://github.com/marcusziade/OpenAIKit.git",
+            url: "https://github.com/guitaripod/OpenAIKit.git",
             from: "1.0.0"
         )
     ],
@@ -1387,6 +1387,6 @@ Now that you've mastered the basics, explore these advanced topics:
 - [Usage Dashboard](https://platform.openai.com/usage)
 
 ### Community
-- [GitHub Issues](https://github.com/marcusziade/OpenAIKit/issues)
-- [Discussions](https://github.com/marcusziade/OpenAIKit/discussions)
-- [Examples](https://github.com/marcusziade/OpenAIKit/tree/main/Examples)
+- [GitHub Issues](https://github.com/guitaripod/OpenAIKit/issues)
+- [Discussions](https://github.com/guitaripod/OpenAIKit/discussions)
+- [Examples](https://github.com/guitaripod/OpenAIKit/tree/main/Examples)

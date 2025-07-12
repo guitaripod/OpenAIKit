@@ -33,13 +33,13 @@ Add OpenAIKit to your project using Swift Package Manager:
 ```swift
 // Package.swift
 dependencies: [
-    .package(url: "https://github.com/marcusziade/OpenAIKit.git", from: "1.0.0")
+    .package(url: "https://github.com/guitaripod/OpenAIKit.git", from: "1.0.0")
 ]
 ```
 
 Or in Xcode:
 1. File → Add Package Dependencies
-2. Enter: `https://github.com/marcusziade/OpenAIKit.git`
+2. Enter: `https://github.com/guitaripod/OpenAIKit.git`
 3. Choose your version requirements
 
 ### Quick Start
